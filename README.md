@@ -16,6 +16,9 @@ This repository contains:
 ### 📂 GitHub Repository
 [AI Study Planner GitHub Link](https://github.com/meiliyuri/AI-Study-Planner-Group8.git)
 
+### 📌 Jira Board  
+[Jira Project Board Link](https://cits5206-2025s2-gourp8.atlassian.net/jira/software/projects/ASP/summary)
+
 ### 💬 MS Teams Project Area
 [MS Teams Link](https://teams.microsoft.com/l/channel/19%3A878c9bc400744c2388c6fddd909a99eb%40thread.tacv2/Group%208?groupId=e524efef-b404-40f0-a05e-8dd542306098&tenantId=05894af0-cb28-46d8-8716-74cdb46e2226&ngc=true)
 
