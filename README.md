@@ -1,7 +1,8 @@
 # 📚 AI Study Planner Project
 
 ## 1️⃣ Project Overview
-The **AI Study Planner** is a collaborative group project aimed at developing an AI-powered tool to help students manage their study schedules effectively.  
+The **AI Study Planner** is a collaborative group project aimed at developing an AI-powered tool to help students manage their study schedules effectively.
+
 This repository contains:
 - Source code
 - Project documentation
@@ -16,7 +17,7 @@ This repository contains:
 ### 📂 GitHub Repository
 [AI Study Planner GitHub Link](https://github.com/meiliyuri/AI-Study-Planner-Group8.git)
 
-### 📌 Jira Board  
+### 📌 Jira Board
 [Jira Project Board Link](https://cits5206-2025s2-gourp8.atlassian.net/jira/software/projects/ASP/summary)
 
 ### 💬 MS Teams Project Area
@@ -33,6 +34,7 @@ This repository contains:
 ## 3️⃣ Repository Structure
 ```plaintext
 AI-Study-Planner-Group8/
+├── .gitignore
 ├── README.md
 ├── Project-Plan/
 ├── Meeting-Notes/
