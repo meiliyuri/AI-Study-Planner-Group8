@@ -1,0 +1,18 @@
+ID,SequenceID,gID,GroupingLevel,GroupingType,SubType,SubValue,Name,Notes,Description,Availability,Code,Outcomes,RequiredInSecondMajor,TypeText
+447723,67930,0,1,3,0,0,1,,,,,,0,NULL
+447724,67930,0,1,3,0,0,2,,,,,,0,NULL
+447725,67930,0,1,3,0,0,3,,,,,,0,NULL
+447726,67930,447723,2,1,1,24,,,1,,,,0,NULL
+447727,67930,447723,2,1,7,6,,,"Students who have not achieved a scaled mark of at least 50 in Mathematics Methods ATAR or equivalent or higher are required to complete ECON1111.",,,,0,NULL
+447728,67930,447724,2,1,2,6,,,,,,,0,NULL
+447729,67930,447724,2,1,1,24,,,2,,,,0,NULL
+447730,67930,447725,2,1,1,18,,,,,,,0,NULL
+447731,67930,447725,2,1,2,18,Electives,,,,,,0,NULL
+509899,75892,0,1,3,0,0,1,,,,,,0,NULL
+509900,75892,0,1,3,0,0,2,,,,,,0,NULL
+509901,75892,0,1,3,0,0,3,,,,,,0,NULL
+509902,75892,509899,2,1,1,24,,,,,,,0,NULL
+509903,75892,509899,2,1,7,6,,,"Students who have not achieved a scaled mark of at least 50 in Mathematics Methods ATAR or equivalent or higher are required to complete ECON1111.",,,,0,NULL
+509904,75892,509900,2,1,1,30,,,,,,,0,NULL
+509905,75892,509901,2,1,1,24,,,"Take all units from this group (24 points).",,,,0,NULL
+509906,75892,509901,2,1,2,12,,,,,,,0,NULL

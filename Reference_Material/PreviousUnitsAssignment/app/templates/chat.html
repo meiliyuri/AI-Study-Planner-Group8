@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}- {{title_page}}{% endblock title %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% endblock scripts %}
+
+{% block classbody %}
+<body class="{{class_page}}">
+{% endblock classbody %}
+
+{% block flashedmessages %}{% endblock flashedmessages %}
+{% block content %}
+
+<div class="loading-popup">
+  <img src="{{ url_for('static',filename='img/loading-w.gif') }}" alt="Loading">
+</div>
+
+
+<h1>Hi, {{ current_user.username }}!</h1><br>
+{% block search %} <!-- Search box will appear on this page -->
+<form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3  search-box" role="search">
+    <input type="text" id="searchInput" placeholder="Search..." oninput="searchPage()" class="form-control search" placeholder="Search..." aria-label="Search" >
+</form>
+{% endblock search %}
+<div class="flash-message">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <p class="message">{{ message }}</p>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+    <div class="chat-container">
+      <div class="chat-logs" id="chatLogs">
+        <div class="logs-container">
+        {% for message in messages %}
+        <div class="log log-{{ loop.index }}">
+          <div class="log-unit">
+            <div class="user-message">
+              <span class="avatar"></span>
+              <p><b>{{ message.author.username }}:</b> {{ message.content }}</p>
+            </div>
+            <div class="ai-message">
+              <span class="avatar"></span>
+              <div class="pre-container">                
+                <b>Ai Chef:</b><br>
+                <pre>{{ message.response }}</pre>
+              </div>
+            </p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+      <div class="chat-input">
+        {{ form.content.label }}
+        <form action="" method="post" class="chat-form">
+          <span class="img"></span>
+            {{ form.hidden_tag() }}
+         
+            {{ form.content(size=32) }}
+            {% for error in form.content.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+            {{ form.submit() }}
+        </form>
+      </div>
+    </div>
+
+    
+<script>
+  //loading 
+  $(document).ready(function() {
+    //hide loading pop-up
+    $('.loading-popup').hide();
+
+    //form submission
+    $('form').on('submit', function(event) {
+      //display loading pop-up
+      $('.loading-popup').show();
+    });
+
+    //scroll chat to the last message
+    var chatLogs = $('#chatLogs');
+    var lastMessage = chatLogs.find('.user-message').last();
+    chatLogs.scrollTop(chatLogs.scrollTop() + lastMessage.position().top);
+
+    var divOffset = document.querySelector('.flash-message').offsetTop;
+    window.scrollTo({
+      top: divOffset,
+      behavior: 'smooth'
+    });
+  });
+</script>
+    
+<script>
+  // This Javascript is for the search function
+  function searchPage() {
+    var searchTerm = document.getElementById('searchInput').value;
+    var logsContainer = document.getElementById('chatLogs');
+    var logs = logsContainer.getElementsByClassName('log');
+
+    for (var i = 0; i < logs.length; i++) {
+      var log = logs[i];
+      var logText = log.innerText || log.textContent;
+      if (logText.includes(searchTerm)) {
+        log.style.display = 'block';
+      } else {
+        log.style.display = 'none';
+      }
+    }
+    logsContainer.scrollTop = 0;
+  }
+
+  // Attach event listener to the search input for "input" and "keydown" events
+  var searchInput = document.getElementById('searchInput');
+  searchInput.addEventListener('input', searchPage);
+  searchInput.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+      searchPage();
+      event.preventDefault();
+    }
+  });
+</script>
+
+<script>
+  //class for size chat
+  document.addEventListener('DOMContentLoaded', function() {
+    var chatLogs = document.getElementById('chatLogs');
+    var logs = chatLogs.getElementsByClassName('log');
+    if (logs.length > 2) {
+      chatLogs.classList.add('more-than-two');
+    }
+    if (logs.length == 0) {
+      chatLogs.classList.add('empty');
+    }
+  });
+</script>
+
+{% endblock content %}

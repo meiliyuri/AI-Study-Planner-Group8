@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Data Import Status{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <h2>Data Import Status</h2>
+        <p class="text-muted">Current status of data imported into the system</p>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h1 class="display-4 text-primary">{{ status.units }}</h1>
+                        <h5>Units</h5>
+                        <p class="text-muted">Individual course units</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h1 class="display-4 text-success">{{ status.courses }}</h1>
+                        <h5>Courses</h5>
+                        <p class="text-muted">Available majors/programs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h1 class="display-4 text-info">{{ status.course_units }}</h1>
+                        <h5>Course-Unit Links</h5>
+                        <p class="text-muted">Unit associations</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h1 class="display-4 text-warning">{{ status.availabilities }}</h1>
+                        <h5>Availabilities</h5>
+                        <p class="text-muted">Semester offerings</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Next Steps</h5>
+                </div>
+                <div class="card-body">
+                    {% if status.units == 0 %}
+                        <div class="alert alert-warning">
+                            <strong>No data imported yet.</strong> Run the data import script:
+                            <code>python3 import_data.py</code>
+                        </div>
+                    {% elif status.courses == 0 %}
+                        <div class="alert alert-warning">
+                            <strong>No courses available.</strong> Make sure course sequence files are imported.
+                        </div>
+                    {% else %}
+                        <div class="alert alert-success">
+                            <strong>System ready!</strong> You can now create study plans.
+                            <a href="{{ url_for('main.index') }}" class="btn btn-success btn-sm ms-2">View Courses</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

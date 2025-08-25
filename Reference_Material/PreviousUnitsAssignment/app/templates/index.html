@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+
+
+{% block classbody %}
+<body id="{{class_page}}">
+{% endblock classbody %}
+
+{% block content %}
+<h1>What Should I Cook?</h1><BR>
+
+<p> Do you have a fridge or pantry full of food but are not sure what to cook? Uninspired or bored of your usual meals? Well you've come to the right place! </p>
+
+<p> Chat with our Ai powered chef now to find the inspiration you seek. Just let her know what <b>ingredients</b> you have and she will respond with a suggested recipe. </p>
+
+<p>As an added benefit of being <b>logged in </b>you will be able to view all your past interactions with our Ai Chef as well as <b>search</b> them for your convenience. </p>
+
+<p> Here's a few pointers to get you started and features of our website: </p>
+<ul>
+    <li>You will need to sign-up and then log-in before being able to access the <b>Chat</b> page </li>
+    <li> The links in top right are <b>dynamic</b>:
+        <ul>
+        <li>While not logged in: The Login and Sign-up buttons are visible</li>
+        <li>When logged in: The Search box and Sign-out buttons are visible</li>
+        </ul></li>
+    <li>You can use the search or the History tab to recall your favourite recipe's!</li>
+</ul>
+
+{% endblock content %}

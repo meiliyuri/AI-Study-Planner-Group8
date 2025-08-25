@@ -1,0 +1,26 @@
+{
+  "Year 1, Semester 1": [
+    "ECON1101",
+    "MATH1014",
+    "STAT1400",
+    "PHIL1001"
+  ],
+  "Year 1, Semester 2": [
+    "ECON1102",
+    "MATH1019",
+    "STAT1401",
+    "ENGL1000"
+  ],
+  "Year 2, Semester 1": [
+    "ECON2233",
+    "ECON2234",
+    "MATH2021",
+    "POLI2000"
+  ],
+  "Year 2, Semester 2": [
+    "ECON2235",
+    "ECON3301",
+    "FINC2000",
+    "MGMT2000"
+  ]
+}
