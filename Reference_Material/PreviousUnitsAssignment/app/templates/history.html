@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}- {{title_page}}{% endblock title %}
+
+{% block classbody %}
+<body id="{{class_page}}">
+{% endblock classbody %}
+
+{% block content %}
+  <h1>History Page</h1>
+  <div class="responses-container">
+    {% if not messages %}
+    <div class="plate-empty">
+      <img src="{{ url_for('static',filename='img/bkg-log.png') }}" alt="plate">
+      <p>You don't have any recipe yet.</p>
+    </div>
+    {% endif %}
+    {% for i in range(messages|length) %}
+      {% set message = messages[i] %}
+      {% set summary = summaries[i] %}
+      {% if summary %}
+      <div class="response-item">
+        <div class="response-summary">
+          <p>{{ summary }}<b>  ...</b></p>
+        </div>
+        <div class="response-details hidden">
+          <div class="pre-container">      
+            <pre>{{ message.response }}</pre>
+            <input type="button" onclick="sendByEmail(this)" value="Send">
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      var responseItems = document.getElementsByClassName('response-item');
+      for (var i = 0; i < responseItems.length; i++) {
+        responseItems[i].addEventListener('click', toggleResponseDetails);
+      }
+  
+      function toggleResponseDetails() {
+        var details = this.querySelector('.response-details');
+        var title = this.querySelector('.response-summary');
+        details.classList.toggle('hidden');
+        title.classList.toggle('active');
+      }
+
+    });
+
+    //send recipe
+    function sendByEmail(button) {
+      var preElement = button.previousElementSibling;
+      var text = preElement.innerText;
+      var lines = text.split('\n');
+      var subject = "";
+
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].trim().startsWith("Recipe:")) {
+          subject = lines[i].trim();
+          break;
+        }
+      }
+
+      var email = "";
+      var mailtoLink = "mailto:" + email + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(text);
+      window.location.href = mailtoLink;
+    }
+  </script>
+{% endblock content %}

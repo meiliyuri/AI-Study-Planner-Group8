@@ -1,0 +1,919 @@
+* commit ed14893e14680b0a352b9e3933edac2bfcc76e8c (HEAD -> main, origin/main, origin/HEAD)
+| Author: souzalii <aline.s@outlook.com.br>
+| Date:   Sun May 21 14:10:38 2023 +0800
+| 
+|     Change name user for test
+| 
+* commit 3b67a8cd96dd083966c70a4f17c228339e54c58a
+| Author: souzalii <65887693+souzalii@users.noreply.github.com>
+| Date:   Sun May 21 14:02:23 2023 +0800
+| 
+|     Update README.md
+|     
+|     Update readme file
+|   
+*   commit 88775f4d239e737e2944695b8f497c8138458fc2
+|\  Merge: f614a4a 70d1da5
+| | Author: souzalii <65887693+souzalii@users.noreply.github.com>
+| | Date:   Sun May 21 10:17:22 2023 +0800
+| | 
+| |     Merge pull request #27 from 23155062/HTML5validation
+| |     
+| |     Change back tag a / all passes html validation
+| | 
+| * commit 70d1da526efaffb16a827078efd3e7a53387285c (origin/HTML5validation)
+| | Author: souzalii <aline.s@outlook.com.br>
+| | Date:   Sun May 21 09:57:51 2023 +0800
+| | 
+| |     Changes in the that a (was buttom) and css for that
+| | 
+| * commit 1c048aae136b12a122181892d2dd21c34fe98aaa
+| | Author: Zachary Baker <23155062@student.uwa.edu.au>
+| | Date:   Sat May 20 11:21:41 2023 +0800
+| | 
+| |     Passes HTML5 Validation
+| |   
+* |   commit f614a4ae36a43f843bd075cf63b7dde1ff8bcc3c
+|\ \  Merge: 1ceef88 d613c68
+| |/  Author: souzalii <65887693+souzalii@users.noreply.github.com>
+|/|   Date:   Sun May 21 09:30:33 2023 +0800
+| |   
+| |       Merge pull request #26 from 23155062/oneLastUnitTest
+| |       
+| |       Test - ok
+| | 
+| * commit d613c68113c6ab0478ebc74c33fd18dba082b6a5
+| | Author: Zachary Baker <23155062@student.uwa.edu.au>
+| | Date:   Sat May 20 10:32:26 2023 +0800
+| | 
+| |     Added some tests inc to secure pages
+| | 
+| * commit 64e8f2db9485ba58e96a5a3259495b6fdeb69990
+|/  Author: Zachary Baker <23155062@student.uwa.edu.au>
+|   Date:   Sat May 20 09:12:28 2023 +0800
+|   
+|       Added an attribution comment to one of our main files
+|   
+*   commit 1ceef887e910a48500cd7faf4324af7420a615a9
+|\  Merge: fb4363f 05acc51
+| | Author: souzalii <65887693+souzalii@users.noreply.github.com>
+| | Date:   Sat May 20 08:11:26 2023 +0800
+| | 
+| |     Merge pull request #25 from 23155062/UpdateComments
+| |     
+| |     Update comments - ok
+| | 
+| * commit 05acc51722841c8fb1602de61296ed8cfb03654f
+| | Author: Zachary Baker <23155062@student.uwa.edu.au>
+| | Date:   Sat May 20 07:54:09 2023 +0800
+| | 
+| |     Started work on tests, not finished but all working
+| | 
+| * commit 0ead456372cb233a333182eb134d7ca9a4c04ae7
+| | Author: Zachary Baker <23155062@student.uwa.edu.au>
+| | Date:   Fri May 19 13:33:05 2023 +0800
+| | 
+| |     Quick commit with everything working
+| | 
+| * commit 12587f2b39005e8407a9754ebbc23a966033f086
+| | Author: Zachary Baker <23155062@student.uwa.edu.au>
+| | Date:   Fri May 19 12:43:09 2023 +0800
+| | 
+| |     Added more verbose comments to .PY files
+| |   
+* |   commit fb4363f40e07306795475ed230b125e9975f32ab
+|\ \  Merge: 260db11 414fb8d
+| | | Author: Zachary Baker <129585209+23155062@users.noreply.github.com>
+| | | Date:   Sat May 20 08:04:54 2023 +0800
+| | | 
+| | |     Merge pull request #24 from 23155062/references
+| | |     
+| | |     This looks great, hopefully worth a few extra marks. As I finish up the tests and HTML validation I'll also try and add a couple more attributions in the comments too.
+| | | 
+| * | commit 414fb8dff1e661be857d1e36a3e67d190cb596e0
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Sat May 20 06:53:24 2023 +0800
+| | | 
+| | |     Page for references
+| | |   
+* | |   commit 260db115e9e8ba65056a7239243d4cbeffb54de7
+|\ \ \  Merge: 61cdef3 17f9c38
+| |/ /  Author: Zachary Baker <129585209+23155062@users.noreply.github.com>
+|/| |   Date:   Sat May 20 08:03:28 2023 +0800
+| | |   
+| | |       Merge pull request #23 from 23155062/loading
+| | |       
+| | |       Tested and works wonderfully, looks amazing :-) Thank you!
+| | | 
+| * | commit 17f9c3834b901db6268af04dd960af81785c0b30
+|/ /  Author: souzalii <aline.s@outlook.com.br>
+| |   Date:   Sat May 20 05:38:28 2023 +0800
+| |   
+| |       Loading for chat response
+| |   
+* |   commit 61cdef317bc66211478b2bd253ac6f6c3977d887
+|\ \  Merge: cc5950b ff894ec
+| | | Author: Zachary Baker <129585209+23155062@users.noreply.github.com>
+| | | Date:   Fri May 19 13:34:39 2023 +0800
+| | | 
+| | |     Merge pull request #22 from 23155062/share
+| | |     
+| | |     Looks fantastic thank you!! Merging...
+| | | 
+| * | commit ff894ecb2b936c5a91025bf796f87f2632919af7
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Fri May 19 13:29:02 2023 +0800
+| | | 
+| | |     remove duplicated function
+| | | 
+| * | commit d951e29c055496c20926390243402525e21d9772
+|/ /  Author: souzalii <aline.s@outlook.com.br>
+| |   Date:   Fri May 19 13:18:21 2023 +0800
+| |   
+| |       Add bt send recipe
+| |   
+* |   commit cc5950b0093a03fc60dbdfcd737d1d7aba1a9e65
+|\ \  Merge: b000f4e a168087
+| | | Author: Zachary Baker <129585209+23155062@users.noreply.github.com>
+| | | Date:   Fri May 19 13:01:07 2023 +0800
+| | | 
+| | |     Merge pull request #21 from 23155062/layout-v4
+| | |     
+| | |     Tested and looks good, thank you!!
+| | | 
+| * | commit a1680875463b71d0a0900a76cd010211bd8ab00b
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Fri May 19 12:56:19 2023 +0800
+| | | 
+| | |     Reduce size image
+| | | 
+| * | commit d47decdf394ac0e3e0e895eb1ff689959d7600f1
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Fri May 19 12:46:33 2023 +0800
+| | | 
+| | |     Removing unnecessary code
+| | | 
+| * | commit 781a20556b3f0e4e7ec81a915a369703d0110fe8
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Fri May 19 12:37:19 2023 +0800
+| | | 
+| | |     add coments
+| | | 
+| * | commit ed75854c8d858b4499615cdf90c042404ab8bffe
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Fri May 19 12:35:06 2023 +0800
+| | | 
+| | |     adjust style background repeated
+| | | 
+| * | commit 7bf3a067a7c68bb3796b7ad1d5c607b4f1864ff2
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Fri May 19 12:31:24 2023 +0800
+| | | 
+| | |     responsive menu
+| | | 
+| * | commit 79271dff2f0c3af63e1976fa5ac11fe9f3073007
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Fri May 19 11:55:47 2023 +0800
+| | | 
+| | |     Remove empty response
+| | | 
+| * | commit d5a5dd52407f8ee37900e2da55a37e9b5355b533
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Fri May 19 11:54:27 2023 +0800
+| | | 
+| | |     Format message history page
+| | | 
+| * | commit 6a8fe6ed2e3ca0f11339dc52907242b012d395d9
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Fri May 19 11:52:28 2023 +0800
+| | | 
+| | |     Move search bar and block enter
+| | | 
+| * | commit 8d18105342db1db9454c8b78d388704f58f2424c
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Fri May 19 11:29:02 2023 +0800
+| | | 
+| | |     Adjust recipe response
+| | |   
+| * |   commit 7f99a4e7b495677484af8565e3da301887092ea8
+| |\ \  Merge: fbbb04c b000f4e
+| |/ /  Author: souzalii <aline.s@outlook.com.br>
+|/| |   Date:   Fri May 19 11:04:08 2023 +0800
+| | |   
+| | |       Merge branch 'main' of github.com:23155062/cits5505_assignment2 into layout-v4
+| | |   
+* | |   commit b000f4e6006baee93d2812ad68d4d859c8813ecf
+|\ \ \  Merge: 82831af 2145579
+| |_|/  Author: souzalii <65887693+souzalii@users.noreply.github.com>
+|/| |   Date:   Fri May 19 11:03:55 2023 +0800
+| | |   
+| | |       Merge pull request #20 from 23155062/improveSearchv2
+| | |       
+| | |       Scroll to bottom after search - ok
+| | | 
+| * | commit 21455793ddd0a3cbd6f7a927236d00627fbc851a
+|/ /  Author: Zachary Baker <23155062@student.uwa.edu.au>
+| |   Date:   Thu May 18 18:36:08 2023 +0800
+| |   
+| |       Scroll to bottom after search
+| | 
+| * commit fbbb04cd6fc3bcb1b6269c0d80ea4313ff541718
+| | Author: souzalii <aline.s@outlook.com.br>
+| | Date:   Fri May 19 11:03:07 2023 +0800
+| | 
+| |     Title tab
+| | 
+| * commit 86d16b617671029e7fd25ed34ebfa0f8b07e670c
+| | Author: souzalii <aline.s@outlook.com.br>
+| | Date:   Fri May 19 11:01:35 2023 +0800
+| | 
+| |     Adjust layout screens
+| | 
+| * commit b3bc7e82911568da97a76cc73c42f3f2ee9c6c10
+|/  Author: souzalii <aline.s@outlook.com.br>
+|   Date:   Fri May 19 09:20:20 2023 +0800
+|   
+|       Size and background for chat box
+|   
+*   commit 82831afbce92c2d9fc639b5154b58433e9d89ddb
+|\  Merge: ebb208f bdd5ece
+| | Author: Zachary Baker <129585209+23155062@users.noreply.github.com>
+| | Date:   Thu May 18 17:48:42 2023 +0800
+| | 
+| |     Merge pull request #19 from 23155062/fix-layout
+| |     
+| |     Works great, thanks!
+| | 
+| * commit bdd5ece9eae9f1f924dd573154b41f16f83ca5ce
+| | Author: souzalii <aline.s@outlook.com.br>
+| | Date:   Thu May 18 17:14:24 2023 +0800
+| | 
+| |     adjust search bar size
+| | 
+| * commit c801a48d446eb59cac0c6848d31e6d5f39338fbc
+| | Author: souzalii <aline.s@outlook.com.br>
+| | Date:   Thu May 18 17:10:31 2023 +0800
+| | 
+| |     adjust menu mozilla
+| |   
+* |   commit ebb208f42bd4e1436414ecb345a1238e07b05c89
+|\ \  Merge: 4fa163f 91fda8b
+| |/  Author: souzalii <65887693+souzalii@users.noreply.github.com>
+|/|   Date:   Thu May 18 17:38:16 2023 +0800
+| |   
+| |       Merge pull request #18 from 23155062/MVC-Changes
+| |       
+| |       Improvements working
+| | 
+| * commit 91fda8b9a443208caf0800b2ffa2aa53d1e305a4
+| | Author: Zachary Baker <23155062@student.uwa.edu.au>
+| | Date:   Thu May 18 13:07:37 2023 +0800
+| | 
+| |     Is it OK to reduce the size of this window?
+| | 
+| * commit 7f88ee6edcd9e4388420f9a1ca5bb833566b99c0
+|/  Author: Zachary Baker <23155062@student.uwa.edu.au>
+|   Date:   Thu May 18 12:16:19 2023 +0800
+|   
+|       Refactor code for MVC design, Ai model change!
+|   
+*   commit 4fa163f98a9923dc06721aff4eea6f28d0e04140
+|\  Merge: 9edbc98 033cd23
+| | Author: Zachary Baker <129585209+23155062@users.noreply.github.com>
+| | Date:   Wed May 17 15:36:43 2023 +0800
+| | 
+| |     Merge pull request #17 from 23155062/layout-v3
+| |     
+| |     Pulled code, tested & functions are running fine. Tests still pass. It honestly looks amazing thanks for your hard work on the styling it makes a huge difference to the presentation.
+| |   
+| *   commit 033cd23dc26b9b5b51092cd425df72c2c2d48a6f
+| |\  Merge: 5f76588 9edbc98
+| |/  Author: souzalii <aline.s@outlook.com.br>
+|/|   Date:   Wed May 17 11:16:13 2023 +0800
+| |   
+| |       Merge branch 'main' of github.com:23155062/cits5505_assignment2 into layout-v3
+| |   
+* |   commit 9edbc981999afe5d7c193f98e1d67320e2150668
+|\ \  Merge: b52bb80 cab1f7a
+| | | Author: souzalii <65887693+souzalii@users.noreply.github.com>
+| | | Date:   Wed May 17 11:16:02 2023 +0800
+| | | 
+| | |     Merge pull request #16 from 23155062/testSearchAndFixes
+| | |     
+| | |     Fixed tests, added test, upd Doc
+| | | 
+| * | commit cab1f7a4408651a1b3f70383b72031e710eca6a7
+|/ /  Author: Zachary Baker <23155062@student.uwa.edu.au>
+| |   Date:   Wed May 17 10:08:52 2023 +0800
+| |   
+| |       Fixed tests, added test, upd Doc
+| | 
+| * commit 5f765888273e050790d9b47037054c2bb05c305e
+| | Author: souzalii <aline.s@outlook.com.br>
+| | Date:   Wed May 17 11:14:19 2023 +0800
+| | 
+| |     change id to class in style
+| | 
+| * commit 3ef9f9d8ca676708e4abebf32d37f6705892bc9f
+| | Author: souzalii <aline.s@outlook.com.br>
+| | Date:   Wed May 17 11:12:33 2023 +0800
+| | 
+| |     Log page layout
+| | 
+| * commit 26fc740e545fec0e4103e8fb2e3e737e1361d800
+|/  Author: souzalii <aline.s@outlook.com.br>
+|   Date:   Wed May 17 10:31:23 2023 +0800
+|   
+|       Layout chat page; change id to class in body
+|   
+*   commit b52bb80786894f2fbb704f066a8df298f404a81a
+|\  Merge: af26be9 5df1de6
+| | Author: Zachary Baker <23155062@student.uwa.edu.au>
+| | Date:   Wed May 17 08:52:48 2023 +0800
+| | 
+| |     Merge branch 'main' of https://github.com/23155062/cits5505_assignment2
+| |   
+| *   commit 5df1de659f18d71f6829b9d0fb244c466643b207
+| |\  Merge: 46d9724 6ca814a
+| | | Author: Zachary Baker <129585209+23155062@users.noreply.github.com>
+| | | Date:   Wed May 17 08:51:05 2023 +0800
+| | | 
+| | |     Merge pull request #15 from 23155062/layout-v2
+| | |     
+| | |     Layout v2 - Tested 100% OK, committing.
+| | | 
+| | * commit 6ca814a1f9c5642817dfeceb352d437edce8e43f
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Wed May 17 01:16:41 2023 +0800
+| | | 
+| | |     remove search bar duplicated
+| | | 
+| | * commit bb3d4afb80971a8f077d8c8a9a1f32b8fcbe904e
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Wed May 17 01:06:18 2023 +0800
+| | | 
+| | |     Change colour menu and error sign in page
+| | | 
+| | * commit e282e63a3fe3b373e0393c70faf9da1b9f738899
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Wed May 17 00:52:34 2023 +0800
+| | | 
+| | |     Change img footer and style alert msg
+| | | 
+| | * commit c9940c94461bc3365850b45da268978c70fff010
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Wed May 17 00:31:41 2023 +0800
+| | | 
+| | |     style forms
+| | | 
+| | * commit edfa397fdbf32c529b65cebef7ce4cafd22d942a
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Wed May 17 00:13:55 2023 +0800
+| | | 
+| | |     Footer text
+| | | 
+| | * commit 2aff7a4ff84227cd795ec8d7c7c8dddcde235150
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Wed May 17 00:01:12 2023 +0800
+| | | 
+| | |     add style for log menu - change from history
+| | | 
+| | * commit 6302dcf8219e04a9e61a82b1863a379b978b80da
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Tue May 16 23:34:48 2023 +0800
+| | | 
+| | |     Add images, change structure menu base, add style menu, add image header and footer
+| | | 
+| | * commit 5a587b214e053948592279bdb169df5675359cda
+| |/  Author: souzalii <aline.s@outlook.com.br>
+| |   Date:   Tue May 16 23:23:01 2023 +0800
+| |   
+| |       Add Favicon
+| | 
+* | commit af26be9643ed28ae65ce0079a47f596ae90172bf
+|/  Author: Zachary Baker <23155062@student.uwa.edu.au>
+|   Date:   Wed May 17 07:38:34 2023 +0800
+|   
+|       Removed DB & Migrations Folder from Repo
+|   
+*   commit 46d9724bc6ce2a1d83ae9285a4964a51fd5edcff
+|\  Merge: 0920fa8 ce28622
+| | Author: souzalii <65887693+souzalii@users.noreply.github.com>
+| | Date:   Tue May 16 23:01:38 2023 +0800
+| | 
+| |     Merge pull request #13 from 23155062/HistoryPage
+| |     
+| |     Added history page, started code tidy-up
+| | 
+| * commit ce28622f21597811c9b4ec1973110d346f307012
+|/  Author: Zachary Baker <23155062@student.uwa.edu.au>
+|   Date:   Tue May 16 12:26:08 2023 +0800
+|   
+|       Added history page, started code tidy-up
+|   
+*   commit 0920fa86f9d0c82773ab0182be2cf03bcd5c8682
+|\  Merge: 6fea60a f12befb
+| | Author: souzalii <65887693+souzalii@users.noreply.github.com>
+| | Date:   Mon May 15 17:50:39 2023 +0800
+| | 
+| |     Merge pull request #12 from 23155062/ImproveChat
+| |     
+| |     everything is working
+| | 
+| * commit f12befb70a2d1f07dd2d106db119a8ab9c6f418a
+| | Author: Zachary Baker <23155062@student.uwa.edu.au>
+| | Date:   Mon May 15 11:13:11 2023 +0800
+| | 
+| |     Added search, tiny bit of style and content
+| | 
+| * commit eb005d9432340a369dab782fd99f97a2dfac16a2
+|/  Author: Zachary Baker <23155062@student.uwa.edu.au>
+|   Date:   Mon May 15 09:03:35 2023 +0800
+|   
+|       Automatic scroll to bottom of chat
+| 
+* commit 6fea60a9e238b2aaadb39497e0dfd55a180c684f
+| Author: Zachary Baker <23155062@student.uwa.edu.au>
+| Date:   Sun May 14 22:28:22 2023 +0800
+| 
+|     Requirements.txt was up-to-date, minor txt changes
+|   
+*   commit 1cb0c7317501b7f456ac42f76720cb12a44dc479
+|\  Merge: 102f1c7 cc26870
+| | Author: Zachary Baker <23155062@student.uwa.edu.au>
+| | Date:   Sun May 14 22:16:16 2023 +0800
+| | 
+| |     Merge branch 'main' of https://github.com/23155062/cits5505_assignment2
+| |   
+| *   commit cc26870ae7af7d4395e5b8e5f86d218def6996ac
+| |\  Merge: fe83b86 89e7311
+| | | Author: Zachary Baker <129585209+23155062@users.noreply.github.com>
+| | | Date:   Sun May 14 22:13:56 2023 +0800
+| | | 
+| | |     Merge pull request #11 from 23155062/testing
+| | |     
+| | |     Testing functions (tested & working!). Site OK, merging.
+| | |   
+| | *   commit 89e7311e6cfe12083d45f754f1d8bdfffdb882db (origin/testing)
+| | |\  Merge: 92d44b9 fe83b86
+| | |/  Author: souzalii <65887693+souzalii@users.noreply.github.com>
+| |/|   Date:   Sun May 14 21:44:58 2023 +0800
+| | |   
+| | |       Merge branch 'main' into testing
+| | | 
+| | * commit 92d44b993a43a60efee665030d6333dedef30858
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Sat May 13 19:08:45 2023 +0800
+| | | 
+| | |     test if pages exists
+| | | 
+| | * commit 9962e6015f42db43e1a51832ce9fea86a5c0af6f
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Sat May 13 19:08:20 2023 +0800
+| | | 
+| | |     update README with instructions for test
+| | | 
+| | * commit 83949f537a099bf0c2074cba1ff2780e6bdaf570
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Sat May 13 18:59:00 2023 +0800
+| | | 
+| | |     Test log in
+| | | 
+| | * commit 860698a241a5dcd4f146b609fc8b5dd2d8e7a162
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Sat May 13 18:27:11 2023 +0800
+| | | 
+| | |     Test duplicated user; fix other tests
+| | | 
+| | * commit 6788a5670d7b089dcdc3fdad21bdf6f6a9241291
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Sat May 13 18:03:39 2023 +0800
+| | | 
+| | |     Test login lenght, type, required
+| | | 
+| | * commit c9279b0409e1d78a656c95b021b63de03e3de7f0
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Sat May 13 18:02:58 2023 +0800
+| | | 
+| | |     Message DataRequired
+| | | 
+| | * commit 6a2b53a46b6471ead189b32fd14ae9bf5bb94687
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Sat May 13 17:04:33 2023 +0800
+| | | 
+| | |     Test creation user: new user, check db, duplicated user
+| | | 
+| | * commit 5f1d4dddeaa33e676f739ed2e688a4f3d6182c97
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Sat May 13 14:01:25 2023 +0800
+| | | 
+| | |     conftest and first test for login
+| | | 
+| | * commit d50b22c23000d09579a8812997f97b5f3cb8e26f
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Sat May 13 13:22:44 2023 +0800
+| | | 
+| | |     Add forms in init app import
+| | | 
+| | * commit c055ae29793fe913174488c6693e31903fbe7fae
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Sat May 13 13:22:07 2023 +0800
+| | | 
+| | |     Remove wrong init file
+| | | 
+| | * commit c70f0ee2932f8f7a9d524c186e3380f4f927a51d
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Sat May 13 13:21:06 2023 +0800
+| | | 
+| | |     Fix name init file in tests folder
+| | | 
+| | * commit 3c628a80dc1df41ab734989fed885fdfd426664f
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Sat May 13 12:59:15 2023 +0800
+| | | 
+| | |     Add validation sign up form and error messages
+| | | 
+| | * commit 61cb57077afafebc15bc1d6887aabb0129d3f030
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Sat May 13 10:57:43 2023 +0800
+| | | 
+| | |     Structure folders tests
+| | | 
+* | | commit 102f1c710217496d94cc61bdb8b1c4557428ee5f
+|/ /  Author: Zachary Baker <23155062@student.uwa.edu.au>
+| |   Date:   Sun May 14 22:15:55 2023 +0800
+| |   
+| |       Quick update to requirements.txt
+| |   
+| | * commit edbc09608fd79afed22ab959df18846e076bc925 (origin/layout-v1)
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Tue May 16 22:56:15 2023 +0800
+| | | 
+| | |     adjust main margin
+| | | 
+| | * commit baa4b50fac652000f4301cd15eb85e3b3e280a08
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Tue May 16 22:53:56 2023 +0800
+| | | 
+| | |     Header images and menus
+| | | 
+| | * commit eaba3a960a24c28fde500174991873a2ddb65673
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Tue May 16 15:04:15 2023 +0800
+| | | 
+| | |     bt header
+| | | 
+| | * commit 5c990a43354ea4160edc774cf913d9d0bca7c7e5
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Tue May 16 14:48:23 2023 +0800
+| | | 
+| | |     Favicon
+| | | 
+| | * commit 6e668473c455b63682fabf5a0dd29969cff57221
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Tue May 16 14:45:53 2023 +0800
+| | | 
+| | |     adjust header responsive
+| | | 
+| | * commit fca4e0081b2f2cccdb941af7273c6264aa7b2c3b
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Tue May 16 14:30:40 2023 +0800
+| | | 
+| | |     Image/logo header and footer
+| | | 
+| | * commit 3c450b7c5c3e14c1d5da0e965b7c0d4d68aae846
+| |/  Author: souzalii <aline.s@outlook.com.br>
+|/|   Date:   Tue May 16 14:27:53 2023 +0800
+| |   
+| |       Update gitignore with db
+| |   
+* |   commit fe83b86ca1f2b408cf0cf69ef084647f6d0e5c91
+|\ \  Merge: 9075c80 a81480b
+| |/  Author: souzalii <65887693+souzalii@users.noreply.github.com>
+|/|   Date:   Sun May 14 21:25:06 2023 +0800
+| |   
+| |       Merge pull request #9 from 23155062/chat
+| |       
+| |       Chat working upon to login
+| | 
+| * commit a81480be1dc5db62ae9833a333cf98cc11606b64
+| | Author: Zachary Baker <23155062@student.uwa.edu.au>
+| | Date:   Sun May 14 17:21:53 2023 +0800
+| | 
+| |     Basic chat with GPT complete!
+| | 
+| * commit 0c039b0c6f25cc2b9d729f6da6d5a04227d63d35
+|/  Author: Zachary Baker <23155062@student.uwa.edu.au>
+|   Date:   Sun May 14 15:30:00 2023 +0800
+|   
+|       Local chat working, adding Ai next
+|   
+*   commit 9075c809532329f96a2dc8f314b3a711e2851548
+|\  Merge: 46ea078 51e2e9f
+| | Author: souzalii <65887693+souzalii@users.noreply.github.com>
+| | Date:   Sat May 13 10:35:30 2023 +0800
+| | 
+| |     Merge pull request #8 from 23155062/structure-base-init
+| |     
+| |     - tested login/logout
+| |     - tested create account
+| | 
+| * commit 51e2e9feaa07bbadc530416a073e5ad103467260
+| | Author: Zachary Baker <23155062@student.uwa.edu.au>
+| | Date:   Fri May 12 18:57:43 2023 +0800
+| | 
+| |     DB & User Logins Done
+| | 
+| * commit 95e0f1fa0c55d8f94a078deb1f7ca99416c1a4e2
+| | Author: Zachary Baker <23155062@student.uwa.edu.au>
+| | Date:   Fri May 12 13:24:10 2023 +0800
+| | 
+| |     Updated commit name from Stud!
+| | 
+| * commit 669e7eaa451b03cfca2bc4c6203c9cf7f10e6309
+| | Author: souzalii <aline.s@outlook.com.br>
+| | Date:   Tue May 9 14:24:59 2023 +0800
+| | 
+| |     adjust blocks
+| |   
+| | * commit b385c33a87defe92757ee9e1f5c96ccc9ebf0b84 (origin/login)
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Tue May 9 14:31:42 2023 +0800
+| | | 
+| | |     Change aFrom to sing-up and fix name function duplicated
+| | | 
+| | * commit 2fbbe1111e606ddac86a0314981b197fde664716
+| | | Author: souzalii <aline.s@outlook.com.br>
+| | | Date:   Tue May 9 14:25:47 2023 +0800
+| | | 
+| | |     adjust blocks
+| | |   
+| | *   commit ce1273b2c07a2d83faccee05b43d751da3d1340a
+| | |\  Merge: fb4cfbd 1624b63
+| | | | Author: souzalii <65887693+souzalii@users.noreply.github.com>
+| | | | Date:   Tue May 9 14:07:20 2023 +0800
+| | | | 
+| | | |     Merge pull request #7 from 23155062/structure-base-init
+| | | |     
+| | | |     Structure base init
+| | | | 
+| | | * commit 1624b634fb13667f5c27e6a35a82133198d9f792
+| | |/| Merge: 26f776a fb4cfbd
+| |/|/  Author: souzalii <65887693+souzalii@users.noreply.github.com>
+| | |   Date:   Tue May 9 14:07:12 2023 +0800
+| | |   
+| | |       Merge branch 'login' into structure-base-init
+| | |     
+| | | *   commit 8ebfdc2c09be488009a93f30d6f7487d8f929c9c (origin/old-staging)
+| | | |\  Merge: 118a2b1 0ab759e
+| | | | | Author: souzalii <65887693+souzalii@users.noreply.github.com>
+| | | | | Date:   Tue May 9 12:56:53 2023 +0800
+| | | | | 
+| | | | |     Merge pull request #4 from 23155062/structure-base-init
+| | | | |     
+| | | | |     DB added, working through tutorials, up to logins.
+| | | | | 
+| | | | * commit 0ab759ed1ec5d48214ff1c790f571169928b1260
+| | |_|/| Merge: 26f776a 118a2b1
+| |/| |/  Author: souzalii <65887693+souzalii@users.noreply.github.com>
+| | | |   Date:   Tue May 9 12:56:45 2023 +0800
+| | | |   
+| | | |       Merge branch 'staging' into structure-base-init
+| | | |   
+| | | *   commit 118a2b1754b3fc081dce7bd20005295b1bdbaee8
+| | | |\  Merge: 3cfe50f fb4cfbd
+| | | |/  Author: souzalii <65887693+souzalii@users.noreply.github.com>
+| | |/|   Date:   Tue May 9 10:26:36 2023 +0800
+| | | |   
+| | | |       Merge branch 'login' into staging
+| | | | 
+| | * | commit fb4cfbd2e5024980ef50267d4900f54574975bd2
+| | | | Author: Aline Andrade <aline.s@outlook.com.br>
+| | | | Date:   Fri May 5 20:46:06 2023 +0800
+| | | | 
+| | | |     start validation fields create account
+| | | | 
+| | * | commit 666eb7e76c89846c35c17ab8afeeb448c39f533c
+| | | | Author: Aline Andrade <aline.s@outlook.com.br>
+| | | | Date:   Fri May 5 20:34:57 2023 +0800
+| | | | 
+| | | |     create account and store session start
+| | | | 
+| | | * commit 3cfe50f852e4ce0188e207eae9e6f980584ff3b1
+| |_|/| Merge: 46ea078 7f4593b
+|/| | | Author: souzalii <65887693+souzalii@users.noreply.github.com>
+| | | | Date:   Tue May 9 10:08:35 2023 +0800
+| | | | 
+| | | |     Merge pull request #2 from 23155062/structure-base-init
+| | | |     
+| | | |     Structure base merged because there ir no new features to aprove
+| | | | 
+| * | | commit 26f776ab650278e74d0b137a73bed1fe61565857 (origin/structure)
+| | |/  Author: stud <stud@example.noreply.com>
+| |/|   Date:   Sun May 7 09:53:03 2023 +0800
+| | |   
+| | |       DB added, working through tutorials, up to logins.
+| | |       
+| | |       Including the DB file for now as it'll be tiny and not necessarily be
+| | |       worth the effort of re-creating every time.
+| | | 
+| * | commit 7f4593ba081e1f3beaad48953b71f522f3565863
+| | | Author: stud <stud@example.noreply.com>
+| | | Date:   Sat May 6 15:41:19 2023 +0800
+| | | 
+| | |     Quick update v2 updated a few comments. Now to DB
+| | | 
+| * | commit 56ff255b69f160019d09b5c8aa7626384ded276d
+| |/  Author: stud <stud@example.noreply.com>
+| |   Date:   Sat May 6 15:07:53 2023 +0800
+| |   
+| |       Commit before starting DB work
+| |   
+| | * commit c5c81c756ff10b7d95fd3e54a7a130c70f1683a7 (origin/tests)
+| | | Author: Aline Andrade <aline.s@outlook.com.br>
+| | | Date:   Fri May 5 21:27:36 2023 +0800
+| | | 
+| | |     Add account poage test - not tested yet - just example
+| | | 
+| | * commit 58bbc21bb3bff228e62fb0f1c538bde293430a45
+| | | Author: Aline Andrade <aline.s@outlook.com.br>
+| | | Date:   Fri May 5 21:16:40 2023 +0800
+| | | 
+| | |     Add form test - not tested yet - just examples
+| | | 
+| | * commit 85e18ed41b2f5e69ab5dcafd1ff49048fd2fb04a
+| | | Author: Aline Andrade <aline.s@outlook.com.br>
+| | | Date:   Fri May 5 21:15:39 2023 +0800
+| | | 
+| | |     First test index and about page
+| | | 
+| | * commit 634ab68a6e0d7aa27cbe7cc4660e0e8d52d41014
+| | | Author: Aline Andrade <aline.s@outlook.com.br>
+| | | Date:   Fri May 5 21:15:12 2023 +0800
+| | | 
+| | |     requirements file is with extra stuff that I will exclude - it was a error
+| | | 
+| | * commit 06ca5530c904cde46daa8b0687e0666810323c52
+| |/  Author: Aline Andrade <aline.s@outlook.com.br>
+| |   Date:   Fri May 5 20:45:09 2023 +0800
+| |   
+| |       Create structure folder test
+| | 
+| * commit bf8e8ba88190bb4f436453582ab2e15e970ca509
+| | Author: Aline Andrade <aline.s@outlook.com.br>
+| | Date:   Fri May 5 08:04:47 2023 +0800
+| | 
+| |     correcting file name - documentation
+| | 
+| * commit fb7e8190a3c7c6875734dee95724f7690574fee4
+| | Author: stud <stud@example.noreply.com>
+| | Date:   Thu May 4 18:50:40 2023 +0800
+| | 
+| |     future files, comments
+| | 
+| * commit 60f934c74ca242e6cee9a40aee1713007a0463ec
+| | Author: stud <stud@example.noreply.com>
+| | Date:   Thu May 4 18:24:42 2023 +0800
+| | 
+| |     Changed start up, added Debug mode = on
+| | 
+| * commit de055a5639722e087307bc23e705797ffe49fd86
+| | Author: stud <stud@example.noreply.com>
+| | Date:   Thu May 4 17:09:53 2023 +0800
+| | 
+| |     Adding GitHub's default .gitignore file
+| | 
+| * commit 9e381359008065eaa43d8f2e4f4d0c4095996b57
+| | Author: Aline Andrade <aline.s@outlook.com.br>
+| | Date:   Thu May 4 12:03:53 2023 +0800
+| | 
+| |     Chaneg structure to include app folder and init file
+| | 
+| * commit e206fc0f3c018b193ce87200c99d5280416fd475 (origin/structure-base)
+| | Author: Aline Andrade <aline.s@outlook.com.br>
+| | Date:   Thu May 4 11:32:44 2023 +0800
+| | 
+| |     update README: install requirements
+| | 
+| * commit 8ce3d378bb1b7bd824942fe45b5c41bca7170c71
+| | Author: Aline Andrade <aline.s@outlook.com.br>
+| | Date:   Thu May 4 11:26:19 2023 +0800
+| | 
+| |     title and id page in the app.py
+| | 
+| * commit 8d41a5c7f8a2447e285ee57cf204eabab3d8c1a1
+| | Author: Aline Andrade <aline.s@outlook.com.br>
+| | Date:   Thu May 4 10:29:11 2023 +0800
+| | 
+| |     Remove documentation about files from readme and create documentation file
+| | 
+| * commit 17a060d1d509adef227d672647055d5cc441e6aa
+| | Author: Aline Andrade <aline.s@outlook.com.br>
+| | Date:   Thu May 4 09:48:54 2023 +0800
+| | 
+| |     Add footer boostrap structure
+| | 
+| * commit b0eb3cd5a491b9ac4d14ec944dbf6db5cb2a6a89
+| | Author: Aline Andrade <aline.s@outlook.com.br>
+| | Date:   Thu May 4 09:46:09 2023 +0800
+| | 
+| |     Add footer boostrap structure
+| | 
+| * commit fc3538e88323f998747ec6c02c8052621e1b70e6
+| | Author: Aline Andrade <aline.s@outlook.com.br>
+| | Date:   Thu May 4 09:37:35 2023 +0800
+| | 
+| |     Add boostrap css and header
+| | 
+| * commit 09cf7e913d03ca44087858e59477357cf9e171c0
+| | Author: Aline Andrade <aline.s@outlook.com.br>
+| | Date:   Thu May 4 09:23:07 2023 +0800
+| | 
+| |     Add first links and change structure about page
+| | 
+| * commit bcda27b5528cbf8ac138214cd8394f247f193742
+| | Author: Aline Andrade <aline.s@outlook.com.br>
+| | Date:   Thu May 4 08:25:27 2023 +0800
+| | 
+| |     Add base file, change index to add header and footer and create blank style.css file
+| | 
+| * commit 265d1cc9043f7462892e69850a1883ae9b20fa22
+|/  Author: Aline Andrade <aline.s@outlook.com.br>
+|   Date:   Thu May 4 08:24:53 2023 +0800
+|   
+|       Add coments struture base file
+| 
+* commit 46ea078cafedc5df99cc649d224ab88493990adc
+| Author: stud <stud@example.noreply.com>
+| Date:   Wed May 3 10:24:24 2023 +0800
+| 
+|     Files created working through course work.
+|     
+|     Files may or may not form the basis of our project, just something to get started with. Will continue to commit as I catch up on the lectures!
+| 
+* commit 71ddc121b82144b29529e0ddbccc2195c87521dc
+| Author: stud <stud@example.noreply.com>
+| Date:   Mon May 1 22:13:01 2023 +0800
+| 
+|     Added requirements.txt
+| 
+* commit b10b54366535fc10e196ffd8d64c0b4876c12b5d
+| Author: Zachary Baker <129585209+23155062@users.noreply.github.com>
+| Date:   Mon May 1 21:51:28 2023 +0800
+| 
+|     Updated Readme.md
+| 
+* commit 2f966726428537884922735a3ec81cef3567f1a9
+| Author: Zachary Baker <129585209+23155062@users.noreply.github.com>
+| Date:   Mon May 1 21:51:01 2023 +0800
+| 
+|     Update README.md (again)
+| 
+* commit 90b5d8c8317b4c52054bbe824ae8e3e0a4c73888
+| Author: Zachary Baker <129585209+23155062@users.noreply.github.com>
+| Date:   Mon May 1 21:47:03 2023 +0800
+| 
+|     Fixing formatting of README.md
+|     
+|     Line breaks especially out of vsCODE not recognised, edited directly on github.com :-)
+| 
+* commit 2dac1d09cafb5aeae4e7a3bed0fd8880efed0ec1
+| Author: stud <stud@example.noreply.com>
+| Date:   Mon May 1 21:34:10 2023 +0800
+| 
+|     Small updates to main branch
+|     
+|     Practicing git commands from the command line so comitting a few small files I've changed.
+|     
+|     Added .gitignore and excluded FLASK compiled folders from being tracked.
+|     Updated the content of the README.md and index.html (nothing of consequence at this stage)
+|     Added app.py which is the main flask app file just for testing, currently working on my local machine
+|   
+*   commit 9f81a4f443cb8baded240c80a11ecf05063c6453
+|\  Merge: 8f30095 f87407d
+| | Author: Zachary Baker <129585209+23155062@users.noreply.github.com>
+| | Date:   Mon Apr 24 22:42:41 2023 +0800
+| | 
+| |     Merge pull request #1 from 23155062/edit-readme
+| |     
+| |     Small update to test pushing a change to a branch
+| | 
+| * commit f87407dcb20e4906c89b2e2a85148c069e1c8671
+|/  Author: Zachary Baker <23155062@student.uwa.edu.au>
+|   Date:   Mon Apr 24 22:40:43 2023 +0800
+|   
+|       Small update to test pushing a change to a branch
+| 
+* commit 8f30095e5dd1c924fc3ef88ef6f9f2fdd783f18c
+| Author: Zachary Baker <23155062@student.uwa.edu.au>
+| Date:   Mon Apr 24 22:38:34 2023 +0800
+| 
+|     Created index.html
+|     
+|     First commit! Direct to main, will create branches from now on.
+| 
+* commit 5ebc498fb8d015bf36ccfa38ed32159e85aba724
+  Author: Zachary Baker <129585209+23155062@users.noreply.github.com>
+  Date:   Mon Apr 24 22:29:47 2023 +0800
+  
+      Initial commit

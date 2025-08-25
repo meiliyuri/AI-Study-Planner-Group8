@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}AI Study Planner - Home{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="text-center mb-5">
+            <h1 class="display-4">AI Study Planner</h1>
+            <p class="lead">Generate intelligent study plans for UWA courses</p>
+            <p class="text-muted">Select a course below to create your personalized study plan</p>
+        </div>
+
+        {% if courses %}
+            <div class="row">
+                {% for course in courses %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ course.code }}</h5>
+                                <p class="card-text">{{ course.title }}</p>
+                                {% if course.description %}
+                                    <small class="text-muted">{{ course.description[:100] }}...</small>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer">
+                                <a href="{{ url_for('main.course_view', course_code=course.code) }}" 
+                                   class="btn btn-primary">Generate Study Plan</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-warning text-center">
+                <h4>No Courses Available</h4>
+                <p>No course data has been imported yet. Please check with the administrator.</p>
+                <a href="{{ url_for('main.import_status') }}" class="btn btn-outline-primary">Check Import Status</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-8 mx-auto">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5 class="card-title">How It Works</h5>
+                <ol>
+                    <li><strong>Select a Course:</strong> Choose from available UWA majors</li>
+                    <li><strong>AI Generation:</strong> Our AI analyzes prerequisites and generates an optimal plan</li>
+                    <li><strong>Customize:</strong> Drag and drop units between semesters to suit your preferences</li>
+                    <li><strong>Validation:</strong> Real-time checking ensures all rules are met</li>
+                    <li><strong>Export:</strong> Download your final plan as a PDF</li>
+                </ol>
+                <p class="mb-0"><small class="text-muted">
+                    <strong>Note:</strong> This is a planning tool. Please consult with academic advisors before finalizing your study plan.
+                </small></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}- {{title_page}}{% endblock title %}
+{% block classbody %}
+<body class="{{class_page}}">
+{% endblock classbody %}
+
+{% block content %}
+    <h1>Signup Page</h1>
+    <form method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.username.label }} {% if form.username.flags.required %}*{% endif %}<br>
+            {{ form.username(size=32) }}<br>
+            <span class="description">
+                {% if not form.username.errors %}
+                {{ form.username.description }}
+                {% endif %}
+                {% for error in form.username.errors %}
+                <span style="color: #c76d51;">[{{ error }}]</span>
+                {% endfor %}
+            </span>
+        </p>
+        <p>
+            {{ form.email.label }} {% if form.email.flags.required %}*{% endif %}<br>
+            {{ form.email(size=64) }}<br>            
+            <span class="description">
+            {% for error in form.email.errors %}
+            <span style="color: #c76d51;">[{{ error }}]</span>
+            {% endfor %}
+            </span>
+            
+        </p>
+        <p>
+            {{ form.password.label }} {% if form.password.flags.required %}*{% endif %}<br>
+            {{ form.password(size=32) }}<br>
+            <span class="description">
+                {% if not form.password.errors %}
+                {{ form.password.description }}
+                {% endif %}
+                {% for error in form.password.errors %}
+                <span style="color: #c76d51;">[{{ error }}]</span>
+                {% endfor %}
+            </span>
+        </p>
+        <p>
+            {{ form.password2.label }} {% if form.password2.flags.required %}*{% endif %}<br>
+            {{ form.password2(size=32) }}<br>
+            {% for error in form.password2.errors %}
+            <span style="color:#c76d51;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}
