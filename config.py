@@ -6,7 +6,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # OpenAI Configuration
-    OPENAI_API_KEY = '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'
+    OPENAI_API_KEY = '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'
     OPENAI_MODEL = 'gpt-3.5-turbo'
     OPENAI_TEMPERATURE = 0.3  # Lower temperature for more consistent rule interpretation
     OPENAI_MAX_TOKENS = 1000
