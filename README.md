@@ -32,7 +32,7 @@ This repository contains:
 ---
 
 ## 3️⃣ Repository Structure
-```plaintext
+```shell
 AI-Study-Planner-Group8/
 ├── .gitignore
 ├── README.md
@@ -40,3 +40,4 @@ AI-Study-Planner-Group8/
 ├── Meeting-Notes/
 ├── src/
 └── resources/
+```
