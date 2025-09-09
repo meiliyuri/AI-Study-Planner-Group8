@@ -11,26 +11,40 @@ This app helps students create study plans for university degrees by:
 - **PDF export**: Generate printable study plans
 - **Admin interface**: Add/remove degree programs easily
 
-## Quick Start
+## Quick Start for Microsoft Windows - instructions may vary for Linux & Macintosh
 
-1. **Install dependencies**:
+1. **Pull code, create Python environment, activate & install pre-requisits**:
    ```bash
+   git clone -b ZacharyBaker3 https://github.com/meiliyuri/AI-Study-Planner-Group8.git
+   cd AI-Study-Planner-Group8
    python3 -m venv venv
-   source venv/bin/activate
+   venv/bin/activate
    pip install -r requirements.txt
    ```
+<img width="958" height="345" alt="Screenshot 2025-09-09 092748" src="https://github.com/user-attachments/assets/2d088ef3-a965-4c39-b9cc-78fa1f943222" />
 
-2. **Setup database** (run once):
+<br></br>
+2. **Set a real API key** (run once):
+   ```bash
+   copy config_local.py.template config_local.py
+   ```
+Modify in your chosen text editor, the real key is located in Teams FILES. It cannot and should not be pushed to Github, if it is OpenAi will immediately invalidate it.
+
+<img width="958" height="323" alt="image" src="https://github.com/user-attachments/assets/16ff76bf-904a-4c2d-8434-68759aa271e8" />
+
+3. **Initialise the DB and start the app**:
    ```bash
    python init_majors.py
-   ```
-
-3. **Run the app**:
-   ```bash
    python -m flask run
    ```
 
+<img width="958" height="487" alt="Screenshot 2025-09-09 093148" src="https://github.com/user-attachments/assets/79dee981-7457-46c4-b46d-ca6a77e51295" />
+
+
 4. **Visit**: http://127.0.0.1:5000
+
+<img width="1047" height="853" alt="image" src="https://github.com/user-attachments/assets/13a142cc-b17e-47f4-9e8b-464f96cb5d2b" />
+
 
 ## Application URLs and Functions
 
@@ -54,4 +68,5 @@ AI-Study-Planner-Group8/
 ├── Meeting-Notes/
 ├── src/
 └── resources/
+
 
