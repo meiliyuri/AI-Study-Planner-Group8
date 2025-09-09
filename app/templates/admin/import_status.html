@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Import Status - AI Study Planner{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-database"></i> Database Import Status</h5>
+                <small class="text-muted">Current state of imported data</small>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h3 class="text-primary">{{ status.units }}</h3>
+                                <p class="mb-0">University Units</p>
+                                <small class="text-muted">Individual subjects/courses</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h3 class="text-success">{{ status.availabilities }}</h3>
+                                <p class="mb-0">Unit Availabilities</p>
+                                <small class="text-muted">Semester offerings</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h3 class="text-info">{{ status.bachelor_degrees }}</h3>
+                                <p class="mb-0">Bachelor Degrees</p>
+                                <small class="text-muted">Base degree programs</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h3 class="text-warning">{{ status.majors }}</h3>
+                                <p class="mb-0">Majors</p>
+                                <small class="text-muted">Specializations</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h3 class="text-secondary">{{ status.degree_programs }}</h3>
+                                <p class="mb-0">Degree Programs</p>
+                                <small class="text-muted">Available to students</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h3 class="text-dark">{{ status.major_units }}</h3>
+                                <p class="mb-0">Major-Unit Associations</p>
+                                <small class="text-muted">Links between majors and their required units</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <h6>System Health</h6>
+                    {% if status.units > 0 and status.majors > 0 %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>System Ready:</strong> Database contains units and majors. Study plan generation should work correctly.
+                        </div>
+                    {% elif status.units > 0 %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Partial Setup:</strong> Units imported but no majors configured. Run <code>python init_majors.py</code> to set up majors.
+                        </div>
+                    {% else %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle"></i>
+                            <strong>Setup Required:</strong> No data imported. Run <code>python init_majors.py</code> to initialize the system.
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mt-3">
+                    <a href="{{ url_for('main.admin_majors') }}" class="btn btn-primary">
+                        <i class="fas fa-cogs"></i> Manage Majors
+                    </a>
+                    <a href="{{ url_for('main.index') }}" class="btn btn-secondary">
+                        <i class="fas fa-home"></i> Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
