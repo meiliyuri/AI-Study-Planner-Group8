@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}AI Study Planner{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="jumbotron text-center mb-5">
+            <h1 class="display-4"><i class="fas fa-graduation-cap"></i> AI Study Planner</h1>
+            <p class="lead">Create intelligent study plans for your university degree with AI-powered prerequisite checking</p>
+            <hr class="my-4">
+            <p>Select a degree program below to generate a personalized study plan</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-university"></i> Available Degree Programs</h5>
+                <small class="text-muted">{{ degree_programs|length }} degree programs available</small>
+            </div>
+            <div class="card-body">
+                {% if degree_programs %}
+                    <div class="row">
+                        {% for program in degree_programs %}
+                            <div class="col-lg-6 col-md-12 mb-3">
+                                <div class="card degree-program-card h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title text-primary">
+                                            <i class="fas fa-award"></i>
+                                            {{ program.bachelor_degree.title }}
+                                        </h6>
+                                        <h5 class="card-subtitle mb-2">
+                                            Major in {{ program.major.title }}
+                                        </h5>
+                                        <p class="card-text text-muted small">
+                                            {{ program.bachelor_degree.duration_years }} year degree 
+                                            • {{ program.bachelor_degree.total_credit_points }} credit points
+                                            • {{ program.major.major_units|selectattr('is_mandatory')|list|length }} core units
+                                        </p>
+                                        <a href="{{ url_for('main.degree_view', program_code=program.code) }}" 
+                                           class="btn btn-primary btn-sm">
+                                            <i class="fas fa-calendar-alt"></i> Generate Study Plan
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-exclamation-circle fa-3x mb-3"></i>
+                        <h5>No degree programs available</h5>
+                        <p>Please check back later or contact your administrator.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6><i class="fas fa-info-circle"></i> How it works</h6>
+                <ol class="mb-0">
+                    <li>Select your degree program and major from the list above</li>
+                    <li>AI generates an intelligent study plan considering prerequisites and unit levels</li>
+                    <li>Customize your plan by dragging and dropping units between semesters</li>
+                    <li>Real-time validation ensures your plan meets all requirements</li>
+                    <li>Export your finalized study plan as a PDF</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+# Local configuration template - Copy this to config_local.py and add your API key
+# This file should be copied to config_local.py and updated with your actual API key
+# The config_local.py file is gitignored and will not be committed to the repository
+
+OPENAI_API_KEY = 'your-openai-api-key-here'
+
+# To use this:
+# 1. Copy this file to config_local.py
+# 2. Replace 'your-openai-api-key-here' with your actual OpenAI API key
+# 3. The app will automatically use your key for AI features

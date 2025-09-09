@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Major Management - Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2>Major Management</h2>
+                <p class="text-muted mb-0">Enable/disable majors and discover new ones from CSV data</p>
+            </div>
+            <div>
+                <a href="/admin/import_status" class="btn btn-outline-secondary me-2">
+                    Import Status
+                </a>
+                <a href="/" class="btn btn-outline-secondary">
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Currently Active Majors -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Currently Active Majors</h5>
+                <small class="text-muted">{{ current_majors|selectattr('is_active')|list|length }} of {{ current_majors|length }} majors enabled</small>
+            </div>
+            <div class="card-body">
+                {% if current_majors %}
+                    {% for major in current_majors %}
+                        <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <div>
+                                <strong>{{ major.code }}</strong>
+                                <br>
+                                <small class="text-muted">{{ major.title }}</small>
+                                {% if major.is_active %}
+                                    <span class="badge bg-success ms-2">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary ms-2">Inactive</span>
+                                {% endif %}
+                            </div>
+                            <button class="btn btn-sm btn-{% if major.is_active %}danger{% else %}success{% endif %}" 
+                                    onclick="toggleMajor('{{ major.code }}')">
+                                {% if major.is_active %}Disable{% else %}Enable{% endif %}
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        No majors currently in database. Add some from the discovery list!
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Majors from Discovery -->
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Available Majors (Auto-Discovery)</h5>
+                <small class="text-muted">{{ available_majors|length }} majors discovered from CSV data</small>
+            </div>
+            <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                {% if available_majors %}
+                    <div class="row mb-2">
+                        <div class="col-6">
+                            <input type="text" id="majorFilter" class="form-control form-control-sm" 
+                                   placeholder="Filter majors..." onkeyup="filterMajors()">
+                        </div>
+                        <div class="col-6">
+                            <select id="statusFilter" class="form-select form-select-sm" onchange="filterMajors()">
+                                <option value="">All Statuses</option>
+                                <option value="exists">Already Added</option>
+                                <option value="new">New/Available</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="majorsList">
+                        {% for major in available_majors %}
+                            <div class="major-item d-flex justify-content-between align-items-center py-2 border-bottom" 
+                                 data-code="{{ major.code }}" data-title="{{ major.title }}" 
+                                 data-exists="{{ major.exists|lower }}" data-active="{{ major.is_active|lower }}">
+                                <div>
+                                    <strong>{{ major.code }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ major.title }}</small>
+                                    <br>
+                                    <small class="text-info">
+                                        {{ major.total_units }} units 
+                                        ({{ major.core_units }} core, {{ major.option_units }} option)
+                                    </small>
+                                    {% if major.exists %}
+                                        {% if major.is_active %}
+                                            <span class="badge bg-success ms-2">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary ms-2">Added but Inactive</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-primary ms-2">Available to Add</span>
+                                    {% endif %}
+                                </div>
+                                {% if major.exists %}
+                                    <button class="btn btn-sm btn-{% if major.is_active %}danger{% else %}success{% endif %}" 
+                                            onclick="toggleMajor('{{ major.code }}')">
+                                        {% if major.is_active %}Disable{% else %}Enable{% endif %}
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-sm btn-primary" 
+                                            onclick="toggleMajor('{{ major.code }}')">
+                                        Add & Enable
+                                    </button>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        No majors discovered from CSV data. Check file path and format.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleMajor(majorCode) {
+    fetch(`/admin/majors/toggle/${majorCode}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message and reload page
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Network error occurred');
+    });
+}
+
+function filterMajors() {
+    const nameFilter = document.getElementById('majorFilter').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
+    const majorItems = document.querySelectorAll('.major-item');
+    
+    majorItems.forEach(item => {
+        const code = item.dataset.code.toLowerCase();
+        const title = item.dataset.title.toLowerCase();
+        const exists = item.dataset.exists === 'true';
+        const active = item.dataset.active === 'true';
+        
+        let showName = code.includes(nameFilter) || title.includes(nameFilter);
+        let showStatus = true;
+        
+        if (statusFilter === 'exists' && !exists) showStatus = false;
+        if (statusFilter === 'new' && exists) showStatus = false;
+        
+        item.style.display = (showName && showStatus) ? 'flex' : 'none';
+    });
+}
+</script>
+{% endblock %}

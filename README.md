@@ -1,14 +1,72 @@
-# 📚 AI Study Planner Project
+# AI Study Planner
 
-## 1️⃣ Project Overview
-The **AI Study Planner** is a collaborative group project aimed at developing an AI-powered tool to help students manage their study schedules effectively.
+An AI-powered Flask web application that helps university students plan their degree programs with intelligent study plan generation and prerequisite validation.
 
-This repository contains:
-- Source code
-- Project documentation
-- Meeting notes
-- Project plans
-- Links to related resources (MS Teams, SharePoint)
+## What It Does
+
+This app helps students create study plans for university degrees by:
+- **Showing available programs**: Currently supports Bachelor of Economics majors (Economics, Financial Economics)
+- **AI-generated plans**: Uses OpenAI to create smart 6-semester study plans considering prerequisites and year levels
+- **Drag-and-drop editing**: Students can move units between semesters with real-time validation
+- **PDF export**: Generate printable study plans
+- **Admin interface**: Add/remove degree programs easily
+
+## Quick Start
+
+1. **Install dependencies**:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+
+2. **Setup database** (run once):
+   ```bash
+   python init_majors.py
+   ```
+
+3. **Run the app**:
+   ```bash
+   python -m flask run
+   ```
+
+4. **Visit**: http://127.0.0.1:5000
+
+## Application URLs and Functions
+
+After running the app, you can access these main features:
+
+### Main User Functions
+- **Homepage**: http://127.0.0.1:5000/
+  - Shows available degree programs (Economics, Financial Economics)
+  - Select your program to start planning
+
+- **Study Plan Generation**: http://127.0.0.1:5000/degree/BEC-ECNPF
+  - AI-generated 6-semester study plan
+  - Drag-and-drop interface to modify plan
+  - Real-time prerequisite validation
+  - PDF export functionality
+
+- **Financial Economics Program**: http://127.0.0.1:5000/degree/BEC-FINEC
+  - Alternative major with different unit requirements
+  - Same AI planning and validation features
+
+### Admin Functions
+- **Import Status**: http://127.0.0.1:5000/admin/import_status
+  - Shows database statistics
+  - View imported units and majors count
+  - System health check
+
+- **Manage Majors**: http://127.0.0.1:5000/admin/majors
+  - Enable/disable degree programs
+  - Add new majors from CSV data
+  - View unit breakdown per major
+
+### API Endpoints (used by JavaScript)
+- **Plan Validation**: POST to /api/validate_plan
+- **PDF Export**: POST to /api/export_pdf
+
+## Current Status
 
 ---
 
