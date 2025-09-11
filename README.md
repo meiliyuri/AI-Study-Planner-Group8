@@ -18,7 +18,7 @@ This app helps students create study plans for university degrees by:
    git clone -b ZacharyBaker3 https://github.com/meiliyuri/AI-Study-Planner-Group8.git
    cd AI-Study-Planner-Group8
    python3 -m venv venv
-   venv/bin/activate
+   .\venv\Scripts\Activate
    pip install -r requirements.txt
    ```
 <img width="958" height="345" alt="Screenshot 2025-09-09 092748" src="https://github.com/user-attachments/assets/2d088ef3-a965-4c39-b9cc-78fa1f943222" />
@@ -68,5 +68,6 @@ AI-Study-Planner-Group8/
 ├── Meeting-Notes/
 ├── src/
 └── resources/
+
 
 
