@@ -14,19 +14,35 @@ This app helps students create study plans for university degrees by:
 ## Quick Start for Microsoft Windows - instructions may vary for Linux & Macintosh
 
 1. **Pull code, create Python environment, activate & install pre-requisits**:
+
+   Windows:
    ```bash
    git clone -b ZacharyBaker3 https://github.com/meiliyuri/AI-Study-Planner-Group8.git
    cd AI-Study-Planner-Group8
    python3 -m venv venv
-   .\venv\Scripts\Activate
+   .\venv\Scripts\Activate 
    pip install -r requirements.txt
    ```
 <img width="958" height="345" alt="Screenshot 2025-09-09 092748" src="https://github.com/user-attachments/assets/2d088ef3-a965-4c39-b9cc-78fa1f943222" />
+   
+   macOS:
 
+   ```bash
+   git clone -b ZacharyBaker3 https://github.com/meiliyuri/AI-Study-Planner-Group8.git
+   cd AI-Study-Planner-Group8
+   python3 -m venv venv
+   source venv/bin/activate 
+   pip install -r requirements.txt
+   ```
 <br></br>
 2. **Set a real API key** (run once):
+   Windows:
    ```bash
-   copy config_local.py.template config_local.py
+   copy config_local.py.template config_local.py 
+   ```
+   macOS:
+   ```bash
+   cp config_local.py.template config_local.py 
    ```
 Modify in your chosen text editor, the real key is located in Teams FILES. It cannot and should not be pushed to Github, if it is OpenAi will immediately invalidate it.
 
@@ -68,6 +84,7 @@ AI-Study-Planner-Group8/
 ├── Meeting-Notes/
 ├── src/
 └── resources/
+
 
 
 
