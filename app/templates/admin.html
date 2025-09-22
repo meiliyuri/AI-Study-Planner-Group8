@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3>Admin Panel</h3>
+            </div>
+            <div class="card-body">
+                <!-- Data Import Section -->
+                <div class="mb-4">
+                    <h5>Import Course Data</h5>
+                    <p class="text-muted">Upload CSV and XLSX files to update course information</p>
+
+                    <form id="import-form" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="units-file" class="form-label">Units CSV File</label>
+                            <input type="file" class="form-control" id="units-file" name="units_file" accept=".csv">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="units-rules-file" class="form-label">Units with Rules CSV File</label>
+                            <input type="file" class="form-control" id="units-rules-file" name="units_rules_file" accept=".csv">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="sequence-files" class="form-label">Major Sequence XLSX Files</label>
+                            <input type="file" class="form-control" id="sequence-files" name="sequence_files" multiple accept=".xlsx">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Import Data</button>
+                    </form>
+                </div>
+
+                <hr>
+
+                <!-- Cache Management -->
+                <div class="mb-4">
+                    <h5>Cache Management</h5>
+                    <p class="text-muted">Clear cached study plans and AI responses</p>
+
+                    <button id="clear-cache" class="btn btn-warning">Clear Plan Cache</button>
+                </div>
+
+                <hr>
+
+                <!-- System Status -->
+                <div class="mb-4">
+                    <h5>System Status</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6>Database Status</h6>
+                                    <span id="db-status" class="badge bg-secondary">Checking...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6>OpenAI API Status</h6>
+                                    <span id="ai-status" class="badge bg-secondary">Checking...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Import Log -->
+        <div class="card">
+            <div class="card-header">
+                <h5>Import Log</h5>
+            </div>
+            <div class="card-body">
+                <div id="import-log" class="debug-output">
+                    <div class="text-muted">Import operations will appear here</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Check system status
+    checkSystemStatus();
+
+    // Handle data import
+    $('#import-form').on('submit', function(e) {
+        e.preventDefault();
+        importData();
+    });
+
+    // Handle cache clearing
+    $('#clear-cache').on('click', function() {
+        clearCache();
+    });
+});
+
+function checkSystemStatus() {
+    // Check database status
+    $.get('/api/admin/status')
+        .done(function(data) {
+            $('#db-status').removeClass('bg-secondary').addClass('bg-success').text('Connected');
+        })
+        .fail(function() {
+            $('#db-status').removeClass('bg-secondary').addClass('bg-danger').text('Error');
+        });
+
+    // Check AI API status
+    $('#ai-status').removeClass('bg-secondary').addClass('bg-warning').text('Not Implemented');
+}
+
+function importData() {
+    const formData = new FormData($('#import-form')[0]);
+
+    $('#import-log').html('<div class="text-info">Starting import...</div>');
+
+    $.ajax({
+        url: '/api/admin/import_data',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            $('#import-log').append('<div class="text-success">Import completed successfully</div>');
+        },
+        error: function(xhr) {
+            $('#import-log').append('<div class="text-danger">Import failed: ' + xhr.responseJSON.error + '</div>');
+        }
+    });
+}
+
+function clearCache() {
+    $.post('/api/admin/clear_cache')
+        .done(function(response) {
+            alert('Cache cleared successfully');
+        })
+        .fail(function(xhr) {
+            alert('Failed to clear cache: ' + xhr.responseJSON.error);
+        });
+}
+</script>
+{% endblock %}

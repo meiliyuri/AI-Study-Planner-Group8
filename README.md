@@ -1,42 +1,144 @@
-# 📚 AI Study Planner Project
+**Important**: API calls to Claude are expensive, at 5-15c per call. Please keep this in mind while testing, at least until a plan caching feature has been implemented. Plan generation takes 15-30 seconds.
 
-## 1️⃣ Project Overview
-The **AI Study Planner** is a collaborative group project aimed at developing an AI-powered tool to help students manage their study schedules effectively.
+# AI Study Planner
 
-This repository contains:
-- Source code
-- Project documentation
-- Meeting notes
-- Project plans
-- Links to related resources (MS Teams, SharePoint)
+An AI-powered Flask web application that helps university students plan their degree programs with intelligent study plan generation and prerequisite validation.
 
----
+## Features
 
-## 2️⃣ Project Resources
+- **AI-Powered Plan Generation**: Uses Claude Opus to create valid study plans
+- **Interactive Drag-and-Drop Interface**: Customize plans with real-time validation
+- **Degree Rule Compliance**: Ensures all UWA Bachelor degree requirements are met
+- **Major Support**: Currently supports Science and Economics degrees
+- **Real-time Validation**: Immediate feedback on plan modifications
+- **PDF Export**: Export completed plans for printing/sharing
+- **Admin Panel**: Import new course data and manage the system
 
-### 📂 GitHub Repository
-[AI Study Planner GitHub Link](https://github.com/meiliyuri/AI-Study-Planner-Group8.git)
+## Technology Stack
 
-### 📌 Jira Board
-[Jira Project Board Link](https://cits5206-2025s2-gourp8.atlassian.net/jira/software/projects/ASP/summary)
+- **Backend**: Flask, SQLAlchemy, Claude API using the Opus 4.1 model
+- **Frontend**: HTML, CSS, JavaScript, Bootstrap, SortableJS
+- **Database**: SQLite (development), PostgreSQL (production)
+- **AI Integration**: Claude Opus 4.1
 
-### 💬 MS Teams Project Area
-[MS Teams Link](https://teams.microsoft.com/l/channel/19%3A878c9bc400744c2388c6fddd909a99eb%40thread.tacv2/Group%208?groupId=e524efef-b404-40f0-a05e-8dd542306098&tenantId=05894af0-cb28-46d8-8716-74cdb46e2226&ngc=true)
+## Project Structure
 
-### 📝 Meeting Minutes
-[Meeting Minutes SharePoint Folder](https://uniwa.sharepoint.com/:f:/r/teams/CITS5206SEM-22025-Group8/Shared%20Documents/Group%208/Meeting%20Minutes?csf=1&web=1&e=2pU9t4)
+```
+AI-Study-Planner-Group8-ZacharyBaker5.2/
+├── app/
+│   ├── __init__.py          # Flask app initialization
+│   ├── models.py            # Database models
+│   ├── routes.py            # API routes
+│   ├── controller.py        # Business logic and AI integration
+│   ├── templates/           # HTML templates
+│   │   ├── base.html
+│   │   ├── index.html
+│   │   └── admin.html
+│   └── static/              # CSS, JS, and other static files
+│       ├── css/
+│       └── js/
+├── Reference_Material/      # Original data files and documentation
+│   └── Essential_Data/      # CSV and XLSX course data
+├── app.py                   # Application entry point
+├── config.py                # Configuration settings
+├── requirements.txt         # Python dependencies
+└── README.md               # This file
+```
 
-### 📅 Project Specification and Plans
-[Project Specification and Plans Document](https://uniwa.sharepoint.com/:w:/r/teams/CITS5206SEM-22025-Group8/Shared%20Documents/Group%208/2025-08-03%20-%20Project%20Specification%20and%20Plans%20(Ai%20First%20DRAFT).docx?d=w07de8b6aa1964b9790ed4f46c9dc61c0&csf=1&web=1&e=p3Awge)
+## Quick Start for Microsoft Windows - instructions may vary for Linux & Macintosh
 
----
+1. **Pull code, create Python environment, activate & install pre-requisits**:
 
-## 3️⃣ Repository Structure
-```plaintext
-AI-Study-Planner-Group8/
-├── .gitignore
-├── README.md
-├── Project-Plan/
-├── Meeting-Notes/
-├── src/
-└── resources/
+   Windows:
+   ```bash
+   git clone -b ZacharyBaker4 https://github.com/meiliyuri/AI-Study-Planner-Group8.git
+   cd AI-Study-Planner-Group8
+   python3 -m venv venv
+   .\venv\Scripts\Activate 
+   pip install -r requirements.txt
+   ```
+   
+<img width="1484" height="397" alt="image" src="https://github.com/user-attachments/assets/d22cb4e6-0269-4570-8afb-908a2c555898" />
+<br></br>
+   macOS:
+
+   ```bash
+   git clone -b ZacharyBaker4 https://github.com/meiliyuri/AI-Study-Planner-Group8.git
+   cd AI-Study-Planner-Group8
+   python3 -m venv venv
+   source venv/bin/activate 
+   pip install -r requirements.txt
+   ```
+
+2. **Set a real API key** (run once):
+
+Copy the **config.py** file from FILES in Teams in to the root of the project folder. Do not sync this file with Github, it contains the actual API Key and will immediately cause it to be deactivated.
+
+3. **Initialise the DB and start the app**:
+   ```bash
+   python data_loader.py
+   python -m flask run
+   ```
+
+<img width="1479" height="758" alt="image" src="https://github.com/user-attachments/assets/4688c0dd-c3fe-4080-bed2-ccc15d8c63c1" />
+<br></br>
+
+4. **Visit**: http://127.0.0.1:5000
+
+<img width="1319" height="877" alt="image" src="https://github.com/user-attachments/assets/2a487579-5d49-4541-8da1-496c114f1ebf" />
+
+
+## Data Structure
+
+### Bachelor Degree Requirements
+
+- **Total Units**: 24 units (144 credit points)
+- **Duration**: 6 semesters over 3 years
+- **Level Distribution**:
+  - Maximum 12 Level 1 units
+  - Minimum 12 Level 2 or Level 3 units
+  - Minimum 3 Level 3 units
+- **Semester Load**: 4 units per semester
+
+### Major Structure
+
+Each major contains:
+- **Mandatory units** (core): Must be completed
+- **Optional units** (electives): Choose from available options
+- **Bridging units**: Excluded from plans (CHEM1003, MATH1720, SCIE1500, ECON1111)
+
+### Data Files
+
+- `Units.csv`: Complete unit catalog with details
+- `Units with unit rules and availabilities.csv`: Prerequisites and rules
+- `Sequence export (MJD-*).xlsx`: Major-specific unit requirements
+
+## AI Integration
+
+### Plan Generation
+
+Uses a multi-step AI pipeline:
+
+1. **Initial Plan Generation**: Opus 4.1 creates a valid plan based on major requirements
+2. **Real-Time Validation**: Some basic rules are checked (availability, prerequisits) immediately while units are being dragged around
+2. **Quality of Service Check**: Opus 4.1 validates the bigger-picture of the plan using all available information
+
+### Prompt Strategy
+
+- **Generation Prompt**: Provides major requirements and asks for structured JSON plan
+- **Validation Prompt**: Checks modifications against UWA degree rules
+- **Temperature Settings**: Low temperature (0.1-0.3) for consistent, rule-based responses
+
+
+### Future Enhancements & Known Issues
+
+- BUG: Units pulled over from the Available Units who's pre-requisites are not met are not being flagged (turned yellow)
+- BUG: AI Quality Check is missing the "or equivalent" part of the ECON1111 prerequisite
+- Research: Not every Ai generated plan is compliant, look at ways to improve the success rate without moving more logic to the code
+- Improvement: The Ai Quality Check should probably have a red/yellow/green indicator if the plan is valid, so students know the Quality Score is not saying the plan is invalid
+- Improvement: The whole site is ready for a front-end enhancement, including the outputted PDF document
+- Improvement: The plans must be cached to be cost effective, each call is 10-20c. Implement caching of base plans in to the DB.
+- Improvement: Add chat function where AI Debug Log is to allow students to ask for unit advice, and add a feature to trigger a re-generation with their comments in the API call (i.e. please re-generate but with a focus on microeconomic units)
+- Improvement: Consider a two-stage build process which pipelines the first generation in to the Ai Validate Plan, and then re-generates the plan, to achieve a better percentage of valid outcomes. This may be part of the Research point above.
+- Improvement: Remove references to OpenAi and ChatGPT, we moved to Claude Opus Ai API, what's left are not in use
+
