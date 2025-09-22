@@ -20,10 +20,11 @@ body {
 .semester-container h6 {
     background: #e9ecef;
     margin: 0;
-    padding: 10px 15px;
+    padding: 12px 15px;
     border-radius: 8px 8px 0 0;
-    font-weight: 600;
-    color: #495057;
+    font-weight: 700;
+    color: #343a40;
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.05);
 }
 
 .semester-units {
@@ -53,13 +54,14 @@ body {
     background: #fff5f5;
     padding: 15px;
     text-align: center;
-    transition: all 0.3s ease;
     cursor: pointer;
+    transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
 }
 
 .trash-zone:hover {
     background: #ffe6e6;
     border-color: #c82333;
+    transform: translateY(-2px);
 }
 
 .trash-zone.drag-over {
@@ -163,12 +165,23 @@ body {
     text-overflow: ellipsis;
 }
 
+.unit-title:hover {
+    white-space: normal;
+    background: linear-gradient(90deg, rgba(0,123,255,0.85), rgba(0,123,255,0.95));
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    position: absolute;
+    z-index: 20;
+    transition: all 0.2s ease;
+}
+
 .unit-level {
-    font-size: 0.8em;
-    padding: 2px 6px;
-    border-radius: 3px;
-    color: white;
-    font-weight: 500;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 0.75em;
+    text-transform: uppercase;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
 
 .unit-level.level-1 { background-color: #28a745; }
@@ -280,9 +293,19 @@ body {
     }
 
     .unit-title {
-        display: none;
-    }
-
+       max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.unit-title:hover {
+    white-space: normal;
+    background: rgba(0,0,0,0.75);
+    color: white;
+    padding: 3px 6px;
+    border-radius: 4px;
+    position: absolute;
+    z-index: 10;
+}
     .col-md-4 {
         margin-top: 20px;
     }
@@ -310,9 +333,11 @@ body {
 /* Plan Summary */
 .plan-summary {
     background: #e9ecef;
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 15px;
+    padding: 12px 15px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .plan-summary .stat {
@@ -321,7 +346,8 @@ body {
 }
 
 .plan-summary .stat-number {
-    font-weight: 600;
+   font-size: 1.3em;
+    font-weight: bold;
     color: #007bff;
 }
 
