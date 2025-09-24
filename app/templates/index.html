@@ -2,6 +2,7 @@
 
 {% block content %}
 <div class="row">
+    <!-- Study Plan Area -->
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
@@ -14,8 +15,10 @@
                         <button id="generate-plan" class="btn btn-primary" disabled>Generate Plan</button>
                         <button id="ai-validate-plan" class="btn btn-warning" disabled title="Comprehensive AI quality analysis">
                             <i class="fas fa-robot"></i> AI Validate Plan
+                        <span id="ai-status-indicator"
+                              class="badge rounded-pill ms-2"
+                              style="display:none;"></span>
                         </button>
-                        <span id="ai-status-indicator" class="badge rounded-pill ms-2" style="display: none;"></span>
                         <button id="export-pdf" class="btn btn-success" disabled>Export PDF</button>
                     </div>
                 </div>
@@ -27,7 +30,9 @@
                     </div>
                 </div>
 
+                <!-- Study Plan Grid (hidden initially) -->
                 <div id="plan-grid" class="row" style="display: none;">
+                    <!-- Year 1 -->
                     <div class="col-md-12 mb-3">
                         <h5>Year 1</h5>
                         <div class="row">
@@ -50,6 +55,7 @@
                         </div>
                     </div>
 
+                    <!-- Year 2 -->
                     <div class="col-md-12 mb-3">
                         <h5>Year 2</h5>
                         <div class="row">
@@ -72,6 +78,7 @@
                         </div>
                     </div>
 
+                    <!-- Year 3 -->
                     <div class="col-md-12">
                         <h5>Year 3</h5>
                         <div class="row">
@@ -98,7 +105,9 @@
         </div>
     </div>
 
+    <!-- Right Panel -->
     <div class="col-md-4">
+        <!-- Validation Status -->
         <div class="card mb-3">
             <div class="card-header">
                 <h5>Plan Validation</h5>
@@ -110,15 +119,19 @@
             </div>
         </div>
 
+        <!-- Available Units -->
         <div class="card mb-3">
             <div class="card-header">
                 <h5>Available Units</h5>
+
+                <!-- Trash/Remove Zone -->
                 <div id="trash-zone" class="trash-zone mt-2 mb-2">
                     <div class="trash-content">
                         <i class="fas fa-trash"></i>
                         <span>Drop here to remove</span>
                     </div>
                 </div>
+
                 <input type="text" id="unit-search" class="form-control form-control-sm mt-2" placeholder="Search units...">
             </div>
             <div class="card-body">
@@ -128,6 +141,7 @@
             </div>
         </div>
 
+        <!-- AI Debugging -->
         <div class="card">
             <div class="card-header">
                 <h5>AI Debug Log</h5>
@@ -141,6 +155,7 @@
     </div>
 </div>
 
+<!-- Loading Modal -->
 <div class="modal fade" id="loading-modal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
