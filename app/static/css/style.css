@@ -304,7 +304,7 @@ body {
 }
 
 .unit-card.hidden {
-    display: none;
+     display: none !important;
 }
 
 /* Plan Summary */
