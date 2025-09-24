@@ -390,3 +390,15 @@ body {
     z-index: 1000;
     pointer-events: none;
 }
+
+/* Button Group Styles */
+.button-group {
+    display: flex;
+    align-items: center; 
+    gap: 10px; 
+    margin-bottom: 20px; 
+}
+
+#major-select {
+    flex-grow: 1; 
+}
