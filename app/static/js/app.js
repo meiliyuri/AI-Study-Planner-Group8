@@ -886,7 +886,7 @@ function aiValidatePlan() {
     })
     .then(result => {
         hideLoading();
-        pdateAIStatusIndicator(result);
+        updateAIStatusIndicator(result);
         showQualityCheckModal(result);
     })
     .catch(error => {
