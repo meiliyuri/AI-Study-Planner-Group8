@@ -886,11 +886,16 @@ function aiValidatePlan() {
     })
     .then(result => {
         hideLoading();
+        updateAIStatusIndicator(result);
         showQualityCheckModal(result);
     })
     .catch(error => {
         hideLoading();
         showError('Failed to validate plan: ' + (error.error || 'Unknown error'));
+        $('#ai-status-indicator').show()
+          .removeClass('bg-success bg-warning')
+          .addClass('bg-danger')
+          .text('Fail');
     });
 }
 
@@ -1089,4 +1094,21 @@ function logDebug(action, data) {
 
     // Keep only last 10 entries
     $('#debug-log .debug-entry').slice(10).remove();
+}
+
+//Update AI light bulb status
+function updateAIStatusIndicator(result) {
+    const indicator = $('#ai-status-indicator');
+    const overall = result.overallQuality || 'unknown';
+
+    indicator.show().removeClass('bg-success bg-warning bg-danger').text('');
+    if (['excellent','good'].includes(overall)) {
+        indicator.addClass('bg-success').text('Pass');
+    } else if (overall === 'fair') {
+        indicator.addClass('bg-warning').text('Warning');
+    } else if (overall === 'poor') {
+        indicator.addClass('bg-danger').text('Fail');
+    } else {
+        indicator.text('N/A');
+    }
 }
