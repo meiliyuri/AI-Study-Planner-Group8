@@ -252,39 +252,50 @@ function createUnitCard(unitCode, unitData = null) {
 }
 
 function handleUnitMove(evt) {
-    const semester = evt.to.dataset.semester;
-    const unitCount = $(evt.to).find('.unit-card').length;
-    const unitCode = $(evt.item).data('unit-code');
+    const semester = evt.to.dataset.semester; // Get the semester the item is being moved to
+    const unitCount = $(evt.to).find('.unit-card').length; // Count the number of units in the target semester
+    const unitCode = $(evt.item).data('unit-code'); // Get the unit code of the item being moved
 
+    // Record which semester the current item belongs to
     $(evt.item).attr('data-semester', semester);
 
-    // Always update the UI, but validate afterwards
-    updateDropZone(evt.to);
-    updateAvailableUnitsFilter();
+    // Update the UI
+    updateDropZone(evt.to); // Update the drop zone UI
+    updateAvailableUnitsFilter(); // Update the filter for available units
 
-    // Check for validation issues and update status
+    // Clear previous flags (to avoid residual mis-coloring)
+    $(evt.item).removeClass('constraint-error constraint-warning constraint-valid')
+               .removeAttr('data-constraint-message');
+
+    // Check semester capacity
     if (unitCount > 4) {
-        updateValidationStatus(`${semester} has ${unitCount} units (max 4 allowed)`, 'error');
-    } else {
-        // Check prerequisite and semester availability constraints
-        const constraintValidation = validateUnitConstraints(unitCode, semester);
-        
-        $(evt.item).removeClass('constraint-error constraint-warning constraint-valid')
-                   .removeAttr('data-constraint-message');
+        updateValidationStatus(`${semester} has ${unitCount} units (max 4 allowed)`, 'error'); // Update validation status
+        $(evt.item).addClass('constraint-error') // Add error class for visual feedback
+                   .attr('data-constraint-message', 'Too many units in this semester'); // Set error message
+        return; // Exit function if the limit is exceeded
+    }
 
-        if (!constraintValidation.isValid) {
-            if (constraintValidation.type === 'error') {
-                $(evt.item).addClass('constraint-error');
-            } else if (constraintValidation.type === 'warning') {
-                $(evt.item).addClass('constraint-warning'); // 黄色
-            }
-            $(evt.item).attr('data-constraint-message', constraintValidation.message);
+    // Validate semester availability & prerequisites
+    const constraintValidation = validateUnitConstraints(unitCode, semester);
 
-            updateValidationStatus(constraintValidation.message, constraintValidation.type);
-        } else {
-            $(evt.item).addClass('constraint-valid');
+    if (!constraintValidation.isValid) {
+        // Set card color based on validation result
+        if (constraintValidation.type === 'error') {
+            $(evt.item).addClass('constraint-error'); // Add error class if validation fails
+        } else if (constraintValidation.type === 'warning') {
+            $(evt.item).addClass('constraint-warning'); // Add warning class if there are warnings
         }
-    }    
+        $(evt.item).attr('data-constraint-message', constraintValidation.message); // Set the constraint message
+
+        // Update the status on the right side
+        updateValidationStatus(constraintValidation.message, constraintValidation.type);
+
+    } else {
+        // If valid, add a green mark to indicate compliance
+        $(evt.item).addClass('constraint-valid');
+        // Continue with overall validatePlan()
+        validatePlan();
+    }
 
     // Apply visual validation to all units in the plan
     validateAndHighlightAllUnits();
