@@ -100,6 +100,8 @@ def load_units_with_rules_csv():
         prerequisites = clean_field(row.get('prereqs', ''))
         corequisites = clean_field(row.get('coreqs', ''))
         incompatibilities = clean_field(row.get('incompatible', ''))
+        homedegree = clean_field(row.get('homedegree', ''))
+        degreestaughtin = clean_field(row.get('degreestaughtin', ''))
 
         # Check if it's a bridging unit
         is_bridging = unit_code in BRIDGING_UNITS
@@ -112,6 +114,8 @@ def load_units_with_rules_csv():
             unit.corequisites = corequisites
             unit.incompatibilities = incompatibilities
             unit.is_bridging = is_bridging
+            unit.homedegree = homedegree
+            unit.degreestaughtin = degreestaughtin
             updated_count += 1
         else:
             unit = Unit(
@@ -123,7 +127,9 @@ def load_units_with_rules_csv():
                 prerequisites=prerequisites,
                 corequisites=corequisites,
                 incompatibilities=incompatibilities,
-                is_bridging=is_bridging
+                is_bridging=is_bridging,
+                homedegree=homedegree, 
+                degreestaughtin=degreestaughtin
             )
             db.session.add(unit)
             updated_count += 1
@@ -131,7 +137,7 @@ def load_units_with_rules_csv():
     db.session.commit()
     print(f"Updated {updated_count} valid units with rules and availability data")
 
-def load_major_sequence_xlsx(file_path, major_code, major_name, degree):
+def load_major_sequence_xlsx(file_path, major_code, major_name, degree, degree_code=None):
     """Load major sequence from XLSX file"""
     if not os.path.exists(file_path):
         print(f"File not found: {file_path}")
@@ -143,13 +149,24 @@ def load_major_sequence_xlsx(file_path, major_code, major_name, degree):
         # Read the XLSX file - skip first 2 rows (metadata), use row 2 as headers
         df = pd.read_excel(file_path, sheet_name='Sequence export', skiprows=2, header=0)
 
-
         # Create or get major
         major = Major.query.filter_by(code=major_code).first()
         if not major:
-            major = Major(code=major_code, name=major_name, degree=degree)
+            major = Major(
+                code=major_code,
+                name=major_name,
+                degree=degree
+            )
+            # degree_code 컬럼이 있으면 채움
+            if hasattr(Major, 'degree_code'):
+                major.degree_code = degree_code
             db.session.add(major)
             db.session.flush()  # Get the ID
+        else:
+            # 기존 레코드 보정: degree_code가 비어있고 이번에 값이 오면 채워넣기
+            if hasattr(Major, 'degree_code'):
+                if degree_code and not (major.degree_code and str(major.degree_code).strip()):
+                    major.degree_code = degree_code
 
         # Process each row in the sequence
         for _, row in df.iterrows():
@@ -159,7 +176,6 @@ def load_major_sequence_xlsx(file_path, major_code, major_name, degree):
             if not unit_code or pd.isna(unit_code):
                 continue
 
-            # Clean the unit code
             unit_code = str(unit_code).strip()
 
             # Find the unit
@@ -167,7 +183,6 @@ def load_major_sequence_xlsx(file_path, major_code, major_name, degree):
             if not unit:
                 print(f"Warning: Unit {unit_code} not found in database")
                 continue
-
 
             # Determine requirement type from curriculum column
             requirement_type = 'option'  # default
@@ -205,15 +220,15 @@ def load_major_sequence_xlsx(file_path, major_code, major_name, degree):
 def load_all_majors():
     """Load all major sequence files"""
     major_files = [
-        ('Reference_Material/Essential_Data/Sequence export (MJD-ECNPF).xlsx', 'MJD-ECNPF', 'Economics', 'Bachelor of Economics'),
-        ('Reference_Material/Essential_Data/Sequence export (MJD-FINEC).xlsx', 'MJD-FINEC', 'Financial Economics', 'Bachelor of Economics'),
-        ('Reference_Material/Essential_Data/Sequence export MJD-AGBUS.xlsx', 'MJD-AGBUS', 'Agribusiness', 'Bachelor of Science'),
-        ('Reference_Material/Essential_Data/Sequence export MJD-AGSCI.xlsx', 'MJD-AGSCI', 'Agricultural Science', 'Bachelor of Science'),
-        ('Reference_Material/Essential_Data/Sequence export MJD-AGTEC.xlsx', 'MJD-AGTEC', 'Agricultural Technology', 'Bachelor of Science'),
+        ('Reference_Material/Essential_Data/Sequence export (MJD-ECNPF).xlsx', 'MJD-ECNPF', 'Economics', 'Bachelor of Economics', 'BP013'),
+        ('Reference_Material/Essential_Data/Sequence export (MJD-FINEC).xlsx', 'MJD-FINEC', 'Financial Economics', 'Bachelor of Economics', 'BP013'),
+        ('Reference_Material/Essential_Data/Sequence export MJD-AGBUS.xlsx', 'MJD-AGBUS', 'Agribusiness', 'Bachelor of Science', 'BP004'),
+        ('Reference_Material/Essential_Data/Sequence export MJD-AGSCI.xlsx', 'MJD-AGSCI', 'Agricultural Science', 'Bachelor of Science', 'BP004'),
+        ('Reference_Material/Essential_Data/Sequence export MJD-AGTEC.xlsx', 'MJD-AGTEC', 'Agricultural Technology', 'Bachelor of Science', 'BP004'),
     ]
 
-    for file_path, major_code, major_name, degree in major_files:
-        load_major_sequence_xlsx(file_path, major_code, major_name, degree)
+    for file_path, major_code, major_name, degree, degree_code in major_files:
+        load_major_sequence_xlsx(file_path, major_code, major_name, degree, degree_code)
 
 def initialize_database():
     """Initialize the database with all course data"""

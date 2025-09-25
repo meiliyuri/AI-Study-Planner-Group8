@@ -33,6 +33,10 @@ class Unit(db.Model):
     # Special unit classification
     is_bridging = db.Column(db.Boolean, default=False)  # Bridging unit flag
 
+    # Specify general elective lectures for a department 
+    homedegree = db.Column(db.Text)        
+    degreestaughtin = db.Column(db.Text)   
+
     def __repr__(self):
         """String representation of Unit object for debugging"""
         return f'<Unit {self.code}: {self.title}>'
@@ -54,6 +58,7 @@ class Major(db.Model):
     code = db.Column(db.String(20), unique=True, nullable=False, index=True)
     name = db.Column(db.String(100), nullable=False)
     degree = db.Column(db.String(50), nullable=False)
+    degree_code = db.Column(db.String(10), nullable=True, index=True)   
 
     def __repr__(self):
         return f'<Major {self.code}: {self.name}>'
