@@ -14,6 +14,8 @@ from reportlab.lib import colors  # PDF color utilities
 from reportlab.lib.styles import getSampleStyleSheet  # PDF styling utilities
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer  # PDF layout components
 from config import Config  # Application configuration
+from sqlalchemy import or_ # SQLAlchemy logical operators
+import re # Regular expressions for text processing
 
 # Claude AI client setup for enhanced academic reasoning capabilities
 from anthropic import Anthropic
@@ -241,47 +243,13 @@ def generate_initial_plan():
                 })
 
         # Get degree-specific general electives
-        degree_type = selected_major.degree.lower()
-        general_electives = []
+         # === General Electives (prefix 보강 없이, 학위코드 매칭만) ===
+        course_code = (getattr(selected_major, 'degree_code', '') or '').strip().upper()
 
-        if 'economics' in degree_type:
-            # Economics degrees - focus on economics, business, stats, math units
-            economics_prefixes = ['ECON', 'FINA', 'ACCT', 'MGMT', 'EMPL', 'STAT', 'MATH', 'WILG']
-            for prefix in economics_prefixes:
-                econ_units = Unit.query.filter(
-                    Unit.code.like(f'{prefix}%'),
-                    Unit.is_bridging == False,
-                    ~Unit.code.in_(units_in_plan)
-                ).limit(20).all()
-                for unit in econ_units:
-                    general_electives.append({
-                        'code': unit.code,
-                        'title': unit.title,
-                        'level': unit.level,
-                        'points': unit.points,
-                        'prerequisites': unit.prerequisites or '',
-                        'availabilities': unit.availabilities or '',
-                        'corequisites': unit.corequisites or '',
-                        'incompatibilities': unit.incompatibilities or ''
-                    })
-        else:
-            # Science degrees - focus on science units
-            science_prefixes = ['SCIE', 'BIOL', 'CHEM', 'PHYS', 'MATH', 'STAT', 'ENVS', 'GEOL', 'GEOG', 'AGRI', 'ANAT', 'PHYL', 'PCOL', 'GENET', 'MICR']
-            for prefix in science_prefixes:
-                science_units = Unit.query.filter(
-                    Unit.code.like(f'{prefix}%'),
-                    Unit.is_bridging == False,
-                    ~Unit.code.in_(units_in_plan)
-                ).limit(15).all()
-                for unit in science_units:
-                    general_electives.append({
-                        'code': unit.code,
-                        'title': unit.title,
-                        'level': unit.level,
-                        'points': unit.points
-                    })
+        # units_in_plan은 위에서 enriched_plan 만들 때 이미 채웠으니 그대로 사용
+        general_electives = find_general_electives_by_degree(course_code, units_in_plan, limit=200)
 
-        # Remove duplicates and limit
+        # 중복 제거 + 정렬 + 제한
         seen_codes = set()
         unique_general_electives = []
         for unit in general_electives:
@@ -289,20 +257,21 @@ def generate_initial_plan():
                 seen_codes.add(unit['code'])
                 unique_general_electives.append(unit)
 
-        # Sort by level then alphabetically
         unique_general_electives.sort(key=lambda x: (x['level'], x['code']))
 
         return jsonify({
-            'plan': plan_data,  # Keep original for compatibility
-            'enriched_plan': enriched_plan,  # Add enriched version
+            'plan': plan_data,                 # Keep original for compatibility
+            'enriched_plan': enriched_plan,    # Add enriched version
             'major_electives': unused_major_electives,
-            'general_electives': unique_general_electives[:50],  # Limit to 50
+            'general_electives': unique_general_electives[:200],  # Limit to 200 일단은 제한 둠
             'major': {
                 'code': selected_major.code,
                 'name': selected_major.name,
-                'degree': selected_major.degree
+                'degree': selected_major.degree,
+                'degree_code': course_code,    # 디버깅/프론트 표시용
             }
         })
+
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -650,6 +619,48 @@ Provide your assessment in the following JSON format:
             "constraintCompliance": "Basic requirements appear met",
             "careerPathway": "Unable to assess - AI service unavailable"
         }
+
+def _field_has_degree(field_value: str, degree_code: str) -> bool:
+    """homedegree / degreestaughtin 문자열에서 ; 또는 , 로 구분된 토큰에 degree_code가 포함되는지 정확 매칭"""
+    if not field_value or not degree_code:
+        return False
+    tokens = [t.strip().upper() for t in re.split(r'[;,]', field_value) if t.strip()]
+    return degree_code.upper() in tokens
+
+def find_general_electives_by_degree(degree_code: str, units_in_plan: set, limit: int = 200):
+    if not degree_code:
+        return []
+    dc = degree_code.upper()
+
+    # 1차: 포함 검색으로 후보 수집
+    rows = Unit.query.filter(
+        Unit.is_bridging == False,
+        ~Unit.code.in_(units_in_plan),
+        or_(
+            Unit.homedegree.ilike(f'%{degree_code}%'),
+            Unit.degreestaughtin.ilike(f'%{degree_code}%')
+        )
+    ).limit(limit).all()
+
+    # 2차: 토큰 단위 정확 매칭
+    out, seen = [], set()
+    for u in rows:
+        ok = _field_has_degree(u.homedegree or '', dc) or _field_has_degree(u.degreestaughtin or '', dc)
+        if not ok or u.code in seen:
+            continue
+        seen.add(u.code)
+        out.append({
+            'code': u.code,
+            'title': u.title,
+            'level': u.level,
+            'points': u.points,
+            'prerequisites': u.prerequisites or '',
+            'availabilities': u.availabilities or '',
+            'corequisites': u.corequisites or '',
+            'incompatibilities': u.incompatibilities or ''
+        })
+    return out
+
 
 def import_course_data():
     """Import course data from uploaded files"""
