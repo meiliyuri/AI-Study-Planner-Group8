@@ -895,12 +895,42 @@ function aiValidatePlan() {
 }
 
 function showLoading(message) {
-    $('#loading-message').text(message);
-    $('#loading-modal').modal('show');
+  $("#loading-message").text(message);
+
+  const el = document.getElementById("loading-modal");
+  if (!el) return;
+
+  let inst = bootstrap.Modal.getInstance(el);
+  if (!inst) {
+    inst = new bootstrap.Modal(el, {
+      backdrop: "static",
+      keyboard: false,
+    });
+  }
+  inst.show();
 }
 
 function hideLoading() {
-    $('#loading-modal').modal('hide');
+  console.log("LOG: Hiding loading modal");
+
+  const el = document.getElementById("loading-modal");
+  if (!el) return;
+
+  let inst = bootstrap.Modal.getInstance(el);
+  if (!inst) {
+    inst = new bootstrap.Modal(el);
+  }
+  inst.hide();
+
+  setTimeout(() => {
+    $(".modal-backdrop").remove();
+    $("body").removeClass("modal-open").css({ overflow: "", paddingRight: "" });
+
+    el.classList.remove("show");
+    el.style.display = "none";
+    el.setAttribute("aria-hidden", "true");
+
+  }, 300);
 }
 
 function showQualityCheckModal(result) {
