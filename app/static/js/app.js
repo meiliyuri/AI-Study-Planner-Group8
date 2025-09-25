@@ -252,49 +252,26 @@ function createUnitCard(unitCode, unitData = null) {
 }
 
 function handleUnitMove(evt) {
-    const semester = evt.to.dataset.semester; // Get the semester the item is being moved to
-    const unitCount = $(evt.to).find('.unit-card').length; // Count the number of units in the target semester
-    const unitCode = $(evt.item).data('unit-code'); // Get the unit code of the item being moved
+    const semester = evt.to.dataset.semester;
+    const unitCount = $(evt.to).find('.unit-card').length;
+    const unitCode = $(evt.item).data('unit-code');
 
-    // Record which semester the current item belongs to
-    $(evt.item).attr('data-semester', semester);
+    // Always update the UI, but validate afterwards
+    updateDropZone(evt.to);
+    updateAvailableUnitsFilter();
 
-    // Update the UI
-    updateDropZone(evt.to); // Update the drop zone UI
-    updateAvailableUnitsFilter(); // Update the filter for available units
-
-    // Clear previous flags (to avoid residual mis-coloring)
-    $(evt.item).removeClass('constraint-error constraint-warning constraint-valid')
-               .removeAttr('data-constraint-message');
-
-    // Check semester capacity
+    // Check for validation issues and update status
     if (unitCount > 4) {
-        updateValidationStatus(`${semester} has ${unitCount} units (max 4 allowed)`, 'error'); // Update validation status
-        $(evt.item).addClass('constraint-error') // Add error class for visual feedback
-                   .attr('data-constraint-message', 'Too many units in this semester'); // Set error message
-        return; // Exit function if the limit is exceeded
-    }
-
-    // Validate semester availability & prerequisites
-    const constraintValidation = validateUnitConstraints(unitCode, semester);
-
-    if (!constraintValidation.isValid) {
-        // Set card color based on validation result
-        if (constraintValidation.type === 'error') {
-            $(evt.item).addClass('constraint-error'); // Add error class if validation fails
-        } else if (constraintValidation.type === 'warning') {
-            $(evt.item).addClass('constraint-warning'); // Add warning class if there are warnings
-        }
-        $(evt.item).attr('data-constraint-message', constraintValidation.message); // Set the constraint message
-
-        // Update the status on the right side
-        updateValidationStatus(constraintValidation.message, constraintValidation.type);
-
+        updateValidationStatus(`${semester} has ${unitCount} units (max 4 allowed)`, 'error');
     } else {
-        // If valid, add a green mark to indicate compliance
-        $(evt.item).addClass('constraint-valid');
-        // Continue with overall validatePlan()
-        validatePlan();
+        // Check prerequisite and semester availability constraints
+        const constraintValidation = validateUnitConstraints(unitCode, semester);
+        if (!constraintValidation.isValid) {
+            updateValidationStatus(constraintValidation.message, constraintValidation.type);
+        } else {
+            // Check other validation rules
+            validatePlan();
+        }
     }
 
     // Apply visual validation to all units in the plan
@@ -915,6 +892,10 @@ function aiValidatePlan() {
     .catch(error => {
         hideLoading();
         showError('Failed to validate plan: ' + (error.error || 'Unknown error'));
+        $('#ai-status-indicator').show()
+          .removeClass('bg-success bg-warning')
+          .addClass('bg-danger')
+          .text('Fail');
     });
 }
 
@@ -1113,4 +1094,21 @@ function logDebug(action, data) {
 
     // Keep only last 10 entries
     $('#debug-log .debug-entry').slice(10).remove();
+}
+
+//Update AI light bulb status
+function updateAIStatusIndicator(result) {
+    const indicator = $('#ai-status-indicator');
+    const overall = result.overallQuality || 'unknown';
+
+    indicator.show().removeClass('bg-success bg-warning bg-danger').text('');
+    if (['excellent','good'].includes(overall)) {
+        indicator.addClass('bg-success').text('Pass');
+    } else if (overall === 'fair') {
+        indicator.addClass('bg-warning').text('Warning');
+    } else if (overall === 'poor') {
+        indicator.addClass('bg-danger').text('Fail');
+    } else {
+        indicator.text('N/A');
+    }
 }
