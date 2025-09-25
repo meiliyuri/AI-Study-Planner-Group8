@@ -45,38 +45,45 @@ AI-Study-Planner-Group8-ZacharyBaker5.2/
 └── README.md               # This file
 ```
 
-## Quick Start for Microsoft Windows - instructions may vary for Linux & Macintosh
+## Instructions to Run the app
 
 1. **Pull code, create Python environment, activate & install pre-requisits**:
 
    Windows:
    ```bash
-   git clone -b ZacharyBaker4 https://github.com/meiliyuri/AI-Study-Planner-Group8.git
+   git clone https://github.com/meiliyuri/AI-Study-Planner-Group8.git # pull repo
    cd AI-Study-Planner-Group8
-   python3 -m venv venv
-   .\venv\Scripts\Activate 
+
+   python3 -m venv venv # create environment and install requirements
+   .\venv\Scripts\Activate
    pip install -r requirements.txt
    ```
-   
-<img width="1484" height="397" alt="image" src="https://github.com/user-attachments/assets/d22cb4e6-0269-4570-8afb-908a2c555898" />
-<br></br>
+
    macOS:
 
    ```bash
-   git clone -b ZacharyBaker4 https://github.com/meiliyuri/AI-Study-Planner-Group8.git
+   git clone https://github.com/meiliyuri/AI-Study-Planner-Group8.git # pull repo
    cd AI-Study-Planner-Group8
-   python3 -m venv venv
-   source venv/bin/activate 
+
+   python3 -m venv venv # create environment and install requirements
+   source venv/bin/activate
    pip install -r requirements.txt
    ```
 
-2. **Set a real API key** (run once):
+2. **Set a real API key**:
 
-Copy the **config.py** file from FILES in Teams in to the root of the project folder. Do not sync this file with Github, it contains the actual API Key and will immediately cause it to be deactivated.
+- If you are a team member: copt the **config.py** file from FILES in Teams in to the root of the project folder. Otherwise, contact the devoplement team for assistance.
+- Important: **DO NOT** commit or sync config.py to GitHub. It contains a real API key which will be deactivated if leaked.
 
 3. **Initialise the DB and start the app**:
+
+Run python data_loader.py **once** before the first launch to set up the database.
    ```bash
    python data_loader.py
+   ```
+
+Run the flask app.
+   ```bash
    python -m flask run
    ```
 
