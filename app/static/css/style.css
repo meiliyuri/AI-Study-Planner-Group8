@@ -103,6 +103,10 @@ body {
     padding: 10px;
 }
 
+/* listing validation erros */
+#validation-status .validation-list { margin: 6px 0 0 18px; }
+
+
 /* Unit Section Headers */
 .unit-section-header {
     margin-top: 15px;
