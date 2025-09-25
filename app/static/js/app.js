@@ -256,6 +256,8 @@ function handleUnitMove(evt) {
     const unitCount = $(evt.to).find('.unit-card').length;
     const unitCode = $(evt.item).data('unit-code');
 
+    $(evt.item).attr('data-semester', semester);
+
     // Always update the UI, but validate afterwards
     updateDropZone(evt.to);
     updateAvailableUnitsFilter();
@@ -264,9 +266,25 @@ function handleUnitMove(evt) {
     if (unitCount > 4) {
         updateValidationStatus(`${semester} has ${unitCount} units (max 4 allowed)`, 'error');
     } else {
-            validatePlan();
+        // Check prerequisite and semester availability constraints
+        const constraintValidation = validateUnitConstraints(unitCode, semester);
+        
+        $(evt.item).removeClass('constraint-error constraint-warning constraint-valid')
+                   .removeAttr('data-constraint-message');
+
+        if (!constraintValidation.isValid) {
+            if (constraintValidation.type === 'error') {
+                $(evt.item).addClass('constraint-error');
+            } else if (constraintValidation.type === 'warning') {
+                $(evt.item).addClass('constraint-warning'); // 黄色
+            }
+            $(evt.item).attr('data-constraint-message', constraintValidation.message);
+
+            updateValidationStatus(constraintValidation.message, constraintValidation.type);
+        } else {
+            $(evt.item).addClass('constraint-valid');
         }
-    }
+    }    
 
     // Apply visual validation to all units in the plan
     validateAndHighlightAllUnits();
