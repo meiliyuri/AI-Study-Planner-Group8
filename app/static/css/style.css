@@ -12,7 +12,7 @@ body {
 /* Study Plan Grid */
 .semester-container {
     margin-bottom: 20px;
-    border: 1px solid #6c757d;
+    border: 1px solid #dc3545;
     border-radius: 8px;
     background: white;
 }
@@ -257,7 +257,7 @@ body {
 
 /* Semester Capacity Indicator */
 .semester-full {
-    border-color: #dc3545 !important;
+    border-color: #28a745;
 }
 
 .semester-full .drop-zone {
