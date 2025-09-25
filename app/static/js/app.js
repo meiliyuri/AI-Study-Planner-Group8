@@ -911,8 +911,6 @@ function showLoading(message) {
 }
 
 function hideLoading() {
-  console.log("LOG: Hiding loading modal");
-
   const el = document.getElementById("loading-modal");
   if (!el) return;
 
@@ -922,6 +920,7 @@ function hideLoading() {
   }
   inst.hide();
 
+  // Forcefully remove backdrop and classes after delay
   setTimeout(() => {
     $(".modal-backdrop").remove();
     $("body").removeClass("modal-open").css({ overflow: "", paddingRight: "" });
