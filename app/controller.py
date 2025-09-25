@@ -925,21 +925,21 @@ def validate_plan_programmatically(plan_data):
     elif level_3_count < 6:
         warnings.append(f"There are only {level_3_count} Level 3 units, minimum required is 6.")
 
-    # Return validation result (🔸배열 포함)
+    # Return validation result
     if critical_errors:
         return {
             'isValid': False,
             'reason': "Critical issues found: " + " ".join(critical_errors),
             'type': 'error',
-            'errors': critical_errors,   # ← 모든 에러를 배열로
-            'warnings': warnings,        # ← 경고도 함께 반환
+            'errors': critical_errors,   
+            'warnings': warnings,        
         }
     elif warnings:
         return {
             'isValid': True,  # Valid but incomplete
-            'reason': "Plan incomplete: " + warnings[0],  # 기존 호환(첫 문장)
+            'reason': "Plan incomplete: " + warnings[0],  
             'type': 'warning',
-            'errors': [],                  # 배열 키는 항상 존재
+            'errors': [],                  
             'warnings': warnings,
         }
     else:
