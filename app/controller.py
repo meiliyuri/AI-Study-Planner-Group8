@@ -243,13 +243,10 @@ def generate_initial_plan():
                 })
 
         # Get degree-specific general electives
-         # === General Electives (prefix 보강 없이, 학위코드 매칭만) ===
         course_code = (getattr(selected_major, 'degree_code', '') or '').strip().upper()
-
-        # units_in_plan은 위에서 enriched_plan 만들 때 이미 채웠으니 그대로 사용
         general_electives = find_general_electives_by_degree(course_code, units_in_plan, limit=200)
 
-        # 중복 제거 + 정렬 + 제한
+        # Remove Duplicates + Sort + Limit
         seen_codes = set()
         unique_general_electives = []
         for unit in general_electives:
@@ -263,12 +260,12 @@ def generate_initial_plan():
             'plan': plan_data,                 # Keep original for compatibility
             'enriched_plan': enriched_plan,    # Add enriched version
             'major_electives': unused_major_electives,
-            'general_electives': unique_general_electives[:200],  # Limit to 200 일단은 제한 둠
+            'general_electives': unique_general_electives[:200],  # Limit to 200
             'major': {
                 'code': selected_major.code,
                 'name': selected_major.name,
                 'degree': selected_major.degree,
-                'degree_code': course_code,    # 디버깅/프론트 표시용
+                'degree_code': course_code,    
             }
         })
 
@@ -310,18 +307,28 @@ def validate_study_plan():
 def get_available_units():
     """Get list of available units for drag and drop"""
     try:
-        # Levels 1–3 only, excluding bridging
-        units = Unit.query.filter(
-            Unit.is_bridging == False,
-            Unit.level.in_([1, 2, 3])
-        ).all()
+        # Retrieve only bridging exclusions from the database
+        all_units = Unit.query.filter_by(is_bridging=False).all()
 
+        # Find the first number in the code and only pass 1/2/3
+        filtered = []
+        for u in all_units:
+            code = (u.code or "").strip()
+            if not code:
+                continue
+            m = re.search(r'\d', code) 
+            if m and m.group(0) in ('1', '2', '3'):
+                filtered.append(u)
+
+        # Sort by code order for readability
+        filtered.sort(key=lambda x: (x.code or ""))
+        
         units_list = []
-        for unit in units:
+        for unit in filtered:
             units_list.append({
                 'code': unit.code,
                 'title': unit.title,
-                'level': unit.level,
+                'level': unit.level,         
                 'points': unit.points,
                 'availabilities': unit.availabilities,
                 'prerequisites': unit.prerequisites,
@@ -333,7 +340,6 @@ def get_available_units():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 def export_plan_to_pdf():
     """Export the current study plan to PDF"""
@@ -625,18 +631,23 @@ Provide your assessment in the following JSON format:
         }
 
 def _field_has_degree(field_value: str, degree_code: str) -> bool:
-    """homedegree / degreestaughtin 문자열에서 ; 또는 , 로 구분된 토큰에 degree_code가 포함되는지 정확 매칭"""
+    """homedegree / degree_taught_in string; exact match for degree_code in tokens separated by ; or ,"""
     if not field_value or not degree_code:
         return False
     tokens = [t.strip().upper() for t in re.split(r'[;,]', field_value) if t.strip()]
     return degree_code.upper() in tokens
+
+def _first_digit_is_123(code: str) -> bool:
+    if not code:
+        return False
+    m = re.search(r'\d', code)
+    return bool(m and m.group(0) in ('1', '2', '3'))
 
 def find_general_electives_by_degree(degree_code: str, units_in_plan: set, limit: int = 200):
     if not degree_code:
         return []
     dc = degree_code.upper()
 
-    # 1차: 포함 검색으로 후보 수집
     rows = Unit.query.filter(
         Unit.is_bridging == False,
         ~Unit.code.in_(units_in_plan),
@@ -646,12 +657,16 @@ def find_general_electives_by_degree(degree_code: str, units_in_plan: set, limit
         )
     ).limit(limit).all()
 
-    # Secondary: Token-level exact matching
     out, seen = [], set()
     for u in rows:
         ok = _field_has_degree(u.homedegree or '', dc) or _field_has_degree(u.degreestaughtin or '', dc)
         if not ok or u.code in seen:
             continue
+
+        # Check whether the first number displayed is 1/2/3.
+        if not _first_digit_is_123(u.code):
+            continue
+
         seen.add(u.code)
         out.append({
             'code': u.code,
