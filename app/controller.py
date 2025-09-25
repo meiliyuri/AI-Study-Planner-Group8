@@ -310,10 +310,13 @@ def validate_study_plan():
 def get_available_units():
     """Get list of available units for drag and drop"""
     try:
-        # Get units that are not bridging units
-        units = Unit.query.filter_by(is_bridging=False).all()
-        units_list = []
+        # Levels 1–3 only, excluding bridging
+        units = Unit.query.filter(
+            Unit.is_bridging == False,
+            Unit.level.in_([1, 2, 3])
+        ).all()
 
+        units_list = []
         for unit in units:
             units_list.append({
                 'code': unit.code,
@@ -330,6 +333,7 @@ def get_available_units():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 def export_plan_to_pdf():
     """Export the current study plan to PDF"""
@@ -642,7 +646,7 @@ def find_general_electives_by_degree(degree_code: str, units_in_plan: set, limit
         )
     ).limit(limit).all()
 
-    # 2차: 토큰 단위 정확 매칭
+    # Secondary: Token-level exact matching
     out, seen = [], set()
     for u in rows:
         ok = _field_has_degree(u.homedegree or '', dc) or _field_has_degree(u.degreestaughtin or '', dc)
@@ -936,21 +940,21 @@ def validate_plan_programmatically(plan_data):
     elif level_3_count < 6:
         warnings.append(f"There are only {level_3_count} Level 3 units, minimum required is 6.")
 
-    # Return validation result (🔸배열 포함)
+    # Return validation result
     if critical_errors:
         return {
             'isValid': False,
             'reason': "Critical issues found: " + " ".join(critical_errors),
             'type': 'error',
-            'errors': critical_errors,   # ← 모든 에러를 배열로
-            'warnings': warnings,        # ← 경고도 함께 반환
+            'errors': critical_errors,   
+            'warnings': warnings,        
         }
     elif warnings:
         return {
             'isValid': True,  # Valid but incomplete
-            'reason': "Plan incomplete: " + warnings[0],  # 기존 호환(첫 문장)
+            'reason': "Plan incomplete: " + warnings[0],  
             'type': 'warning',
-            'errors': [],                  # 배열 키는 항상 존재
+            'errors': [],                  
             'warnings': warnings,
         }
     else:
