@@ -23,7 +23,7 @@ An AI-powered Flask web application that helps university students plan their de
 
 ## Project Structure
 
-```
+```bash
 AI-Study-Planner-Group8-ZacharyBaker5.2/
 ├── app/
 │   ├── __init__.py          # Flask app initialization
@@ -45,48 +45,56 @@ AI-Study-Planner-Group8-ZacharyBaker5.2/
 └── README.md               # This file
 ```
 
-## Quick Start for Microsoft Windows - instructions may vary for Linux & Macintosh
+## Instructions to Run the app
 
 1. **Pull code, create Python environment, activate & install pre-requisits**:
 
-   Windows:
-   ```bash
-   git clone -b ZacharyBaker4 https://github.com/meiliyuri/AI-Study-Planner-Group8.git
-   cd AI-Study-Planner-Group8
-   python3 -m venv venv
-   .\venv\Scripts\Activate 
-   pip install -r requirements.txt
-   ```
-   
-<img width="1484" height="397" alt="image" src="https://github.com/user-attachments/assets/d22cb4e6-0269-4570-8afb-908a2c555898" />
-<br></br>
-   macOS:
+Windows:
 
-   ```bash
-   git clone -b ZacharyBaker4 https://github.com/meiliyuri/AI-Study-Planner-Group8.git
-   cd AI-Study-Planner-Group8
-   python3 -m venv venv
-   source venv/bin/activate 
-   pip install -r requirements.txt
-   ```
+```bash
+git clone https://github.com/meiliyuri/AI-Study-Planner-Group8.git # pull repo
+cd AI-Study-Planner-Group8
 
-2. **Set a real API key** (run once):
+python3 -m venv venv # create environment and install requirements
+.\venv\Scripts\Activate
+pip install -r requirements.txt
+```
 
-Copy the **config.py** file from FILES in Teams in to the root of the project folder. Do not sync this file with Github, it contains the actual API Key and will immediately cause it to be deactivated.
+macOS:
+
+```bash
+git clone https://github.com/meiliyuri/AI-Study-Planner-Group8.git # pull repo
+cd AI-Study-Planner-Group8
+
+python3 -m venv venv # create environment and install requirements
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+2. **Set a real API key**:
+
+- If you are a team member: copt the **config.py** file from FILES in Teams in to the root of the project folder. Otherwise, contact the devoplement team for assistance.
+- Important: **DO NOT** force syncing `config.py`(in `.gitignore` file already) to GitHub. It contains a real API key which will be deactivated if leaked.
 
 3. **Initialise the DB and start the app**:
-   ```bash
-   python data_loader.py
-   python -m flask run
-   ```
 
-<img width="1479" height="758" alt="image" src="https://github.com/user-attachments/assets/4688c0dd-c3fe-4080-bed2-ccc15d8c63c1" />
-<br></br>
+Run python data_loader.py **once** before the first launch to set up the database.
+
+```bash
+python data_loader.py
+```
+
+Run the flask app.
+
+```bash
+python -m flask run
+```
+
+![Run the flask app](https://github.com/user-attachments/assets/4688c0dd-c3fe-4080-bed2-ccc15d8c63c1)
 
 4. **Visit**: http://127.0.0.1:5000
 
-<img width="1319" height="877" alt="image" src="https://github.com/user-attachments/assets/2a487579-5d49-4541-8da1-496c114f1ebf" />
-
+![Web Demo](https://github.com/user-attachments/assets/2a487579-5d49-4541-8da1-496c114f1ebf)
 
 ## Data Structure
 
@@ -129,7 +137,6 @@ Uses a multi-step AI pipeline:
 - **Validation Prompt**: Checks modifications against UWA degree rules
 - **Temperature Settings**: Low temperature (0.1-0.3) for consistent, rule-based responses
 
-
 ### Future Enhancements & Known Issues
 
 - BUG: Units pulled over from the Available Units who's pre-requisites are not met are not being flagged (turned yellow)
@@ -141,4 +148,3 @@ Uses a multi-step AI pipeline:
 - Improvement: Add chat function where AI Debug Log is to allow students to ask for unit advice, and add a feature to trigger a re-generation with their comments in the API call (i.e. please re-generate but with a focus on microeconomic units)
 - Improvement: Consider a two-stage build process which pipelines the first generation in to the Ai Validate Plan, and then re-generates the plan, to achieve a better percentage of valid outcomes. This may be part of the Research point above.
 - Improvement: Remove references to OpenAi and ChatGPT, we moved to Claude Opus Ai API, what's left are not in use
-
