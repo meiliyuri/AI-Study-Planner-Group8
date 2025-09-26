@@ -295,18 +295,22 @@ function updateAllDropZones() {
 }
 
 function validatePlan() {
+    // Get the current study plan structure from the UI
     const plan = getCurrentPlan();
 
+    // Send the plan to the backend for validation
     $.ajax({
         url: '/api/validate_plan',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ plan }),
         success: function(data) {
+            // Collect validation issues and warnings returned by the server
             const issues = Array.isArray(data.errors) ? data.errors.slice() : [];
             const warns  = Array.isArray(data.warnings) ? data.warnings.slice() : [];
 
-            // Compatibility handling in case the server sends only the reason without an array
+            // Backward compatibility:
+            // Some server responses may only provide a "reason" string instead of arrays
             if (!issues.length && data && typeof data.reason === 'string' && data.type === 'error') {
                 issues.push(data.reason);
             }
@@ -314,12 +318,13 @@ function validatePlan() {
                 warns.push(data.reason);
             }
 
-            // Remove duplicates
+            // Deduplicate issues/warnings in case of duplicates
             const uniq = arr => [...new Set(arr)];
 
             const allIssues = uniq(issues);
             const allWarns  = uniq(warns);
 
+            // Update the validation status box depending on the results
             if (allIssues.length) {
                 updateValidationStatus(allIssues, 'error');    
             } else if (allWarns.length) {
@@ -329,10 +334,12 @@ function validatePlan() {
             }
         },
         error: function() {
+            // Handle network or server errors
             updateValidationStatus('Validation failed due to a network/server error.', 'error');
         }
     });
 }
+
 
 function validatePlanLocally(asArray = false) {
     const issues = [];
@@ -723,7 +730,7 @@ function updateAvailableUnitsFilter() {
     $('#available-units .unit-card').each(function() {
         const unitCode = $(this).data('unit-code');
         if (unitsInPlan.has(unitCode)) {
-            $(this).addClass('hidden');    
+            $(this).addClass('hidden');
         } else {
             $(this).removeClass('hidden');  
             $(this).css('display', '');     
@@ -747,9 +754,9 @@ function updateSectionHeaders() {
         });
 
         if (hasVisibleUnits) {
-            $header.show();   
+            $header.show();
         } else {
-            $header.hide();  
+            $header.hide();
         }
     });
 }
@@ -775,9 +782,9 @@ function filterUnits(searchTerm) {
         const notInPlan = !unitsInPlan.has(actualUnitCode);
 
         if (matchesSearch && notInPlan) {
-            $(this).removeClass('hidden').css('display', '');  // inline 제거
+            $(this).removeClass('hidden').css('display', '');
         } else {
-            $(this).addClass('hidden');;
+            $(this).addClass('hidden');
         }
     });
 
