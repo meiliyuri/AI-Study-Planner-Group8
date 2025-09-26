@@ -725,7 +725,7 @@ function updateAvailableUnitsFilter() {
     $('#available-units .unit-card').each(function() {
         const unitCode = $(this).data('unit-code');
         if (unitsInPlan.has(unitCode)) {
-            $(this).addClass('hidden');    
+            $(this).addClass('hidden');
         } else {
             $(this).removeClass('hidden');  
             $(this).css('display', '');     
@@ -749,9 +749,9 @@ function updateSectionHeaders() {
         });
 
         if (hasVisibleUnits) {
-            $header.show();   
+            $header.show();
         } else {
-            $header.hide();  
+            $header.hide();
         }
     });
 }
@@ -777,9 +777,9 @@ function filterUnits(searchTerm) {
         const notInPlan = !unitsInPlan.has(actualUnitCode);
 
         if (matchesSearch && notInPlan) {
-            $(this).removeClass('hidden').css('display', '');  // inline 제거
+            $(this).removeClass('hidden').css('display', '');  
         } else {
-            $(this).addClass('hidden');;
+            $(this).addClass('hidden');
         }
     });
 
