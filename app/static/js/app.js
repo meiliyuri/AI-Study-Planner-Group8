@@ -902,12 +902,41 @@ function aiValidatePlan() {
 }
 
 function showLoading(message) {
-    $('#loading-message').text(message);
-    $('#loading-modal').modal('show');
+  $("#loading-message").text(message);
+
+  const el = document.getElementById("loading-modal");
+  if (!el) return;
+
+  let inst = bootstrap.Modal.getInstance(el);
+  if (!inst) {
+    inst = new bootstrap.Modal(el, {
+      backdrop: "static",
+      keyboard: false,
+    });
+  }
+  inst.show();
 }
 
 function hideLoading() {
-    $('#loading-modal').modal('hide');
+  const el = document.getElementById("loading-modal");
+  if (!el) return;
+
+  let inst = bootstrap.Modal.getInstance(el);
+  if (!inst) {
+    inst = new bootstrap.Modal(el);
+  }
+  inst.hide();
+
+  // Forcefully remove backdrop and classes after delay
+  setTimeout(() => {
+    $(".modal-backdrop").remove();
+    $("body").removeClass("modal-open").css({ overflow: "", paddingRight: "" });
+
+    el.classList.remove("show");
+    el.style.display = "none";
+    el.setAttribute("aria-hidden", "true");
+
+  }, 300);
 }
 
 function showQualityCheckModal(result) {
@@ -958,7 +987,13 @@ function showQualityCheckModal(result) {
                         <!-- Overall Quality Score -->
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <div class="card ${qualityClass === 'text-success' ? 'border-success' : qualityClass === 'text-danger' ? 'border-danger' : 'border-warning'}">
+                                <div class="card ${
+                                  qualityClass === "text-success"
+                                    ? "border-success"
+                                    : qualityClass === "text-danger"
+                                    ? "border-danger"
+                                    : "border-warning"
+                                }">
                                     <div class="card-body text-center">
                                         <h3 class="${qualityClass}">${qualityScore}%</h3>
                                         <p class="mb-0">Quality Score</p>
@@ -989,32 +1024,59 @@ function showQualityCheckModal(result) {
                         </div>
 
                         <!-- Analysis Results -->
-                        ${warnings.length > 0 ? `
+                        ${
+                          warnings.length > 0
+                            ? `
                         <div class="mb-3">
                             <h6><i class="fas fa-exclamation-triangle text-warning me-2"></i>Warnings</h6>
                             <ul class="list-group list-group-flush">
-                                ${warnings.map(warning => `<li class="list-group-item border-0 bg-light">${warning}</li>`).join('')}
+                                ${warnings
+                                  .map(
+                                    (warning) =>
+                                      `<li class="list-group-item border-0 bg-light">${warning}</li>`
+                                  )
+                                  .join("")}
                             </ul>
                         </div>
-                        ` : ''}
+                        `
+                            : ""
+                        }
 
-                        ${recommendations.length > 0 ? `
+                        ${
+                          recommendations.length > 0
+                            ? `
                         <div class="mb-3">
                             <h6><i class="fas fa-lightbulb text-info me-2"></i>Recommendations</h6>
                             <ul class="list-group list-group-flush">
-                                ${recommendations.map(rec => `<li class="list-group-item border-0 bg-light">${rec}</li>`).join('')}
+                                ${recommendations
+                                  .map(
+                                    (rec) =>
+                                      `<li class="list-group-item border-0 bg-light">${rec}</li>`
+                                  )
+                                  .join("")}
                             </ul>
                         </div>
-                        ` : ''}
+                        `
+                            : ""
+                        }
 
-                        ${strengths.length > 0 ? `
+                        ${
+                          strengths.length > 0
+                            ? `
                         <div class="mb-3">
                             <h6><i class="fas fa-check-circle text-success me-2"></i>Strengths</h6>
                             <ul class="list-group list-group-flush">
-                                ${strengths.map(strength => `<li class="list-group-item border-0 bg-light">${strength}</li>`).join('')}
+                                ${strengths
+                                  .map(
+                                    (strength) =>
+                                      `<li class="list-group-item border-0 bg-light">${strength}</li>`
+                                  )
+                                  .join("")}
                             </ul>
                         </div>
-                        ` : ''}
+                        `
+                            : ""
+                        }
 
                         <!-- Detailed Analysis -->
                         <div class="accordion" id="detailedAnalysis">
@@ -1026,7 +1088,10 @@ function showQualityCheckModal(result) {
                                 </h2>
                                 <div id="academicProgression" class="accordion-collapse collapse" data-bs-parent="#detailedAnalysis">
                                     <div class="accordion-body">
-                                        ${result.academicProgression || 'Analysis not available'}
+                                        ${
+                                          result.academicProgression ||
+                                          "Analysis not available"
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -1038,8 +1103,14 @@ function showQualityCheckModal(result) {
                                 </h2>
                                 <div id="majorCoherence" class="accordion-collapse collapse" data-bs-parent="#detailedAnalysis">
                                     <div class="accordion-body">
-                                        <strong>Major Coherence:</strong> ${result.majorCoherence || 'Analysis not available'}<br><br>
-                                        <strong>Career Pathway:</strong> ${result.careerPathway || 'Analysis not available'}
+                                        <strong>Major Coherence:</strong> ${
+                                          result.majorCoherence ||
+                                          "Analysis not available"
+                                        }<br><br>
+                                        <strong>Career Pathway:</strong> ${
+                                          result.careerPathway ||
+                                          "Analysis not available"
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -1051,8 +1122,14 @@ function showQualityCheckModal(result) {
                                 </h2>
                                 <div id="constraintCompliance" class="accordion-collapse collapse" data-bs-parent="#detailedAnalysis">
                                     <div class="accordion-body">
-                                        <strong>Level Distribution:</strong> ${result.levelDistribution || 'Analysis not available'}<br><br>
-                                        <strong>UWA Policy Compliance:</strong> ${result.constraintCompliance || 'Analysis not available'}
+                                        <strong>Level Distribution:</strong> ${
+                                          result.levelDistribution ||
+                                          "Analysis not available"
+                                        }<br><br>
+                                        <strong>UWA Policy Compliance:</strong> ${
+                                          result.constraintCompliance ||
+                                          "Analysis not available"
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -1060,9 +1137,10 @@ function showQualityCheckModal(result) {
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" onclick="$('#qualityCheckModal').modal('hide'); $('#export-pdf').click();">
-                            <i class="fas fa-file-pdf me-2"></i>Continue to PDF Export
-                        </button>
+                        <button type="button" class="btn btn-primary"
+  onclick="bootstrap.Modal.getInstance(document.getElementById('qualityCheckModal')).hide(); document.getElementById('export-pdf').click();">
+  <i class="fas fa-file-pdf me-2"></i>Continue to PDF Export
+</button>
                     </div>
                 </div>
             </div>
@@ -1077,6 +1155,10 @@ function showQualityCheckModal(result) {
 
     // Show modal
     $('#qualityCheckModal').modal('show');
+
+    const el = document.getElementById('qualityCheckModal');
+    const inst = new bootstrap.Modal(el);
+    inst.show();
 }
 
 function showError(message) {
