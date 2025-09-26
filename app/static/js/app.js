@@ -777,7 +777,7 @@ function filterUnits(searchTerm) {
         const notInPlan = !unitsInPlan.has(actualUnitCode);
 
         if (matchesSearch && notInPlan) {
-            $(this).removeClass('hidden').css('display', '');  
+            $(this).removeClass('hidden').css('display', '');
         } else {
             $(this).addClass('hidden');
         }
