@@ -18,6 +18,9 @@
                         <span id="ai-status-indicator"
                               class="badge rounded-pill ms-2"
                               style="display:none;"></span>
+                        <span id="ai-status-indicator"
+                              class="badge rounded-pill ms-2"
+                              style="display:none;"></span>
                         </button>
                         <button id="export-pdf" class="btn btn-success" disabled>Export PDF</button>
                     </div>
@@ -150,10 +153,13 @@
                 <div id="debug-log" class="debug-output">
                     <div class="text-muted">AI interactions will appear here</div>
                 </div>
-                <div class="mt-3">
-                     <input type="text" id="ai-user-input" class="form-control" placeholder="Ask for unit advice...">
-                     <button id="ai-send-btn" class="btn btn-primary mt-2 w-100">Send</button>
-                </div>   
+            </div>
+            <div class="card-footer">
+                <form id="ai-chat-form" class="d-flex">
+                    <input id="ai-chat-input" type="text" class="form-control me-2"
+                           placeholder="Ask AI (e.g. focus on microeconomics)">
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </form>
             </div>
         </div>
     </div>
