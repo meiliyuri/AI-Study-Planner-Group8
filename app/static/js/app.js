@@ -40,7 +40,8 @@ function setupEventHandlers() {
 
     // Unit search
     $('#unit-search').on('input', function() {
-        filterUnits($(this).val());
+        if (!this.value) { $('#available-units .unit-card').css('display',''); }
+        filterUnits(this.value);
     });
 }
 
@@ -724,9 +725,10 @@ function updateAvailableUnitsFilter() {
     $('#available-units .unit-card').each(function() {
         const unitCode = $(this).data('unit-code');
         if (unitsInPlan.has(unitCode)) {
-            $(this).hide();
+            $(this).addClass('hidden');
         } else {
-            $(this).show();
+            $(this).removeClass('hidden');  
+            $(this).css('display', '');     
         }
     });
 
@@ -739,9 +741,8 @@ function updateSectionHeaders() {
         const $header = $(this);
         let hasVisibleUnits = false;
 
-        // Check if any unit cards after this header are visible
-        $header.nextUntil('.unit-section-header, :last').each(function() {
-            if ($(this).hasClass('unit-card') && $(this).is(':visible')) {
+                $header.nextUntil('.unit-section-header').each(function() {
+            if ($(this).hasClass('unit-card') && !$(this).hasClass('hidden')) {
                 hasVisibleUnits = true;
                 return false; // break
             }
@@ -754,6 +755,7 @@ function updateSectionHeaders() {
         }
     });
 }
+
 
 function filterUnits(searchTerm) {
     const term = searchTerm.toLowerCase();
@@ -775,9 +777,9 @@ function filterUnits(searchTerm) {
         const notInPlan = !unitsInPlan.has(actualUnitCode);
 
         if (matchesSearch && notInPlan) {
-            $(this).show().removeClass('hidden');
+            $(this).removeClass('hidden').css('display', '');
         } else {
-            $(this).hide().addClass('hidden');
+            $(this).addClass('hidden');
         }
     });
 
