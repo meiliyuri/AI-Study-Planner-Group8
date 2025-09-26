@@ -12,7 +12,7 @@ body {
 /* Study Plan Grid */
 .semester-container {
     margin-bottom: 20px;
-    border: 1px solid #6c757d;
+    border: 1px solid #dc3545;
     border-radius: 8px;
     background: white;
 }
@@ -102,6 +102,10 @@ body {
     border-radius: 4px;
     padding: 10px;
 }
+
+/* listing validation erros */
+#validation-status .validation-list { margin: 6px 0 0 18px; }
+
 
 /* Unit Section Headers */
 .unit-section-header {
@@ -253,7 +257,7 @@ body {
 
 /* Semester Capacity Indicator */
 .semester-full {
-    border-color: #dc3545 !important;
+    border-color: #28a745;
 }
 
 .semester-full .drop-zone {

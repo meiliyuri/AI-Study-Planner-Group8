@@ -254,30 +254,19 @@ function createUnitCard(unitCode, unitData = null) {
 
 function handleUnitMove(evt) {
     const semester = evt.to.dataset.semester;
-    const unitCount = $(evt.to).find('.unit-card').length;
     const unitCode = $(evt.item).data('unit-code');
 
-    // Always update the UI, but validate afterwards
+    // Always update the UI
     updateDropZone(evt.to);
     updateAvailableUnitsFilter();
 
-    // Check for validation issues and update status
-    if (unitCount > 4) {
-        updateValidationStatus(`${semester} has ${unitCount} units (max 4 allowed)`, 'error');
-    } else {
-        // Check prerequisite and semester availability constraints
-        const constraintValidation = validateUnitConstraints(unitCode, semester);
-        if (!constraintValidation.isValid) {
-            updateValidationStatus(constraintValidation.message, constraintValidation.type);
-        } else {
-            // Check other validation rules
-            validatePlan();
-        }
-    }
+    // Re-examine entire plan → Output all cumulative errors/warnings
+    validatePlan();
 
     // Apply visual validation to all units in the plan
     validateAndHighlightAllUnits();
 }
+
 
 function updateDropZone(semesterElement) {
     const unitCount = $(semesterElement).find('.unit-card').length;
@@ -306,39 +295,57 @@ function updateAllDropZones() {
 }
 
 function validatePlan() {
-    // First do local validation for immediate feedback
-    const localValidation = validatePlanLocally();
-
-    if (!localValidation.isValid) {
-        updateValidationStatus(localValidation.reason, localValidation.type);
-        return;
-    }
-
-    // If local validation passes, check with backend
+    // Get the current study plan structure from the UI
     const plan = getCurrentPlan();
 
+    // Send the plan to the backend for validation
     $.ajax({
         url: '/api/validate_plan',
         method: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify({ plan: plan }),
+        data: JSON.stringify({ plan }),
         success: function(data) {
-            // Use the type from backend if provided, otherwise default logic
-            const statusType = data.type || (data.isValid ? 'success' : 'error');
-            updateValidationStatus(data.reason, statusType);
-            logDebug('Validation result', data);
+            // Collect validation issues and warnings returned by the server
+            const issues = Array.isArray(data.errors) ? data.errors.slice() : [];
+            const warns  = Array.isArray(data.warnings) ? data.warnings.slice() : [];
+
+            // Backward compatibility:
+            // Some server responses may only provide a "reason" string instead of arrays
+            if (!issues.length && data && typeof data.reason === 'string' && data.type === 'error') {
+                issues.push(data.reason);
+            }
+            if (!warns.length && data && typeof data.reason === 'string' && data.type === 'warning') {
+                warns.push(data.reason);
+            }
+
+            // Deduplicate issues/warnings in case of duplicates
+            const uniq = arr => [...new Set(arr)];
+
+            const allIssues = uniq(issues);
+            const allWarns  = uniq(warns);
+
+            // Update the validation status box depending on the results
+            if (allIssues.length) {
+                updateValidationStatus(allIssues, 'error');    
+            } else if (allWarns.length) {
+                updateValidationStatus(allWarns, 'warning');   
+            } else {
+                updateValidationStatus('Plan generated successfully', 'success');
+            }
         },
-        error: function(xhr) {
-            updateValidationStatus('Validation failed', 'error');
+        error: function() {
+            // Handle network or server errors
+            updateValidationStatus('Validation failed due to a network/server error.', 'error');
         }
     });
 }
 
-function validatePlanLocally() {
+
+function validatePlanLocally(asArray = false) {
     const issues = [];
     const warnings = [];
 
-    // Check semester capacity (max 4 units per semester)
+    // Limit of 4 courses per semester
     $('.semester-units').each(function() {
         const semesterName = $(this).attr('id');
         const unitCount = $(this).find('.unit-card').length;
@@ -350,7 +357,7 @@ function validatePlanLocally() {
         }
     });
 
-    // Count total units
+    // Total number of units
     const totalUnits = $('.semester-units .unit-card').length;
     if (totalUnits > 24) {
         issues.push(`Total ${totalUnits} units exceeds maximum of 24`);
@@ -358,27 +365,25 @@ function validatePlanLocally() {
         warnings.push(`Plan has ${totalUnits} units (target: 24)`);
     }
 
-    // Return results
-    if (issues.length > 0) {
+    if (asArray) {
         return {
-            isValid: false,
-            reason: issues[0], // Show first critical issue
-            type: 'error'
-        };
-    } else if (warnings.length > 0) {
-        return {
-            isValid: true, // Valid but with warnings
-            reason: warnings[0] + ' - plan incomplete',
-            type: 'warning'
-        };
-    } else {
-        return {
-            isValid: true,
-            reason: 'Plan structure looks good',
-            type: 'success'
+            isValid: issues.length === 0,
+            type: issues.length ? 'error' : (warnings.length ? 'warning' : 'success'),
+            errors: issues,
+            warnings: warnings
         };
     }
+
+    // (For existing compatibility) Single-line mode
+    if (issues.length > 0) {
+        return { isValid: false, reason: issues[0], type: 'error' };
+    } else if (warnings.length > 0) {
+        return { isValid: true, reason: warnings[0] + ' - plan incomplete', type: 'warning' };
+    } else {
+        return { isValid: true, reason: 'Plan structure looks good', type: 'success' };
+    }
 }
+
 
 function validateUnitConstraints(unitCode, targetSemester) {
     // Find unit data in all units (both in plan and available)
@@ -787,24 +792,27 @@ function filterUnits(searchTerm) {
     updateSectionHeaders();
 }
 
-function updateValidationStatus(message, type) {
-    const statusDiv = $('#validation-status');
-    statusDiv.removeClass('validation-success validation-error validation-warning');
+function updateValidationStatus(messageOrList, type) {
+    const $box = $('#validation-status');
+    $box.removeClass('validation-success validation-error validation-warning');
 
-    switch(type) {
-        case 'success':
-            statusDiv.addClass('validation-success');
-            break;
-        case 'error':
-            statusDiv.addClass('validation-error');
-            break;
-        case 'warning':
-            statusDiv.addClass('validation-warning');
-            break;
+    if (type === 'error') $box.addClass('validation-error');
+    else if (type === 'warning') $box.addClass('validation-warning');
+    else $box.addClass('validation-success');
+
+    const title = type ? type[0].toUpperCase() + type.slice(1) : 'Status';
+    let body = '';
+
+    if (Array.isArray(messageOrList)) {
+        body = '<ul class="validation-list">' +
+               messageOrList.map(m => `<li>${m}</li>`).join('') +
+               '</ul>';
+    } else {
+        body = String(messageOrList || '');
     }
-
-    statusDiv.html(`<strong>${type.charAt(0).toUpperCase() + type.slice(1)}:</strong> ${message}`);
+    $box.html(`<strong>${title}:</strong> ${body}`);
 }
+
 
 function exportToPDF() {
     const plan = getCurrentPlan();

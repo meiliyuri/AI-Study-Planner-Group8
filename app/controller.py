@@ -957,20 +957,20 @@ def validate_plan_programmatically(plan_data):
     for semester, units in plan_data.items():
         if len(units) > 4:
             critical_errors.append(f"{semester} has {len(units)} units, but maximum allowed is 4.")
-        elif len(units) < 4 and len(units) > 0:
+        elif 0 < len(units) < 4:
             warnings.append(f"{semester} has {len(units)} units, target is 4 units.")
 
     # Rule 3: Maximum 12 Level 1 units - always critical error if exceeded
     if level_1_count > 12:
         critical_errors.append(f"There are {level_1_count} Level 1 units which exceeds the maximum of 12.")
 
-    # Rule 4: Minimum 12 Level 2 or Level 3 units - warn if close, error if far off
+    # Rule 4: Minimum 12 Level 2 or Level 3 units
     if level_2_3_count < 8:  # Really low
         critical_errors.append(f"There are only {level_2_3_count} Level 2 or Level 3 units, minimum required is 12.")
     elif level_2_3_count < 12:
         warnings.append(f"There are only {level_2_3_count} Level 2 or Level 3 units, minimum required is 12.")
 
-    # Rule 5: Minimum 6 Level 3 units - warn if close, error if very low
+    # Rule 5: Minimum 6 Level 3 units
     if level_3_count < 3:
         critical_errors.append(f"There are only {level_3_count} Level 3 units, minimum required is 6.")
     elif level_3_count < 6:
@@ -980,20 +980,26 @@ def validate_plan_programmatically(plan_data):
     if critical_errors:
         return {
             'isValid': False,
-            'reason': f"Critical issues found: {' '.join(critical_errors)}",
-            'type': 'error'
+            'reason': "Critical issues found: " + " ".join(critical_errors),
+            'type': 'error',
+            'errors': critical_errors,   
+            'warnings': warnings,        
         }
     elif warnings:
         return {
             'isValid': True,  # Valid but incomplete
-            'reason': f"Plan incomplete: {warnings[0]}",  # Show first warning
-            'type': 'warning'
+            'reason': "Plan incomplete: " + warnings[0],  
+            'type': 'warning',
+            'errors': [],                  
+            'warnings': warnings,
         }
     else:
         return {
             'isValid': True,
             'reason': 'Plan meets all UWA degree requirements',
-            'type': 'success'
+            'type': 'success',
+            'errors': [],
+            'warnings': [],
         }
 
 def create_validation_prompt(major, plan_data):
