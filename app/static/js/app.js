@@ -347,7 +347,7 @@ function validatePlanLocally(asArray = false) {
 
     // Limit of 4 courses per semester
     $('.semester-units').each(function() {
-        const semesterName = $(this).attr('id');   
+        const semesterName = $(this).attr('id');
         const unitCount = $(this).find('.unit-card').length;
 
         if (unitCount > 4) {
