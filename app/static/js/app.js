@@ -1232,7 +1232,7 @@ function aiChatMessage(message) {
 
     showLoading('Re-generating study plan with your feedback...');
 
-    fetch('/api/regenerate_plan', {
+    fetch('/api/generate_plan', {  
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -1240,7 +1240,7 @@ function aiChatMessage(message) {
         body: JSON.stringify({
             major_id: parseInt(majorId),
             plan: plan,
-            user_feedback: message
+            user_feedback: message   
         })
     })
     .then(response => {
