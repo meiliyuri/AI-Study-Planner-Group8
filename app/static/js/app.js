@@ -43,6 +43,16 @@ function setupEventHandlers() {
         if (!this.value) { $('#available-units .unit-card').css('display',''); }
         filterUnits(this.value);
     });
+    
+    // AI Chat form submit
+    $('#ai-chat-form').on('submit', function(e) {
+        e.preventDefault();
+        const message = $('#ai-chat-input').val().trim();
+        if (!message) return;
+        aiChatMessage(message);
+        $('#ai-chat-input').val('');
+    });
+
 }
 
 function setupDragAndDrop() {
@@ -1203,4 +1213,77 @@ function updateAIStatusIndicator(result) {
     } else {
         indicator.text('N/A');
     }
+}
+
+// AI Chat 
+function aiChatMessage(message) {
+    const timestamp = new Date().toLocaleTimeString();
+
+    const userEntry = `
+        <div class="debug-entry user-entry">
+            <div class="debug-timestamp">[${timestamp}]</div>
+            <strong>User:</strong> ${message}
+        </div>
+    `;
+    $('#debug-log').prepend(userEntry);
+
+    const majorId = $('#major-select').val();
+    const plan = getCurrentPlan();
+
+    showLoading('Re-generating study plan with your feedback...');
+
+    fetch('/api/generate_plan', {  
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            major_id: parseInt(majorId),
+            plan: plan,
+            user_feedback: message   
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => Promise.reject(err));
+        }
+        return response.json();
+    })
+    .then(data => {
+        hideLoading();
+
+        currentPlan = data.plan;
+        allUnitsData = [];
+        if (data.enriched_plan) {
+            Object.keys(data.enriched_plan).forEach(semester => {
+                data.enriched_plan[semester].forEach(unitData => {
+                    allUnitsData.push(unitData);
+                });
+            });
+        }
+        const planToDisplay = data.enriched_plan || data.plan;
+        displayStudyPlan(planToDisplay, !!data.enriched_plan);
+
+        const aiEntry = `
+            <div class="debug-entry ai-entry">
+                <div class="debug-timestamp">[${timestamp}]</div>
+                <strong>AI:</strong> Plan regenerated with your feedback.
+            </div>
+        `;
+        $('#debug-log').prepend(aiEntry);
+
+        updateValidationStatus('Plan updated with feedback', 'success');
+    })
+    .catch(error => {
+        hideLoading();
+        showError('Failed to re-generate plan: ' + (error.error || 'Unknown error'));
+
+        const errorEntry = `
+            <div class="debug-entry error-entry">
+                <div class="debug-timestamp">[${timestamp}]</div>
+                <strong>Error:</strong> ${error.error || 'Unknown error'}
+            </div>
+        `;
+        $('#debug-log').prepend(errorEntry);
+    });
 }
