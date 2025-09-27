@@ -1,6 +1,6 @@
 // AI Study Planner Frontend JavaScript
 
-$(document).ready(function() {
+$(document).ready(function () {
     // Initialize the application
     initializeApp();
 });
@@ -18,28 +18,28 @@ function initializeApp() {
 
 function setupEventHandlers() {
     // Major selection
-    $('#major-select').on('change', function() {
+    $('#major-select').on('change', function () {
         const majorId = $(this).val();
         $('#generate-plan').prop('disabled', !majorId);
     });
 
     // Generate plan button
-    $('#generate-plan').on('click', function() {
+    $('#generate-plan').on('click', function () {
         generateStudyPlan();
     });
 
     // Export PDF button
-    $('#export-pdf').on('click', function() {
+    $('#export-pdf').on('click', function () {
         exportToPDF();
     });
 
     // AI Validate Plan button
-    $('#ai-validate-plan').on('click', function() {
+    $('#ai-validate-plan').on('click', function () {
         aiValidatePlan();
     });
 
     // Unit search
-    $('#unit-search').on('input', function() {
+    $('#unit-search').on('input', function () {
         filterUnits($(this).val());
     });
 }
@@ -58,13 +58,13 @@ function setupDragAndDrop() {
             const sortable = Sortable.create(element, {
                 group: 'units',
                 animation: 150,
-                onAdd: function(evt) {
+                onAdd: function (evt) {
                     handleUnitMove(evt);
                 },
-                onUpdate: function(evt) {
+                onUpdate: function (evt) {
                     handleUnitMove(evt);
                 },
-                onRemove: function(evt) {
+                onRemove: function (evt) {
                     const removedUnitCode = $(evt.item).data('unit-code');
                     updateDropZone(evt.from);
                     // Check if any remaining units depend on the removed unit
@@ -86,7 +86,7 @@ function setupDragAndDrop() {
             },
             sort: false,
             animation: 150,
-            onAdd: function(evt) {
+            onAdd: function (evt) {
                 // When unit is dragged back to available units, remove it from plan
                 const removedUnitCode = $(evt.item).data('unit-code');
                 evt.item.remove();
@@ -107,7 +107,7 @@ function setupDragAndDrop() {
                 put: true
             },
             animation: 150,
-            onAdd: function(evt) {
+            onAdd: function (evt) {
                 // Remove the unit completely when dropped in trash
                 const removedUnitCode = $(evt.item).data('unit-code');
                 evt.item.remove();
@@ -122,7 +122,7 @@ function setupDragAndDrop() {
 
 function loadMajors() {
     $.get('/api/majors')
-        .done(function(data) {
+        .done(function (data) {
             const select = $('#major-select');
             select.empty().append('<option value="">Select a Major...</option>');
 
@@ -130,7 +130,7 @@ function loadMajors() {
                 select.append(`<option value="${major.id}">${major.code} - ${major.name}</option>`);
             });
         })
-        .fail(function() {
+        .fail(function () {
             showError('Failed to load majors');
         });
 }
@@ -146,7 +146,7 @@ function generateStudyPlan() {
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ major_id: parseInt(majorId) }),
-        success: function(data) {
+        success: function (data) {
             hideLoading();
             currentPlan = data.plan;
 
@@ -174,7 +174,7 @@ function generateStudyPlan() {
             updateValidationStatus('Plan generated successfully', 'success');
             logDebug('Plan generated', data);
         },
-        error: function(xhr) {
+        error: function (xhr) {
             hideLoading();
             showError('Failed to generate plan: ' + (xhr.responseJSON?.error || 'Unknown error'));
         }
@@ -188,7 +188,7 @@ function displayStudyPlan(plan, isEnriched = false) {
     $('#ai-validate-plan').prop('disabled', false);
 
     // Clear existing units
-    $('.semester-units').each(function() {
+    $('.semester-units').each(function () {
         $(this).empty().append('<div class="drop-zone">Drop units here (4 max)</div>');
     });
 
@@ -299,7 +299,7 @@ function updateDropZone(semesterElement) {
 }
 
 function updateAllDropZones() {
-    $('.semester-units').each(function() {
+    $('.semester-units').each(function () {
         updateDropZone(this);
     });
 }
@@ -321,13 +321,13 @@ function validatePlan() {
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ plan: plan }),
-        success: function(data) {
+        success: function (data) {
             // Use the type from backend if provided, otherwise default logic
             const statusType = data.type || (data.isValid ? 'success' : 'error');
             updateValidationStatus(data.reason, statusType);
             logDebug('Validation result', data);
         },
-        error: function(xhr) {
+        error: function (xhr) {
             updateValidationStatus('Validation failed', 'error');
         }
     });
@@ -338,7 +338,7 @@ function validatePlanLocally() {
     const warnings = [];
 
     // Check semester capacity (max 4 units per semester)
-    $('.semester-units').each(function() {
+    $('.semester-units').each(function () {
         const semesterName = $(this).attr('id');
         const unitCount = $(this).find('.unit-card').length;
 
@@ -489,7 +489,7 @@ function getUnitsTakenBefore(targetSemester) {
     // Get units from all previous semesters
     for (let i = 0; i < targetIndex; i++) {
         const semester = semesterOrder[i];
-        $(`#${CSS.escape(semester)} .unit-card`).each(function() {
+        $(`#${CSS.escape(semester)} .unit-card`).each(function () {
             const unitCode = $(this).data('unit-code');
             if (unitCode) {
                 unitsTaken.push(unitCode);
@@ -557,13 +557,13 @@ function parseAndCheckPrerequisites(prerequisiteText, unitsTakenBefore) {
 function validateAndHighlightAllUnits() {
     // Clear all existing constraint classes
     $('.unit-card').removeClass('constraint-error constraint-warning constraint-valid')
-                   .removeAttr('data-constraint-message');
+        .removeAttr('data-constraint-message');
 
     // Validate each unit in each semester
-    $('.semester-units').each(function() {
+    $('.semester-units').each(function () {
         const semester = $(this).data('semester');
 
-        $(this).find('.unit-card').each(function() {
+        $(this).find('.unit-card').each(function () {
             const unitCode = $(this).data('unit-code');
             const constraintValidation = validateUnitConstraints(unitCode, semester);
 
@@ -584,10 +584,10 @@ function checkDependentUnitsAfterRemoval(removedUnitCode) {
     console.log(`Checking dependent units after removing ${removedUnitCode}`);
 
     // Go through all units currently on the board
-    $('.semester-units').each(function() {
+    $('.semester-units').each(function () {
         const semester = $(this).data('semester');
 
-        $(this).find('.unit-card').each(function() {
+        $(this).find('.unit-card').each(function () {
             const unitCode = $(this).data('unit-code');
             const unitData = allUnitsData.find(unit => unit.code === unitCode);
 
@@ -604,7 +604,7 @@ function checkDependentUnitsAfterRemoval(removedUnitCode) {
 
                 // Clear previous styling
                 $(this).removeClass('constraint-error constraint-warning constraint-valid')
-                       .removeAttr('data-constraint-message');
+                    .removeAttr('data-constraint-message');
 
                 // Apply new styling based on validation result
                 if (!constraintValidation.isValid) {
@@ -626,11 +626,11 @@ function checkDependentUnitsAfterRemoval(removedUnitCode) {
 function getCurrentPlan() {
     const plan = {};
 
-    $('.semester-units').each(function() {
+    $('.semester-units').each(function () {
         const semester = $(this).data('semester');
         const units = [];
 
-        $(this).find('.unit-card').each(function() {
+        $(this).find('.unit-card').each(function () {
             units.push($(this).data('unit-code'));
         });
 
@@ -642,7 +642,7 @@ function getCurrentPlan() {
 
 function loadAvailableUnits() {
     $.get('/api/units')
-        .done(function(data) {
+        .done(function (data) {
             availableUnits = data.units;
 
             // Add available units to allUnitsData for validation
@@ -659,7 +659,7 @@ function loadAvailableUnits() {
 
             displayAvailableUnits(data.units);
         })
-        .fail(function() {
+        .fail(function () {
             showError('Failed to load available units');
         });
 }
@@ -715,13 +715,13 @@ function displayCategorizedUnits(majorElectives, generalElectives) {
 function updateAvailableUnitsFilter() {
     // Get all units currently in the plan
     const unitsInPlan = new Set();
-    $('.semester-units .unit-card').each(function() {
+    $('.semester-units .unit-card').each(function () {
         const unitCode = $(this).data('unit-code');
         unitsInPlan.add(unitCode);
     });
 
     // Hide/show units in available units list
-    $('#available-units .unit-card').each(function() {
+    $('#available-units .unit-card').each(function () {
         const unitCode = $(this).data('unit-code');
         if (unitsInPlan.has(unitCode)) {
             $(this).hide();
@@ -735,12 +735,12 @@ function updateAvailableUnitsFilter() {
 }
 
 function updateSectionHeaders() {
-    $('.unit-section-header').each(function() {
+    $('.unit-section-header').each(function () {
         const $header = $(this);
         let hasVisibleUnits = false;
 
         // Check if any unit cards after this header are visible
-        $header.nextUntil('.unit-section-header, :last').each(function() {
+        $header.nextUntil('.unit-section-header, :last').each(function () {
             if ($(this).hasClass('unit-card') && $(this).is(':visible')) {
                 hasVisibleUnits = true;
                 return false; // break
@@ -760,12 +760,12 @@ function filterUnits(searchTerm) {
 
     // Get units currently in plan to maintain that filter
     const unitsInPlan = new Set();
-    $('.semester-units .unit-card').each(function() {
+    $('.semester-units .unit-card').each(function () {
         const unitCode = $(this).data('unit-code');
         unitsInPlan.add(unitCode);
     });
 
-    $('#available-units .unit-card').each(function() {
+    $('#available-units .unit-card').each(function () {
         const unitCode = $(this).find('.unit-code').text().toLowerCase();
         const unitTitle = $(this).find('.unit-title').text().toLowerCase();
         const actualUnitCode = $(this).data('unit-code');
@@ -789,7 +789,7 @@ function updateValidationStatus(message, type) {
     const statusDiv = $('#validation-status');
     statusDiv.removeClass('validation-success validation-error validation-warning');
 
-    switch(type) {
+    switch (type) {
         case 'success':
             statusDiv.addClass('validation-success');
             break;
@@ -823,31 +823,33 @@ function exportToPDF() {
         },
         body: JSON.stringify({ plan: plan })
     })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(err => Promise.reject(err));
-        }
-        return response.blob();
-    })
-    .then(blob => {
-        // Create download link
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = `study_plan_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => Promise.reject(err));
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `study_plan_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.pdf`;
+            document.body.appendChild(a);
 
-        hideLoading();
-        updateValidationStatus('PDF exported successfully', 'success');
-    })
-    .catch(error => {
-        hideLoading();
-        showError('Failed to export PDF: ' + (error.error || 'Unknown error'));
-    });
+            hideLoading();
+
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            updateValidationStatus('PDF exported successfully', 'success');
+        })
+        .catch(error => {
+            hideLoading();
+            showError('Failed to export PDF: ' + (error.error || 'Unknown error'));
+        });
 }
 
 function aiValidatePlan() {
@@ -878,29 +880,37 @@ function aiValidatePlan() {
             major_code: majorId
         })
     })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(err => Promise.reject(err));
-        }
-        return response.json();
-    })
-    .then(result => {
-        hideLoading();
-        showQualityCheckModal(result);
-    })
-    .catch(error => {
-        hideLoading();
-        showError('Failed to validate plan: ' + (error.error || 'Unknown error'));
-    });
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => Promise.reject(err));
+            }
+            return response.json();
+        })
+        .then(result => {
+            hideLoading();
+            showQualityCheckModal(result);
+        })
+        .catch(error => {
+            hideLoading();
+            showError('Failed to validate plan: ' + (error.error || 'Unknown error'));
+        });
 }
 
 function showLoading(message) {
     $('#loading-message').text(message);
-    $('#loading-modal').modal('show');
+    const modalEl = document.getElementById('loading-modal');
+    if (modalEl) {
+        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modalInstance.show();
+    }
 }
 
 function hideLoading() {
-    $('#loading-modal').modal('hide');
+    const modalEl = document.getElementById('loading-modal');
+    if (modalEl) {
+        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modalInstance.hide();
+    }
 }
 
 function showQualityCheckModal(result) {
@@ -1063,7 +1073,11 @@ function showQualityCheckModal(result) {
     `;
 
     // Remove existing modal if any
-    $('#qualityCheckModal').remove();
+    const modalEl = document.getElementById('qualityCheckModal');
+    if (modalEl) {
+        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modalInstance.show();
+    }
 
     // Add modal to page
     $('body').append(modalHtml);
