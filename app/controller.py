@@ -311,7 +311,7 @@ def generate_initial_plan():
         return jsonify({'error': str(e)}), 500
 
 def validate_study_plan():
-    """Validate a modified study plan using OpenAI"""
+    """Validate a modified study plan using Claude API"""
     try:
         data = request.get_json()
         plan_data = data.get('plan')
@@ -753,7 +753,7 @@ Reason through each placement decision carefully."""
         return None
 
 def create_plan_generation_prompt(major, mandatory_units, optional_units, additional_units):
-    """Create OpenAI prompt for intelligent plan generation with STRATEGY 2: Pre-split by availability"""
+    """Create Claude API prompt for intelligent plan generation with STRATEGY 2: Pre-split by availability"""
 
     # Count total mandatory and optional units from major
     total_major_units = sum(len(units) for units in mandatory_units.values()) + sum(len(units) for units in optional_units.values())
