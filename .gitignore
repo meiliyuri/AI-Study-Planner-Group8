@@ -28,6 +28,7 @@ ENV/
 
 # Environment Variables (config.py contains sensitive API keys)
 config.py
+.env
 
 # Database
 *.db
