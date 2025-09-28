@@ -7,15 +7,19 @@ from flask import request, jsonify, session, make_response  # Flask request hand
 from app.models import Unit, Major, MajorUnit, StudyPlan  # Database models for academic data
 import json  # JSON parsing and serialization
 import io  # Input/output operations for PDF generation
+import os  # Logo file path in PDF
 from datetime import datetime  # Date and time utilities
 from reportlab.pdfgen import canvas  # PDF generation library
 from reportlab.lib.pagesizes import letter, A4  # PDF page size constants
 from reportlab.lib import colors  # PDF color utilities
-from reportlab.lib.styles import getSampleStyleSheet  # PDF styling utilities
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet  # PDF styling utilities
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer  # PDF layout components
 from config import Config  # Application configuration
+from reportlab.lib.units import inch # Add UWA logo
+from reportlab.pdfbase import pdfdoc # PDF metadata
 from sqlalchemy import or_ # SQLAlchemy logical operators
 import re # Regular expressions for text processing
+
 
 # Claude AI client setup for enhanced academic reasoning capabilities
 from anthropic import Anthropic
@@ -274,7 +278,7 @@ def generate_initial_plan():
         return jsonify({'error': str(e)}), 500
 
 def validate_study_plan():
-    """Validate a modified study plan using OpenAI"""
+    """Validate a modified study plan using Claude API"""
     try:
         data = request.get_json()
         plan_data = data.get('plan')
@@ -358,12 +362,17 @@ def export_plan_to_pdf():
 
         # Styles
         styles = getSampleStyleSheet()
-        title_style = styles['Title']
+        title_style = ParagraphStyle(
+            'MyTitle',
+            parent=styles['Title'],
+            textColor=colors.whitesmoke,
+            alignment=1  # center
+        )
         heading_style = styles['Heading2']
         normal_style = styles['Normal']
 
         # Title
-        title = Paragraph("Study Plan", title_style)
+        title = Paragraph("My Study Plan", title_style)
         elements.append(title)
         elements.append(Spacer(1, 20))
 
@@ -404,24 +413,33 @@ def export_plan_to_pdf():
                         table_data.append([unit_code, 'Unit not found', '', ''])
 
                 # Create table
+                uwa_blue = colors.HexColor('#00008B')
                 table = Table(table_data, colWidths=[80, 300, 50, 50])
                 table.setStyle(TableStyle([
-                    ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                    ('BACKGROUND', (0, 0), (-1, 0), uwa_blue),
                     ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
                     ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
                     ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
                     ('FONTSIZE', (0, 0), (-1, 0), 10),
                     ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                    ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
                     ('FONTSIZE', (0, 1), (-1, -1), 9),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                    ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
                     ('GRID', (0, 0), (-1, -1), 1, colors.black)
                 ]))
 
                 elements.append(table)
                 elements.append(Spacer(1, 20))
+                
+        doc = SimpleDocTemplate(buffer, pagesize=A4)
+
+        # PDF metadata
+        doc.title = "My Study Plan"
+        doc.subject = "Study Plan for Student"
+        doc.creator = "UWA Study Planner"
 
         # Build PDF
-        doc.build(elements)
+        doc.build(elements, onFirstPage=add_logo)
         pdf_data = buffer.getvalue()
         buffer.close()
 
@@ -434,6 +452,40 @@ def export_plan_to_pdf():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+def add_logo(canvas, doc):
+    # background
+    page_width, page_height = doc.pagesize
+    left_margin = 40
+    right_margin = 40
+    rect_height = 80          # hight
+    rect_width = page_width - left_margin - right_margin  # width
+    rect_x = left_margin
+    rect_y = page_height - rect_height - 40  # top
+    
+    uwa_blue = colors.HexColor('#00008B')
+    canvas.setFillColor(uwa_blue)
+    canvas.rect(rect_x, rect_y, rect_width, rect_height, fill=1, stroke=0)
+
+    # Logo is at left center
+    logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             "static", "images", "uwa_logo.png")
+    if os.path.exists(logo_path):
+        logo_width = 60
+        logo_height = 60
+        logo_x = rect_x + 20   
+        logo_y = rect_y + (rect_height - logo_height)/2 
+        canvas.drawImage(
+            logo_path,
+            x=logo_x,
+            y=logo_y,
+            width=logo_width,
+            height=logo_height,
+            preserveAspectRatio=True,
+            mask='auto'
+        )
+    else:
+        print(f"Logo not found: {logo_path}")
 
 def ai_validate_plan():
     """AI-powered comprehensive study plan quality validation"""
@@ -732,7 +784,7 @@ Reason through each placement decision carefully."""
         return None
 
 def create_plan_generation_prompt(major, mandatory_units, optional_units, additional_units):
-    """Create OpenAI prompt for intelligent plan generation with STRATEGY 2: Pre-split by availability"""
+    """Create Claude API prompt for intelligent plan generation with STRATEGY 2: Pre-split by availability"""
 
     # Count total mandatory and optional units from major
     total_major_units = sum(len(units) for units in mandatory_units.values()) + sum(len(units) for units in optional_units.values())

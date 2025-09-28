@@ -43,6 +43,16 @@ function setupEventHandlers() {
         if (!this.value) { $('#available-units .unit-card').css('display',''); }
         filterUnits(this.value);
     });
+    
+    // AI Chat form submit
+    $('#ai-chat-form').on('submit', function(e) {
+        e.preventDefault();
+        const message = $('#ai-chat-input').val().trim();
+        if (!message) return;
+        aiChatMessage(message);
+        $('#ai-chat-input').val('');
+    });
+
 }
 
 function setupDragAndDrop() {
@@ -295,18 +305,22 @@ function updateAllDropZones() {
 }
 
 function validatePlan() {
+    // Get the current study plan structure from the UI
     const plan = getCurrentPlan();
 
+    // Send the plan to the backend for validation
     $.ajax({
         url: '/api/validate_plan',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ plan }),
         success: function(data) {
+            // Collect validation issues and warnings returned by the server
             const issues = Array.isArray(data.errors) ? data.errors.slice() : [];
             const warns  = Array.isArray(data.warnings) ? data.warnings.slice() : [];
 
-            // Compatibility handling in case the server sends only the reason without an array
+            // Backward compatibility:
+            // Some server responses may only provide a "reason" string instead of arrays
             if (!issues.length && data && typeof data.reason === 'string' && data.type === 'error') {
                 issues.push(data.reason);
             }
@@ -314,12 +328,13 @@ function validatePlan() {
                 warns.push(data.reason);
             }
 
-            // Remove duplicates
+            // Deduplicate issues/warnings in case of duplicates
             const uniq = arr => [...new Set(arr)];
 
             const allIssues = uniq(issues);
             const allWarns  = uniq(warns);
 
+            // Update the validation status box depending on the results
             if (allIssues.length) {
                 updateValidationStatus(allIssues, 'error');    
             } else if (allWarns.length) {
@@ -329,10 +344,12 @@ function validatePlan() {
             }
         },
         error: function() {
+            // Handle network or server errors
             updateValidationStatus('Validation failed due to a network/server error.', 'error');
         }
     });
 }
+
 
 function validatePlanLocally(asArray = false) {
     const issues = [];
@@ -340,7 +357,7 @@ function validatePlanLocally(asArray = false) {
 
     // Limit of 4 courses per semester
     $('.semester-units').each(function() {
-        const semesterName = $(this).attr('id');   
+        const semesterName = $(this).attr('id');
         const unitCount = $(this).find('.unit-card').length;
 
         if (unitCount > 4) {
@@ -723,7 +740,7 @@ function updateAvailableUnitsFilter() {
     $('#available-units .unit-card').each(function() {
         const unitCode = $(this).data('unit-code');
         if (unitsInPlan.has(unitCode)) {
-            $(this).addClass('hidden');    
+            $(this).addClass('hidden');
         } else {
             $(this).removeClass('hidden');  
             $(this).css('display', '');     
@@ -747,9 +764,9 @@ function updateSectionHeaders() {
         });
 
         if (hasVisibleUnits) {
-            $header.show();   
+            $header.show();
         } else {
-            $header.hide();  
+            $header.hide();
         }
     });
 }
@@ -775,9 +792,9 @@ function filterUnits(searchTerm) {
         const notInPlan = !unitsInPlan.has(actualUnitCode);
 
         if (matchesSearch && notInPlan) {
-            $(this).removeClass('hidden').css('display', '');  // inline 제거
+            $(this).removeClass('hidden').css('display', '');
         } else {
-            $(this).addClass('hidden');;
+            $(this).addClass('hidden');
         }
     });
 
@@ -889,21 +906,55 @@ function aiValidatePlan() {
     })
     .then(result => {
         hideLoading();
+        updateAIStatusIndicator(result);
         showQualityCheckModal(result);
     })
     .catch(error => {
         hideLoading();
         showError('Failed to validate plan: ' + (error.error || 'Unknown error'));
+        $('#ai-status-indicator').show()
+          .removeClass('bg-success bg-warning')
+          .addClass('bg-danger')
+          .text('Fail');
     });
 }
 
 function showLoading(message) {
-    $('#loading-message').text(message);
-    $('#loading-modal').modal('show');
+  $("#loading-message").text(message);
+
+  const el = document.getElementById("loading-modal");
+  if (!el) return;
+
+  let inst = bootstrap.Modal.getInstance(el);
+  if (!inst) {
+    inst = new bootstrap.Modal(el, {
+      backdrop: "static",
+      keyboard: false,
+    });
+  }
+  inst.show();
 }
 
 function hideLoading() {
-    $('#loading-modal').modal('hide');
+  const el = document.getElementById("loading-modal");
+  if (!el) return;
+
+  let inst = bootstrap.Modal.getInstance(el);
+  if (!inst) {
+    inst = new bootstrap.Modal(el);
+  }
+  inst.hide();
+
+  // Forcefully remove backdrop and classes after delay
+  setTimeout(() => {
+    $(".modal-backdrop").remove();
+    $("body").removeClass("modal-open").css({ overflow: "", paddingRight: "" });
+
+    el.classList.remove("show");
+    el.style.display = "none";
+    el.setAttribute("aria-hidden", "true");
+
+  }, 300);
 }
 
 function showQualityCheckModal(result) {
@@ -954,7 +1005,13 @@ function showQualityCheckModal(result) {
                         <!-- Overall Quality Score -->
                         <div class="row mb-4">
                             <div class="col-md-6">
-                                <div class="card ${qualityClass === 'text-success' ? 'border-success' : qualityClass === 'text-danger' ? 'border-danger' : 'border-warning'}">
+                                <div class="card ${
+                                  qualityClass === "text-success"
+                                    ? "border-success"
+                                    : qualityClass === "text-danger"
+                                    ? "border-danger"
+                                    : "border-warning"
+                                }">
                                     <div class="card-body text-center">
                                         <h3 class="${qualityClass}">${qualityScore}%</h3>
                                         <p class="mb-0">Quality Score</p>
@@ -985,32 +1042,59 @@ function showQualityCheckModal(result) {
                         </div>
 
                         <!-- Analysis Results -->
-                        ${warnings.length > 0 ? `
+                        ${
+                          warnings.length > 0
+                            ? `
                         <div class="mb-3">
                             <h6><i class="fas fa-exclamation-triangle text-warning me-2"></i>Warnings</h6>
                             <ul class="list-group list-group-flush">
-                                ${warnings.map(warning => `<li class="list-group-item border-0 bg-light">${warning}</li>`).join('')}
+                                ${warnings
+                                  .map(
+                                    (warning) =>
+                                      `<li class="list-group-item border-0 bg-light">${warning}</li>`
+                                  )
+                                  .join("")}
                             </ul>
                         </div>
-                        ` : ''}
+                        `
+                            : ""
+                        }
 
-                        ${recommendations.length > 0 ? `
+                        ${
+                          recommendations.length > 0
+                            ? `
                         <div class="mb-3">
                             <h6><i class="fas fa-lightbulb text-info me-2"></i>Recommendations</h6>
                             <ul class="list-group list-group-flush">
-                                ${recommendations.map(rec => `<li class="list-group-item border-0 bg-light">${rec}</li>`).join('')}
+                                ${recommendations
+                                  .map(
+                                    (rec) =>
+                                      `<li class="list-group-item border-0 bg-light">${rec}</li>`
+                                  )
+                                  .join("")}
                             </ul>
                         </div>
-                        ` : ''}
+                        `
+                            : ""
+                        }
 
-                        ${strengths.length > 0 ? `
+                        ${
+                          strengths.length > 0
+                            ? `
                         <div class="mb-3">
                             <h6><i class="fas fa-check-circle text-success me-2"></i>Strengths</h6>
                             <ul class="list-group list-group-flush">
-                                ${strengths.map(strength => `<li class="list-group-item border-0 bg-light">${strength}</li>`).join('')}
+                                ${strengths
+                                  .map(
+                                    (strength) =>
+                                      `<li class="list-group-item border-0 bg-light">${strength}</li>`
+                                  )
+                                  .join("")}
                             </ul>
                         </div>
-                        ` : ''}
+                        `
+                            : ""
+                        }
 
                         <!-- Detailed Analysis -->
                         <div class="accordion" id="detailedAnalysis">
@@ -1022,7 +1106,10 @@ function showQualityCheckModal(result) {
                                 </h2>
                                 <div id="academicProgression" class="accordion-collapse collapse" data-bs-parent="#detailedAnalysis">
                                     <div class="accordion-body">
-                                        ${result.academicProgression || 'Analysis not available'}
+                                        ${
+                                          result.academicProgression ||
+                                          "Analysis not available"
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -1034,8 +1121,14 @@ function showQualityCheckModal(result) {
                                 </h2>
                                 <div id="majorCoherence" class="accordion-collapse collapse" data-bs-parent="#detailedAnalysis">
                                     <div class="accordion-body">
-                                        <strong>Major Coherence:</strong> ${result.majorCoherence || 'Analysis not available'}<br><br>
-                                        <strong>Career Pathway:</strong> ${result.careerPathway || 'Analysis not available'}
+                                        <strong>Major Coherence:</strong> ${
+                                          result.majorCoherence ||
+                                          "Analysis not available"
+                                        }<br><br>
+                                        <strong>Career Pathway:</strong> ${
+                                          result.careerPathway ||
+                                          "Analysis not available"
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -1047,8 +1140,14 @@ function showQualityCheckModal(result) {
                                 </h2>
                                 <div id="constraintCompliance" class="accordion-collapse collapse" data-bs-parent="#detailedAnalysis">
                                     <div class="accordion-body">
-                                        <strong>Level Distribution:</strong> ${result.levelDistribution || 'Analysis not available'}<br><br>
-                                        <strong>UWA Policy Compliance:</strong> ${result.constraintCompliance || 'Analysis not available'}
+                                        <strong>Level Distribution:</strong> ${
+                                          result.levelDistribution ||
+                                          "Analysis not available"
+                                        }<br><br>
+                                        <strong>UWA Policy Compliance:</strong> ${
+                                          result.constraintCompliance ||
+                                          "Analysis not available"
+                                        }
                                     </div>
                                 </div>
                             </div>
@@ -1056,9 +1155,10 @@ function showQualityCheckModal(result) {
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" onclick="$('#qualityCheckModal').modal('hide'); $('#export-pdf').click();">
-                            <i class="fas fa-file-pdf me-2"></i>Continue to PDF Export
-                        </button>
+                        <button type="button" class="btn btn-primary"
+  onclick="bootstrap.Modal.getInstance(document.getElementById('qualityCheckModal')).hide(); document.getElementById('export-pdf').click();">
+  <i class="fas fa-file-pdf me-2"></i>Continue to PDF Export
+</button>
                     </div>
                 </div>
             </div>
@@ -1073,6 +1173,10 @@ function showQualityCheckModal(result) {
 
     // Show modal
     $('#qualityCheckModal').modal('show');
+
+    const el = document.getElementById('qualityCheckModal');
+    const inst = new bootstrap.Modal(el);
+    inst.show();
 }
 
 function showError(message) {
@@ -1092,4 +1196,94 @@ function logDebug(action, data) {
 
     // Keep only last 10 entries
     $('#debug-log .debug-entry').slice(10).remove();
+}
+
+//Update AI light bulb status
+function updateAIStatusIndicator(result) {
+    const indicator = $('#ai-status-indicator');
+    const overall = result.overallQuality || 'unknown';
+
+    indicator.show().removeClass('bg-success bg-warning bg-danger').text('');
+    if (['excellent','good'].includes(overall)) {
+        indicator.addClass('bg-success').text('Pass');
+    } else if (overall === 'fair') {
+        indicator.addClass('bg-warning').text('Warning');
+    } else if (overall === 'poor') {
+        indicator.addClass('bg-danger').text('Fail');
+    } else {
+        indicator.text('N/A');
+    }
+}
+
+// AI Chat 
+function aiChatMessage(message) {
+    const timestamp = new Date().toLocaleTimeString();
+
+    const userEntry = `
+        <div class="debug-entry user-entry">
+            <div class="debug-timestamp">[${timestamp}]</div>
+            <strong>User:</strong> ${message}
+        </div>
+    `;
+    $('#debug-log').prepend(userEntry);
+
+    const majorId = $('#major-select').val();
+    const plan = getCurrentPlan();
+
+    showLoading('Re-generating study plan with your feedback...');
+
+    fetch('/api/generate_plan', {  
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            major_id: parseInt(majorId),
+            plan: plan,
+            user_feedback: message   
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => Promise.reject(err));
+        }
+        return response.json();
+    })
+    .then(data => {
+        hideLoading();
+
+        currentPlan = data.plan;
+        allUnitsData = [];
+        if (data.enriched_plan) {
+            Object.keys(data.enriched_plan).forEach(semester => {
+                data.enriched_plan[semester].forEach(unitData => {
+                    allUnitsData.push(unitData);
+                });
+            });
+        }
+        const planToDisplay = data.enriched_plan || data.plan;
+        displayStudyPlan(planToDisplay, !!data.enriched_plan);
+
+        const aiEntry = `
+            <div class="debug-entry ai-entry">
+                <div class="debug-timestamp">[${timestamp}]</div>
+                <strong>AI:</strong> Plan regenerated with your feedback.
+            </div>
+        `;
+        $('#debug-log').prepend(aiEntry);
+
+        updateValidationStatus('Plan updated with feedback', 'success');
+    })
+    .catch(error => {
+        hideLoading();
+        showError('Failed to re-generate plan: ' + (error.error || 'Unknown error'));
+
+        const errorEntry = `
+            <div class="debug-entry error-entry">
+                <div class="debug-timestamp">[${timestamp}]</div>
+                <strong>Error:</strong> ${error.error || 'Unknown error'}
+            </div>
+        `;
+        $('#debug-log').prepend(errorEntry);
+    });
 }

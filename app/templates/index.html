@@ -15,6 +15,12 @@
                         <button id="generate-plan" class="btn btn-primary" disabled>Generate Plan</button>
                         <button id="ai-validate-plan" class="btn btn-warning" disabled title="Comprehensive AI quality analysis">
                             <i class="fas fa-robot"></i> AI Validate Plan
+                        <span id="ai-status-indicator"
+                              class="badge rounded-pill ms-2"
+                              style="display:none;"></span>
+                        <span id="ai-status-indicator"
+                              class="badge rounded-pill ms-2"
+                              style="display:none;"></span>
                         </button>
                         <button id="export-pdf" class="btn btn-success" disabled>Export PDF</button>
                     </div>
@@ -147,6 +153,13 @@
                 <div id="debug-log" class="debug-output">
                     <div class="text-muted">AI interactions will appear here</div>
                 </div>
+            </div>
+            <div class="card-footer">
+                <form id="ai-chat-form" class="d-flex">
+                    <input id="ai-chat-input" type="text" class="form-control me-2"
+                           placeholder="Ask AI">
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </form>
             </div>
         </div>
     </div>
