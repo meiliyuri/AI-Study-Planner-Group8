@@ -333,6 +333,7 @@ function validatePlan() {
 
             const allIssues = uniq(issues);
             const allWarns  = uniq(warns);
+            const missingPrereqs = (data.details && data.details.missingPrereqs) || [];
 
             // Update the validation status box depending on the results
             if (allIssues.length) {
@@ -802,7 +803,7 @@ function filterUnits(searchTerm) {
     updateSectionHeaders();
 }
 
-function updateValidationStatus(messageOrList, type) {
+function updateValidationStatus(messageOrList, type, missingPrereqs = []) {
     const $box = $('#validation-status');
     $box.removeClass('validation-success validation-error validation-warning');
 
@@ -820,6 +821,11 @@ function updateValidationStatus(messageOrList, type) {
     } else {
         body = String(messageOrList || '');
     }
+    if (missingPrereqs.length) {
+        body += '<div class="mt-2"><strong>Missing prerequisites:</strong><ul>' +
+                missingPrereqs.map(m => `<li>${m}</li>`).join('') +
+                '</ul></div>';
+    }    
     $box.html(`<strong>${title}:</strong> ${body}`);
 }
 
