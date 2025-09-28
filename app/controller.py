@@ -455,7 +455,21 @@ def get_available_units():
             'corequisites': u.corequisites or '', 'incompatibilities': u.incompatibilities or ''
         } for u in base_q.order_by(Unit.level.asc(), Unit.code.asc()).all()]
 
+        # 1) Major core(아직 plan에 없는 core)
+        major_core = []
+        if sp and sp.major_id:
+            mu_rows = MajorUnit.query.filter_by(major_id=sp.major_id, requirement_type='core').all()
+            for mu in mu_rows:
+                u = mu.unit
+                if (not u.is_bridging) and (u.code not in used_units) and (u.level in (1,2,3)):
+                    major_core.append({
+                        'code': u.code, 'title': u.title, 'level': u.level, 'points': u.points,
+                        'prerequisites': u.prerequisites or '', 'availabilities': u.availabilities or '',
+                        'corequisites': u.corequisites or '', 'incompatibilities': u.incompatibilities or ''
+                    })
+
         return jsonify({
+            'major_core': major_core,
             'major_electives': major_electives,
             'general_electives': general_electives
         })

@@ -691,13 +691,15 @@ function displayAvailableUnits(payload) {
   const $wrap = $('#available-units');
   $wrap.empty();
 
-  // 백엔드 섹션 키 우선, 하위호환도 허용
+  const core    = payload.major_core || [];
   const major   = payload.major_electives || payload.major || [];
   const general = payload.general_electives || payload.general || payload.units || [];
 
-  renderSection($wrap, 'Major Electives:', major);
-  renderSection($wrap, 'General Electives:', general);
+  renderSection($wrap, 'MAJOR CORE', core);
+  renderSection($wrap, 'MAJOR ELECTIVES',     major);
+  renderSection($wrap, 'GENERAL ELECTIVES',   general);
 }
+
 
 
 function renderSection($wrap, headerText, units) {
