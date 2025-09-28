@@ -67,6 +67,14 @@ def ai_validate_plan():
 def admin():
     return render_template('admin.html', title_page="Admin Panel")
 
+@app.route('/contact')
+def contact():
+    return render_template('contact.html', title_page="Contact Us")
+
+@app.route('/faq')
+def faq():
+    return render_template('faq.html', title_page="FAQ's")
+
 @app.route('/api/admin/import_data', methods=['POST'])
 def import_data():
     return controller.import_course_data()
