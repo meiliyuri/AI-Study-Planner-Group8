@@ -100,6 +100,7 @@ python -m flask run
 
 See the [FAQ page](http://127.0.0.1:5000/faq) in the web app for answers to common questions about speed, cost, accuracy, prerequisites, and exporting.
 
+
 ## Data Structure
 
 ### Bachelor Degree Requirements
