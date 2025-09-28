@@ -17,6 +17,7 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from config import Config  # Application configuration
 from reportlab.lib.units import inch # Add UWA logo
 from reportlab.pdfbase import pdfdoc # PDF metadata
+from sqlalchemy import or_  # SQLAlchemy logical operators for queries
 
 # Claude AI client setup for enhanced academic reasoning capabilities
 from anthropic import Anthropic
@@ -243,63 +244,62 @@ def generate_initial_plan():
                     'requirement_type': mu.requirement_type
                 })
 
+                   
         # Get degree-specific general electives
-        degree_type = selected_major.degree.lower()
+        course_code = getattr(selected_major, 'course_code', None)  # ex) 'BP004'
         general_electives = []
 
-        if 'economics' in degree_type:
-            # Economics degrees - focus on economics, business, stats, math units
-            economics_prefixes = ['ECON', 'FINA', 'ACCT', 'MGMT', 'EMPL', 'STAT', 'MATH', 'WILG']
-            for prefix in economics_prefixes:
-                econ_units = Unit.query.filter(
-                    Unit.code.like(f'{prefix}%'),
-                    Unit.is_bridging == False,
-                    ~Unit.code.in_(units_in_plan)
-                ).limit(20).all()
-                for unit in econ_units:
-                    general_electives.append({
-                        'code': unit.code,
-                        'title': unit.title,
-                        'level': unit.level,
-                        'points': unit.points,
-                        'prerequisites': unit.prerequisites or '',
-                        'availabilities': unit.availabilities or '',
-                        'corequisites': unit.corequisites or '',
-                        'incompatibilities': unit.incompatibilities or ''
-                    })
-        else:
-            # Science degrees - focus on science units
-            science_prefixes = ['SCIE', 'BIOL', 'CHEM', 'PHYS', 'MATH', 'STAT', 'ENVS', 'GEOL', 'GEOG', 'AGRI', 'ANAT', 'PHYL', 'PCOL', 'GENET', 'MICR']
-            for prefix in science_prefixes:
-                science_units = Unit.query.filter(
-                    Unit.code.like(f'{prefix}%'),
-                    Unit.is_bridging == False,
-                    ~Unit.code.in_(units_in_plan)
-                ).limit(15).all()
-                for unit in science_units:
-                    general_electives.append({
-                        'code': unit.code,
-                        'title': unit.title,
-                        'level': unit.level,
-                        'points': unit.points
-                    })
+        q = Unit.query.filter(
+            Unit.is_bridging == False,
+            ~Unit.code.in_(units_in_plan),
+            Unit.electives.isnot(None),
+            Unit.electives != ''
+        )
 
-        # Remove duplicates and limit
-        seen_codes = set()
+        if course_code:
+            # electives가 'BP001,BP004,...' 처럼 콤마로 저장되어 있으므로 LIKE 4가지 패턴으로 안전 매칭
+            q = q.filter(or_(
+                Unit.electives == course_code,                       # 정확히 동일
+                Unit.electives.like(f'{course_code},%'),            # 맨 앞
+                Unit.electives.like(f'%,{course_code},%'),          # 중간
+                Unit.electives.like(f'%,{course_code}')             # 맨 뒤
+            ))
+
+        q = q.filter(
+            or_(
+                Unit.code.op('GLOB')('*1[0-9][0-9][0-9]'),
+                Unit.code.op('GLOB')('*2[0-9][0-9][0-9]'),
+                Unit.code.op('GLOB')('*3[0-9][0-9][0-9]')
+            )
+        )
+
+        # 정렬 + 제한
+        for unit in q.order_by(Unit.level.asc(), Unit.code.asc()).limit(1000).all():
+            general_electives.append({
+                'code': unit.code,
+                'title': unit.title,
+                'level': unit.level,
+                'points': unit.points,
+                'prerequisites': unit.prerequisites or '',
+                'availabilities': unit.availabilities or '',
+                'corequisites': unit.corequisites or '',
+                'incompatibilities': unit.incompatibilities or ''
+            })
+
+         # --- dedup 단계 추가 ---
         unique_general_electives = []
-        for unit in general_electives:
-            if unit['code'] not in seen_codes:
-                seen_codes.add(unit['code'])
-                unique_general_electives.append(unit)
-
-        # Sort by level then alphabetically
-        unique_general_electives.sort(key=lambda x: (x['level'], x['code']))
+        seen_codes = set()
+        for u in general_electives:
+            code = u.get('code')
+            if code and code not in seen_codes:
+                unique_general_electives.append(u)
+                seen_codes.add(code)
 
         return jsonify({
             'plan': plan_data,  # Keep original for compatibility
             'enriched_plan': enriched_plan,  # Add enriched version
             'major_electives': unused_major_electives,
-            'general_electives': unique_general_electives[:50],  # Limit to 50
+            'general_electives': unique_general_electives[:1000],  # Limit to 50
             'major': {
                 'code': selected_major.code,
                 'name': selected_major.name,
@@ -343,22 +343,44 @@ def validate_study_plan():
 
 def get_available_units():
     """Get list of available units for drag and drop"""
+           
     try:
-        # Get units that are not bridging units
-        units = Unit.query.filter_by(is_bridging=False).all()
-        units_list = []
+        course_code = None
 
-        for unit in units:
-            units_list.append({
-                'code': unit.code,
-                'title': unit.title,
-                'level': unit.level,
-                'points': unit.points,
-                'availabilities': unit.availabilities,
-                'prerequisites': unit.prerequisites,
-                'corequisites': unit.corequisites,
-                'incompatibilities': unit.incompatibilities
-            })
+        # 세션에 저장된 study_plan에서 major → course_code 읽기
+        session_id = session.get('session_id')
+        if session_id:
+            sp = StudyPlan.query.filter_by(session_id=session_id).first()
+            if sp and getattr(sp.major, 'course_code', None):
+                course_code = sp.major.course_code
+
+        base_q = Unit.query.filter(
+            Unit.is_bridging == False
+        )
+
+        if course_code:
+            base_q = base_q.filter(
+                Unit.electives.isnot(None),
+                Unit.electives != ''
+            ).filter(or_(
+                Unit.electives == course_code,
+                Unit.electives.like(f'{course_code},%'),
+                Unit.electives.like(f'%,{course_code},%'),
+                Unit.electives.like(f'%,{course_code}')
+            ))
+
+        units = base_q.order_by(Unit.level.asc(), Unit.code.asc()).all()
+
+        units_list = [{
+            'code': u.code,
+            'title': u.title,
+            'level': u.level,
+            'points': u.points,
+            'availabilities': u.availabilities,
+            'prerequisites': u.prerequisites,
+            'corequisites': u.corequisites,
+            'incompatibilities': u.incompatibilities
+        } for u in units]
 
         return jsonify({'units': units_list})
 
