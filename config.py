@@ -1,10 +1,10 @@
 import os
 
 class Config:
-    # Database URI (SQLite for local dev)
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL") or "sqlite:///app.db"
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///site.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # Secret key (needed for sessions/CSRF)
-    SECRET_KEY = os.environ.get("SECRET_KEY") or "dev-secret-key"
+    # Claude AI API Key (dummy for local dev)
+    CLAUDE_API_KEY = os.environ.get('CLAUDE_API_KEY', 'test-claude-key')
 
