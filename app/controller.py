@@ -4,6 +4,7 @@
 
 from app import app, db  # Flask app and SQLAlchemy database instance
 from flask import request, jsonify, session, make_response  # Flask request handling functions
+from check_prerequisites import check_prerequisite
 from app.models import Unit, Major, MajorUnit, StudyPlan  # Database models for academic data
 import json  # JSON parsing and serialization
 import io  # Input/output operations for PDF generation
