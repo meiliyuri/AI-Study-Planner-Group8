@@ -976,6 +976,43 @@ def validate_plan_programmatically(plan_data):
         critical_errors.append(f"There are only {level_3_count} Level 3 units, minimum required is 6.")
     elif level_3_count < 6:
         warnings.append(f"There are only {level_3_count} Level 3 units, minimum required is 6.")
+    
+    # Rule 6: Prerequisites must be met in earlier semesters
+    # Build a stable chronological semester order to enforce "earlier than"
+    semester_order = [
+        'Year 1, Semester 1', 'Year 1, Semester 2',
+        'Year 2, Semester 1', 'Year 2, Semester 2',
+        'Year 3, Semester 1', 'Year 3, Semester 2'
+    ]
+    taken_so_far = []           # list of unit codes already completed in prior semesters
+    missing_prereqs = []        # collect human-readable messages to show in UI
+
+    for semester in semester_order:
+        units_this_sem = plan_data.get(semester, [])
+        for unit_code in units_this_sem:
+            # pull the unit from DB so we can read its prerequisites text
+            unit = Unit.query.filter_by(code=unit_code).first()
+            if not unit:
+                # you already handle "Unit not found" elsewhere; skip here
+                continue
+
+            is_ok, message = check_prerequisite(
+                unit_code=unit.code,
+                prerequisite_text=unit.prerequisites or "",
+                units_taken_before=taken_so_far
+            )
+
+            if not is_ok:
+                # message might be "Missing prerequisite: ECON1102; Insufficient points: ..."
+                missing_prereqs.append(f"{unit.code}: {message} (before {semester})")
+
+        # after checking this semester, mark its units as completed for next semesters
+        taken_so_far.extend(units_this_sem)
+
+    if missing_prereqs:
+        # Treat as critical errors (so validation fails), append to your existing list
+        critical_errors.extend(missing_prereqs)
+
 
     # Return validation result
     if critical_errors:
@@ -984,7 +1021,8 @@ def validate_plan_programmatically(plan_data):
             'reason': "Critical issues found: " + " ".join(critical_errors),
             'type': 'error',
             'errors': critical_errors,   
-            'warnings': warnings,        
+            'warnings': warnings,
+            'details': { 'missingPrereqs': missing_prereqs }        
         }
     elif warnings:
         return {
@@ -993,6 +1031,7 @@ def validate_plan_programmatically(plan_data):
             'type': 'warning',
             'errors': [],                  
             'warnings': warnings,
+            'details': { 'missingPrereqs': [] }
         }
     else:
         return {
@@ -1001,6 +1040,7 @@ def validate_plan_programmatically(plan_data):
             'type': 'success',
             'errors': [],
             'warnings': [],
+            'details': { 'missingPrereqs': [] }
         }
 
 def create_validation_prompt(major, plan_data):
