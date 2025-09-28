@@ -708,17 +708,47 @@ def clear_plan_cache():
         return jsonify({'error': str(e)}), 500
 
 def call_claude_for_plan_generation(prompt):
-    """Call Claude Opus 4.1 with maximum reasoning capabilities for plan generation"""
+    """Call Claude (Sonnet 3.5) to generate a plan; return raw text/JSON string or None on failure."""
+    import traceback
+
     try:
-        # Claude Opus 4.1 - Latest and most powerful model with maximum reasoning settings
-        response = claude_client.messages.create(
-            model="claude-opus-4-1-20250805",  # Claude Opus 4.1 - Latest model
-            max_tokens=4096,  # Maximum reasoning capability
-            temperature=0.1,  # Low temperature for consistency in constraint satisfaction
-            messages=[
-                {
-                    "role": "user",
-                    "content": f"""Think step by step and use maximum reasoning to solve this complex constraint satisfaction problem. Apply ultra-careful analysis to ensure all temporal dependencies and constraints are satisfied.
+        # Use the global client you already created at the top of this file:
+        #   from anthropic import Anthropic
+        #   claude_client = Anthropic(api_key=Config.CLAUDE_API_KEY)
+        model_name = "claude-3-5-sonnet-20240620"
+
+        app.logger.info(f"[Claude] Calling model={model_name} (prompt_len={len(prompt)})")
+        resp = claude_client.messages.create(
+            model=model_name,
+            max_tokens=1200,
+            temperature=0.1,
+            messages=[{"role": "user", "content": prompt}],
+        )
+
+        # Anthropic returns a list of content blocks; grab the first text block
+        if not resp or not getattr(resp, "content", None):
+            app.logger.error("[Claude] Empty response/content")
+            return None
+
+        # Extract text from blocks
+        text_blocks = []
+        for block in resp.content:
+            # Blocks typically have type="text" and .text
+            if hasattr(block, "text"):
+                text_blocks.append(block.text)
+        plan_text = (text_blocks[0].strip() if text_blocks else "").strip()
+
+        if not plan_text:
+            app.logger.error(f"[Claude] No text blocks found. Raw resp: {resp}")
+            return None
+
+        return plan_text
+
+    except Exception as e:
+        app.logger.error("[Claude] Exception: " + str(e))
+        app.logger.error(traceback.format_exc())
+        return None
+    
 
 {prompt}
 
