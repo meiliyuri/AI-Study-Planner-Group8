@@ -417,7 +417,48 @@ def get_available_units():
             'incompatibilities': u.incompatibilities
         } for u in units]
 
-        return jsonify({'units': units_list})
+        # 1) Major electives (해당 전공의 'option' 유닛 중 아직 plan에 없는 것)
+        major_electives = []
+        if sp and sp.major_id:
+            mu_rows = MajorUnit.query.filter_by(major_id=sp.major_id, requirement_type='option').all()
+            for mu in mu_rows:
+                u = mu.unit
+                if (not u.is_bridging) and (u.code not in used_units) and u.level in (1,2,3):
+                    major_electives.append({
+                        'code': u.code, 'title': u.title, 'level': u.level,
+                        'points': u.points, 'prerequisites': u.prerequisites or '',
+                        'availabilities': u.availabilities or '',
+                        'corequisites': u.corequisites or '', 'incompatibilities': u.incompatibilities or ''
+                    })
+
+        # 2) General electives (지금까지의 base_q 로직 + level 1~3 필터 권장)
+        base_q = Unit.query.filter(
+            Unit.is_bridging == False,
+            Unit.level.in_([1,2,3])
+        )
+        if course_code:
+            base_q = base_q.filter(
+                Unit.electives.isnot(None),
+                Unit.electives != ''
+            ).filter(or_(
+                Unit.electives == course_code,
+                Unit.electives.like(f'{course_code},%'),
+                Unit.electives.like(f'%,{course_code},%'),
+                Unit.electives.like(f'%,{course_code}')
+            ))
+        if used_units:
+            base_q = base_q.filter(~Unit.code.in_(used_units))
+
+        general_electives = [{
+            'code': u.code, 'title': u.title, 'level': u.level, 'points': u.points,
+            'prerequisites': u.prerequisites or '', 'availabilities': u.availabilities or '',
+            'corequisites': u.corequisites or '', 'incompatibilities': u.incompatibilities or ''
+        } for u in base_q.order_by(Unit.level.asc(), Unit.code.asc()).all()]
+
+        return jsonify({
+            'major_electives': major_electives,
+            'general_electives': general_electives
+        })
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500

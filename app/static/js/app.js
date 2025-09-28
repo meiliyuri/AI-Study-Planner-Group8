@@ -686,15 +686,30 @@ function loadAvailableUnits() {
         });
 }
 
-function displayAvailableUnits(units) {
-    const container = $('#available-units');
-    container.empty();
+// displayAvailableUnits는 배열(old)과 섹션(new) 모두 처리 가능하게
+function displayAvailableUnits(payload) {
+  const $wrap = $('#available-units');
+  $wrap.empty();
 
-    units.forEach(unit => {
-        const unitCard = createUnitCard(unit.code, unit);
-        container.append(unitCard);
-    });
+  // 백엔드 섹션 키 우선, 하위호환도 허용
+  const major   = payload.major_electives || payload.major || [];
+  const general = payload.general_electives || payload.general || payload.units || [];
+
+  renderSection($wrap, 'Major Electives:', major);
+  renderSection($wrap, 'General Electives:', general);
 }
+
+
+function renderSection($wrap, headerText, units) {
+  if (!units || !units.length) return;
+  // 헤더 클래스는 updateSectionHeaders()에서 쓰는 것과 동일하게
+  $wrap.append(`<div class="unit-section-header"><h6>${headerText}</h6></div>`);
+  units.forEach(u => {
+    // makeUnitCard(X) → createUnitCard(O)
+    $wrap.append(createUnitCard(u.code, u));
+  });
+}
+
 
 function displayCategorizedUnits(majorElectives, generalElectives) {
     const container = $('#available-units');
@@ -1307,27 +1322,20 @@ function savePlan() {
 function refreshAvailableUnits() {
   return $.get('/api/units')
     .done(function(data) {
-      // 서버에서 받아온 units를 availableUnits에 반영
-      availableUnits = data.units;
-
-      // allUnitsData 업데이트 (검증용 메타 유지)
-      data.units.forEach(unit => {
+      // allUnitsData도 최신화 (검증용 메타 유지)
+      const merged = [...(data.major_electives || []), ...(data.general_electives || [])];
+      merged.forEach(unit => {
         const i = allUnitsData.findIndex(x => x.code === unit.code);
-        if (i >= 0) {
-          allUnitsData[i] = unit; // 이미 있으면 업데이트
-        } else {
-          allUnitsData.push(unit); // 없으면 새로 추가
-        }
+        if (i >= 0) allUnitsData[i] = unit; else allUnitsData.push(unit);
       });
 
-      // 실제 UI에 표시
-      displayAvailableUnits(data.units);
-
+      // ⬇️ 섹션 객체 그대로 넘김
+      displayAvailableUnits(data);
+      updateAvailableUnitsFilter();
     })
-    .fail(function() { 
-      showError('Failed to load available units'); 
-    });
+    .fail(function(){ showError('Failed to load available units'); });
 }
+
 
 // 너무 자주 호출 방지용(선택)
 const saveAndRefresh = _.debounce(() => {  // lodash 사용 중이면
