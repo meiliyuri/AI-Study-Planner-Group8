@@ -30,8 +30,12 @@ class Unit(db.Model):
     corequisites = db.Column(db.Text)    # Units to be taken simultaneously
     incompatibilities = db.Column(db.Text)  # Units that cannot be taken together
 
+    electives = db.Column(db.Text) # Elective groupings if applicable
+    
     # Special unit classification
     is_bridging = db.Column(db.Boolean, default=False)  # Bridging unit flag
+
+   
 
     def __repr__(self):
         """String representation of Unit object for debugging"""

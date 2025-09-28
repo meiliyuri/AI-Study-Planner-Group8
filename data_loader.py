@@ -100,6 +100,7 @@ def load_units_with_rules_csv():
         prerequisites = clean_field(row.get('prereqs', ''))
         corequisites = clean_field(row.get('coreqs', ''))
         incompatibilities = clean_field(row.get('incompatible', ''))
+        electives = clean_field(row.get('electives', ''))
 
         # Check if it's a bridging unit
         is_bridging = unit_code in BRIDGING_UNITS
@@ -111,6 +112,7 @@ def load_units_with_rules_csv():
             unit.prerequisites = prerequisites
             unit.corequisites = corequisites
             unit.incompatibilities = incompatibilities
+            unit.electives = electives
             unit.is_bridging = is_bridging
             updated_count += 1
         else:
@@ -123,6 +125,7 @@ def load_units_with_rules_csv():
                 prerequisites=prerequisites,
                 corequisites=corequisites,
                 incompatibilities=incompatibilities,
+                electives=electives,
                 is_bridging=is_bridging
             )
             db.session.add(unit)
