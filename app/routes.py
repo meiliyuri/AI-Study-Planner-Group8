@@ -85,10 +85,8 @@ def clear_cache():
 
 @app.route('/api/plan/save', methods=['POST'])
 def save_plan():
-    # 프론트에서 현재 plan 객체를 보내주면 서버에 저장
     return controller.save_current_plan()
 
 @app.route('/api/electives', methods=['GET'])
 def get_electives():
-    # 서버에 저장된 최신 plan 기준으로 general electives 재계산
     return controller.get_general_electives()

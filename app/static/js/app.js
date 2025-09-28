@@ -686,7 +686,7 @@ function loadAvailableUnits() {
         });
 }
 
-// displayAvailableUnits는 배열(old)과 섹션(new) 모두 처리 가능하게
+// displayAvailableUnits can handle both arrays (old) and sections (new).
 function displayAvailableUnits(payload) {
   const $wrap = $('#available-units');
   $wrap.empty();
@@ -700,18 +700,15 @@ function displayAvailableUnits(payload) {
   renderSection($wrap, 'GENERAL ELECTIVES',   general);
 }
 
-
-
 function renderSection($wrap, headerText, units) {
   if (!units || !units.length) return;
-  // 헤더 클래스는 updateSectionHeaders()에서 쓰는 것과 동일하게
+  //  The header class is the same as the one used in updateSectionHeaders().
   $wrap.append(`<div class="unit-section-header"><h6>${headerText}</h6></div>`);
   units.forEach(u => {
     // makeUnitCard(X) → createUnitCard(O)
     $wrap.append(createUnitCard(u.code, u));
   });
 }
-
 
 function displayCategorizedUnits(majorElectives, generalElectives) {
     const container = $('#available-units');
@@ -793,7 +790,6 @@ function updateSectionHeaders() {
         }
     });
 }
-
 
 function filterUnits(searchTerm) {
     const term = searchTerm.toLowerCase();
@@ -1324,23 +1320,21 @@ function savePlan() {
 function refreshAvailableUnits() {
   return $.get('/api/units')
     .done(function(data) {
-      // allUnitsData도 최신화 (검증용 메타 유지)
+      // allUnitsData also updated (verification metadata retained)
       const merged = [...(data.major_electives || []), ...(data.general_electives || [])];
       merged.forEach(unit => {
         const i = allUnitsData.findIndex(x => x.code === unit.code);
         if (i >= 0) allUnitsData[i] = unit; else allUnitsData.push(unit);
       });
 
-      // ⬇️ 섹션 객체 그대로 넘김
       displayAvailableUnits(data);
       updateAvailableUnitsFilter();
     })
     .fail(function(){ showError('Failed to load available units'); });
 }
 
-
-// 너무 자주 호출 방지용(선택)
-const saveAndRefresh = _.debounce(() => {  // lodash 사용 중이면
+// To prevent too frequent calls
+const saveAndRefresh = _.debounce(() => {
   savePlan().then(() => refreshAvailableUnits());
 }, 250);
 
