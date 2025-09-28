@@ -750,29 +750,6 @@ def call_claude_for_plan_generation(prompt):
         return None
     
 
-{prompt}
-
-Use deep reasoning to verify:
-1. All prerequisites are in earlier semesters than dependent units
-2. All units are placed in semesters where they're available
-3. No temporal logic violations occur
-4. All degree requirements are met
-
-Reason through each placement decision carefully."""
-                }
-            ]
-        )
-
-        plan_content = response.content[0].text if response.content else None
-
-        if not plan_content:
-            return None
-
-        return plan_content
-
-    except Exception as e:
-        return None
-
 def create_plan_generation_prompt(major, mandatory_units, optional_units, additional_units):
     """Create Claude API prompt for intelligent plan generation with STRATEGY 2: Pre-split by availability"""
 
