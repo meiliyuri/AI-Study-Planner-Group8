@@ -50,34 +50,24 @@ def extract_json_from_response(text):
     return None  # Return None if no valid JSON structure found
 
 def get_available_majors():
-    """Get list of available majors for degree selection
-
-    Retrieves all available academic majors from the database and formats
-    them for frontend consumption. Used to populate major selection dropdown.
-
-    Returns:
-        JSON response: List of majors with id, code, name, and degree fields
-    """
+    """Get list of available majors for degree selection"""
     try:
-        # SQLAlchemy query to get all majors from database
         available_majors = Major.query.all()
-        majors_list = []  # Initialize empty list for major data
-
-        # Build list of major dictionaries for JSON response
+        majors_list = []
         for individual_major in available_majors:
-            major_data = {
+            majors_list.append({
                 'id': individual_major.id,
                 'code': individual_major.code,
                 'name': individual_major.name,
                 'degree': individual_major.degree
-            }
-            majors_list.append(major_data)
-
-        # Return JSON response with majors list
+            })
         return jsonify({'majors': majors_list})
     except Exception as database_error:
-        # Return error response if database operation fails
+        import traceback
+        print("ERROR in /api/majors:", database_error)
+        traceback.print_exc()  # <-- this shows the full stack trace in the terminal
         return jsonify({'error': str(database_error)}), 500
+
 
 def generate_initial_plan():
     """Generate an initial study plan using Claude AI
