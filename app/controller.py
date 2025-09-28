@@ -188,15 +188,28 @@ def generate_initial_plan():
             if items and isinstance(items[0], dict) and 'unit' in items[0]:
                 # New format: convert objects to unit codes
                 plan_data[semester] = [item['unit'] for item in items]
+       
+        # Save / Upsert the plan for this session (세션당 1개만 유지)
+        existing = (StudyPlan.query
+                    .filter_by(session_id=current_session_id)
+                    .order_by(StudyPlan.id.desc())
+                    .first())
 
-        # Save the plan
-        study_plan = StudyPlan(
-            session_id=current_session_id,
-            major_id=selected_major_id,
-            plan_data=json.dumps(plan_data),
-            is_valid=True
-        )
-        db.session.add(study_plan)
+        if existing:
+            # 같은 세션이면 기존 레코드를 덮어쓴다 (중복 INSERT 방지)
+            existing.major_id = selected_major_id
+            existing.plan_data = json.dumps(plan_data)
+            existing.is_valid = True
+            study_plan = existing
+        else:
+            # 세션에 첫 플랜이면 새로 생성
+            study_plan = StudyPlan(
+                session_id=current_session_id,
+                major_id=selected_major_id,
+                plan_data=json.dumps(plan_data),
+                is_valid=True
+            )
+            db.session.add(study_plan)
         db.session.commit()
 
         # Enrich plan with unit details for frontend
@@ -343,21 +356,38 @@ def validate_study_plan():
 
 def get_available_units():
     """Get list of available units for drag and drop"""
-           
     try:
         course_code = None
+        used_units = set()
 
-        # 세션에 저장된 study_plan에서 major → course_code 읽기
+        # 세션에서 study_plan 읽기
         session_id = session.get('session_id')
         if session_id:
-            sp = StudyPlan.query.filter_by(session_id=session_id).first()
-            if sp and getattr(sp.major, 'course_code', None):
-                course_code = sp.major.course_code
+            sp = StudyPlan.query.filter_by(session_id=session_id).order_by(StudyPlan.id.desc()).first()
+            if sp:
+                # major → course_code
+                if getattr(sp.major, 'course_code', None):
+                    course_code = sp.major.course_code
+                # 현재 plan_data 안의 모든 unit code 수집
+                if sp.plan_data:
+                    plan = json.loads(sp.plan_data)
+                    for sem_units in plan.values():
+                        used_units.update(sem_units)
 
+        # 기본 쿼리: bridging 아닌 것
+        base_q = Unit.query.filter(Unit.is_bridging == False)
+
+        # 레벨 필터: 1, 2, 3 시작하는 과목만
         base_q = Unit.query.filter(
-            Unit.is_bridging == False
+            Unit.is_bridging == False,
+            or_(
+                Unit.code.like('____1%'),
+                Unit.code.like('____2%'),
+                Unit.code.like('____3%')
+            )
         )
 
+        # course_code electives 필터
         if course_code:
             base_q = base_q.filter(
                 Unit.electives.isnot(None),
@@ -369,6 +399,11 @@ def get_available_units():
                 Unit.electives.like(f'%,{course_code}')
             ))
 
+        # 이미 Plan에 있는 과목은 제외
+        if used_units:
+            base_q = base_q.filter(~Unit.code.in_(used_units))
+
+        # 정렬 후 가져오기
         units = base_q.order_by(Unit.level.asc(), Unit.code.asc()).all()
 
         units_list = [{
@@ -386,6 +421,91 @@ def get_available_units():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+   
+
+def save_current_plan():
+    try:
+        data = request.get_json() or {}
+        session_id = session.get('session_id')
+        if not session_id:
+            return jsonify({'error': 'No session'}), 400
+
+        # ✅ 최신 레코드로 통일
+        sp = (StudyPlan.query
+              .filter_by(session_id=session_id)
+              .order_by(StudyPlan.id.desc())
+              .first())
+
+        if not sp:
+            sp = StudyPlan(session_id=session_id, plan_data=json.dumps(data.get('plan', {})))
+            db.session.add(sp)
+        else:
+            sp.plan_data = json.dumps(data.get('plan', {}))
+
+        db.session.commit()
+        return jsonify({'ok': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+
+def get_general_electives():
+    try:
+        session_id = session.get('session_id')
+        sp = StudyPlan.query.filter_by(session_id=session_id).first()
+        if not sp:
+            return jsonify({'general_electives': []})
+
+        # 현재 플랜에서 이미 담긴 유닛 제외
+        plan = json.loads(sp.plan_data or '{}')
+        units_in_plan = {c for _, codes in plan.items() for c in codes}
+
+        # 전공의 course_code ↔ Unit.electives 매칭
+        course_code = getattr(sp.major, 'course_code', None)
+        q = Unit.query.filter(
+            Unit.is_bridging == False,
+            ~Unit.code.in_(units_in_plan),
+            Unit.electives.isnot(None),
+            Unit.electives != ''
+        )
+        if course_code:
+            q = q.filter(or_(
+                Unit.electives == course_code,
+                Unit.electives.like(f'{course_code},%'),
+                Unit.electives.like(f'%,{course_code},%'),
+                Unit.electives.like(f'%,{course_code}')
+            ))
+
+        # 과목코드의 ‘첫 숫자’가 1/2/3인 것만
+        q = q.filter(or_(
+            Unit.code.op('GLOB')('*1[0-9][0-9][0-9]'),
+            Unit.code.op('GLOB')('*2[0-9][0-9][0-9]'),
+            Unit.code.op('GLOB')('*3[0-9][0-9][0-9]')
+        )).order_by(Unit.level.asc(), Unit.code.asc())
+
+        general = [{
+            'code': u.code,
+            'title': u.title,
+            'level': u.level,
+            'points': u.points,
+            'prerequisites': u.prerequisites or '',
+            'availabilities': u.availabilities or '',
+            'corequisites': u.corequisites or '',
+            'incompatibilities': u.incompatibilities or ''
+        } for u in q.all()]
+
+        # dedup → unique_general_electives
+        seen, unique = set(), []
+        for item in general:
+            c = item['code']
+            if c not in seen:
+                seen.add(c)
+                unique.append(item)
+
+        return jsonify({'general_electives': unique})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 def export_plan_to_pdf():
     """Export the current study plan to PDF"""

@@ -80,6 +80,7 @@ function setupDragAndDrop() {
                     updateDropZone(evt.from);
                     // Check if any remaining units depend on the removed unit
                     checkDependentUnitsAfterRemoval(removedUnitCode);
+                    savePlan().then(() => refreshAvailableUnits());
                 }
             });
             sortableInstances.push(sortable);
@@ -104,6 +105,7 @@ function setupDragAndDrop() {
                 updateAvailableUnitsFilter();
                 checkDependentUnitsAfterRemoval(removedUnitCode);
                 validatePlan();
+                savePlan().then(() => refreshAvailableUnits());
             }
         });
     }
@@ -126,6 +128,7 @@ function setupDragAndDrop() {
                 checkDependentUnitsAfterRemoval(removedUnitCode);
                 validatePlan();
                 updateValidationStatus('Unit removed from plan', 'success');
+                savePlan().then(() => refreshAvailableUnits());
             }
         });
     }
@@ -275,6 +278,9 @@ function handleUnitMove(evt) {
 
     // Apply visual validation to all units in the plan
     validateAndHighlightAllUnits();
+
+    // After saving is complete, reload the Available Units to the latest state.
+    savePlan().then(() => refreshAvailableUnits());
 }
 
 
@@ -1287,3 +1293,44 @@ function aiChatMessage(message) {
         $('#debug-log').prepend(errorEntry);
     });
 }
+
+
+function savePlan() {
+  const plan = getCurrentPlan();
+  return fetch('/api/plan/save', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ plan })
+  }).then(r => r.json());
+}
+
+function refreshAvailableUnits() {
+  return $.get('/api/units')
+    .done(function(data) {
+      // 서버에서 받아온 units를 availableUnits에 반영
+      availableUnits = data.units;
+
+      // allUnitsData 업데이트 (검증용 메타 유지)
+      data.units.forEach(unit => {
+        const i = allUnitsData.findIndex(x => x.code === unit.code);
+        if (i >= 0) {
+          allUnitsData[i] = unit; // 이미 있으면 업데이트
+        } else {
+          allUnitsData.push(unit); // 없으면 새로 추가
+        }
+      });
+
+      // 실제 UI에 표시
+      displayAvailableUnits(data.units);
+
+    })
+    .fail(function() { 
+      showError('Failed to load available units'); 
+    });
+}
+
+// 너무 자주 호출 방지용(선택)
+const saveAndRefresh = _.debounce(() => {  // lodash 사용 중이면
+  savePlan().then(() => refreshAvailableUnits());
+}, 250);
+
