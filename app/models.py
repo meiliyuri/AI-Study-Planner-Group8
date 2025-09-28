@@ -54,9 +54,10 @@ class Major(db.Model):
     code = db.Column(db.String(20), unique=True, nullable=False, index=True)
     name = db.Column(db.String(100), nullable=False)
     degree = db.Column(db.String(50), nullable=False)
+    course_code = db.Column(db.String(20), nullable=True)
 
     def __repr__(self):
-        return f'<Major {self.code}: {self.name}>'
+        return f'<Major {self.code} ({self.course_code}): {self.name}>'
 
 class MajorUnit(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -131,7 +131,7 @@ def load_units_with_rules_csv():
     db.session.commit()
     print(f"Updated {updated_count} valid units with rules and availability data")
 
-def load_major_sequence_xlsx(file_path, major_code, major_name, degree):
+def load_major_sequence_xlsx(file_path, major_code, major_name, degree, course_code):
     """Load major sequence from XLSX file"""
     if not os.path.exists(file_path):
         print(f"File not found: {file_path}")
@@ -147,7 +147,7 @@ def load_major_sequence_xlsx(file_path, major_code, major_name, degree):
         # Create or get major
         major = Major.query.filter_by(code=major_code).first()
         if not major:
-            major = Major(code=major_code, name=major_name, degree=degree)
+            major = Major(code=major_code, name=major_name, degree=degree, course_code=course_code)
             db.session.add(major)
             db.session.flush()  # Get the ID
 
@@ -205,15 +205,15 @@ def load_major_sequence_xlsx(file_path, major_code, major_name, degree):
 def load_all_majors():
     """Load all major sequence files"""
     major_files = [
-        ('Reference_Material/Essential_Data/Sequence export (MJD-ECNPF).xlsx', 'MJD-ECNPF', 'Economics', 'Bachelor of Economics'),
-        ('Reference_Material/Essential_Data/Sequence export (MJD-FINEC).xlsx', 'MJD-FINEC', 'Financial Economics', 'Bachelor of Economics'),
-        ('Reference_Material/Essential_Data/Sequence export MJD-AGBUS.xlsx', 'MJD-AGBUS', 'Agribusiness', 'Bachelor of Science'),
-        ('Reference_Material/Essential_Data/Sequence export MJD-AGSCI.xlsx', 'MJD-AGSCI', 'Agricultural Science', 'Bachelor of Science'),
-        ('Reference_Material/Essential_Data/Sequence export MJD-AGTEC.xlsx', 'MJD-AGTEC', 'Agricultural Technology', 'Bachelor of Science'),
+        ('Reference_Material/Essential_Data/Sequence export (MJD-ECNPF).xlsx', 'MJD-ECNPF', 'Economics', 'Bachelor of Economics', 'BP013'),
+        ('Reference_Material/Essential_Data/Sequence export (MJD-FINEC).xlsx', 'MJD-FINEC', 'Financial Economics', 'Bachelor of Economics', 'BP013'),
+        ('Reference_Material/Essential_Data/Sequence export MJD-AGBUS.xlsx', 'MJD-AGBUS', 'Agribusiness', 'Bachelor of Science', 'BP004'),
+        ('Reference_Material/Essential_Data/Sequence export MJD-AGSCI.xlsx', 'MJD-AGSCI', 'Agricultural Science', 'Bachelor of Science', 'BP004'),
+        ('Reference_Material/Essential_Data/Sequence export MJD-AGTEC.xlsx', 'MJD-AGTEC', 'Agricultural Technology', 'Bachelor of Science', 'BP004'),
     ]
 
-    for file_path, major_code, major_name, degree in major_files:
-        load_major_sequence_xlsx(file_path, major_code, major_name, degree)
+    for file_path, major_code, major_name, degree, course_code in major_files:
+        load_major_sequence_xlsx(file_path, major_code, major_name, degree, course_code)
 
 def initialize_database():
     """Initialize the database with all course data"""
