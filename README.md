@@ -96,6 +96,11 @@ python -m flask run
 
 ![Web Demo](https://github.com/user-attachments/assets/2a487579-5d49-4541-8da1-496c114f1ebf)
 
+## FAQ
+
+See the [FAQ page](http://127.0.0.1:5000/faq) in the web app for answers to common questions about speed, cost, accuracy, prerequisites, and exporting.
+
+
 ## Data Structure
 
 ### Bachelor Degree Requirements
