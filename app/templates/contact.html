@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<body>
+
+  <section class="contact-section">
+    <div class="container">
+      <div class="form-header">
+        <h1>Get in Touch</h1>
+        <p>We’d love to hear from you! Please fill out the form and we’ll get back to you shortly.</p>
+      </div>
+      <form class="contact-form" action="https://formspree.io/f/mkgqoeee" method="POST">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" name="name" required placeholder="John Doe" />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" required placeholder="youremail@example.com" />
+        </div>
+
+        <div class="form-group">
+          <label for="subject">Subject</label>
+          <input type="text" id="subject" name="subject" required placeholder="Subject..." />
+        </div>
+
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" rows="6" required placeholder="Type your message here..."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">Send Message</button>
+      </form>
+    </div>
+  </section>
+</body>
+
+{% endblock %}
