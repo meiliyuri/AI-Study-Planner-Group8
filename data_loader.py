@@ -172,16 +172,26 @@ def load_major_sequence_xlsx(file_path, major_code, major_name, degree, course_c
                 continue
 
 
-            # Determine requirement type from curriculum column
-            requirement_type = 'option'  # default
-            if f'{major_code}' in curriculum and 'as core' in curriculum:
-                requirement_type = 'core'
-            elif f'{major_code}' in curriculum and 'as option' in curriculum:
-                requirement_type = 'option'
-            elif f'{major_code}' in curriculum and 'as bridging' in curriculum:
-                requirement_type = 'bridging'
-            else:
-                continue  # Skip if not related to this major
+            # Split into segments (;), then evaluate only the syntax containing the specified major_code
+            curriculum = str(row.get('Curriculum', '') or '')
+            segments = [seg.strip() for seg in curriculum.split(';') if seg.strip()]
+
+            requirement_type = None
+            for seg in segments:
+                if major_code in seg:
+                    s = seg.lower()
+                    if 'as bridging' in s:
+                        requirement_type = 'bridging'
+                        break
+                    if 'as core' in s:
+                        requirement_type = 'core'
+                        break
+                    if 'as option' in s:
+                        requirement_type = 'option'
+                        break
+
+            if not requirement_type: # Activities unrelated to this major → Skip
+                continue
 
             # Check if relationship already exists
             existing = MajorUnit.query.filter_by(
