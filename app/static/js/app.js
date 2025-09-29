@@ -324,6 +324,13 @@ function validatePlan() {
             // Collect validation issues and warnings returned by the server
             const issues = Array.isArray(data.errors) ? data.errors.slice() : [];
             const warns  = Array.isArray(data.warnings) ? data.warnings.slice() : [];
+            
+            // Additional prerequisites check results
+            const prereqMessages = collectPrerequisiteWarnings();
+            prereqMessages.forEach(msg => {
+                if (msg.startsWith("❌")) issues.push(msg);
+                else warns.push(msg);
+            });
 
             // Backward compatibility:
             // Some server responses may only provide a "reason" string instead of arrays
@@ -339,15 +346,9 @@ function validatePlan() {
 
             const allIssues = uniq(issues);
             const allWarns  = uniq(warns);
-
+            
             // Update the validation status box depending on the results
-            if (allIssues.length) {
-                updateValidationStatus(allIssues, 'error');    
-            } else if (allWarns.length) {
-                updateValidationStatus(allWarns, 'warning');   
-            } else {
-                updateValidationStatus('Plan generated successfully', 'success');
-            }
+            updateValidationStatus(allIssues, allWarns, 'Plan generated successfully');
         },
         error: function() {
             // Handle network or server errors
@@ -821,27 +822,44 @@ function filterUnits(searchTerm) {
     updateSectionHeaders();
 }
 
-function updateValidationStatus(messageOrList, type) {
+function updateValidationStatus(errors = [], warnings = [], successMessage = '') {
     const $box = $('#validation-status');
     $box.removeClass('validation-success validation-error validation-warning');
+    $box.empty();  
 
-    if (type === 'error') $box.addClass('validation-error');
-    else if (type === 'warning') $box.addClass('validation-warning');
-    else $box.addClass('validation-success');
-
-    const title = type ? type[0].toUpperCase() + type.slice(1) : 'Status';
-    let body = '';
-
-    if (Array.isArray(messageOrList)) {
-        body = '<ul class="validation-list">' +
-               messageOrList.map(m => `<li>${m}</li>`).join('') +
-               '</ul>';
-    } else {
-        body = String(messageOrList || '');
+    // Errors
+    if (errors.length > 0) {
+        const errorHtml = `
+            <div class="validation-error">
+                <strong>Errors:</strong>
+                <ul class="validation-list">
+                    ${errors.map(m => `<li>${m}</li>`).join('')}
+                </ul>
+            </div>`;
+        $box.append(errorHtml);
     }
-    $box.html(`<strong>${title}:</strong> ${body}`);
-}
 
+    // Warnings
+    if (warnings.length > 0) {
+        const warnHtml = `
+            <div class="validation-warning mt-2">
+                <strong>Warnings:</strong>
+                <ul class="validation-list">
+                    ${warnings.map(m => `<li>${m}</li>`).join('')}
+                </ul>
+            </div>`;
+        $box.append(warnHtml);
+    }
+
+    // Success
+    if (errors.length === 0 && warnings.length === 0 && successMessage) {
+        const successHtml = `
+            <div class="validation-success">
+                <strong>Success:</strong> ${successMessage}
+            </div>`;
+        $box.append(successHtml);
+    }
+}
 
 function exportToPDF() {
     const plan = getCurrentPlan();
@@ -1338,3 +1356,26 @@ const saveAndRefresh = _.debounce(() => {
   savePlan().then(() => refreshAvailableUnits());
 }, 250);
 
+// prerequisite inssue Collection Function
+function collectPrerequisiteWarnings() {
+    const prereqWarnings = [];
+
+    $('.semester-units').each(function() {
+        const semester = $(this).data('semester');
+
+        $(this).find('.unit-card').each(function() {
+            const unitCode = $(this).data('unit-code');
+            const result = validateUnitConstraints(unitCode, semester);
+
+            if (!result.isValid) {
+                if (result.type === 'error') {
+                    prereqWarnings.push(`${result.message}`);
+                } else if (result.type === 'warning') {
+                    prereqWarnings.push(`${result.message}`);
+                }
+            }
+        });
+    });
+
+    return prereqWarnings;
+}
