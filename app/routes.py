@@ -89,6 +89,10 @@ def contact():
 def faq():
     return render_template('faq.html', title_page="FAQ's")
 
+@app.route('/settings')
+def settings():
+    return render_template('settings.html', title_page="Settings")
+
 @app.route('/api/admin/import_data', methods=['POST'])
 def import_data():
     return controller.import_course_data()
