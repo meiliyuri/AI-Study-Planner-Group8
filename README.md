@@ -98,6 +98,62 @@ python -m flask run
 
 See the [FAQ page](http://127.0.0.1:5000/faq) in the web app for answers to common questions about speed, cost, accuracy, prerequisites, and exporting.
 
+## Contact Page
+
+If you encounter issues or have questions about the AI Study Planner, you can use the **Contact form** in the app:
+
+* **Visit**: [http://127.0.0.1:5000/contact](http://127.0.0.1:5000/contact)
+* Fill out the form with your **name**, **email**, and **message**.
+* Submit your query, and the development team will review it.
+
+This is the primary channel for reporting bugs, asking questions, or providing feedback while using the local development version of the app.
+
+## Running Tests
+
+To ensure everything is working correctly and all features are stable, the project includes automated tests for routes, the database, and planner functionality.
+
+### 1. Activate the Python environment
+
+Make sure you are in the project folder and your virtual environment is activated.
+
+**Windows:**
+
+```bash
+.\venv\Scripts\Activate
+```
+
+**macOS/Linux:**
+
+```bash
+source venv/bin/activate
+```
+
+### 2. Install test dependencies
+
+All required packages are included in `requirements.txt`, including `pytest` and `beautifulsoup4` (for HTML parsing in tests). If you haven’t installed them yet:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Run the tests
+
+From the project root folder, simply run:
+
+```bash
+pytest -v
+```
+
+* `-v` (verbose) shows each test’s status.
+* All tests should pass.
+* If any fail, carefully review the error message and make sure the environment is correctly set up.
+
+### 4. Test coverage areas
+
+* **Basic pages**: Home page, admin page, planner page.
+* **Planner functionality**: Buttons, major selection, plan generation.
+* **Admin panel and database**: Connection status, system badges.
+* **Advanced features**: AI status badges, import logs, and validation messages.
 
 ## Data Structure
 
