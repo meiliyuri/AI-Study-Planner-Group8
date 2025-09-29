@@ -17,6 +17,7 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from config import Config  # Application configuration
 from reportlab.lib.units import inch # Add UWA logo
 from reportlab.pdfbase import pdfdoc # PDF metadata
+from sqlalchemy import or_  # SQLAlchemy logical operators for queries
 
 # Claude AI client setup for enhanced academic reasoning capabilities
 from anthropic import Anthropic
@@ -187,15 +188,28 @@ def generate_initial_plan():
             if items and isinstance(items[0], dict) and 'unit' in items[0]:
                 # New format: convert objects to unit codes
                 plan_data[semester] = [item['unit'] for item in items]
+       
+        # Save / Upsert the plan for this session (Only one per session)
+        existing = (StudyPlan.query
+                    .filter_by(session_id=current_session_id)
+                    .order_by(StudyPlan.id.desc())
+                    .first())
 
-        # Save the plan
-        study_plan = StudyPlan(
-            session_id=current_session_id,
-            major_id=selected_major_id,
-            plan_data=json.dumps(plan_data),
-            is_valid=True
-        )
-        db.session.add(study_plan)
+        if existing:
+            # If it's the same session, it overwrites the existing record (prevents duplicate inserts).
+            existing.major_id = selected_major_id
+            existing.plan_data = json.dumps(plan_data)
+            existing.is_valid = True
+            study_plan = existing
+        else:
+            # If it's the first plan in the session, create a new one.
+            study_plan = StudyPlan(
+                session_id=current_session_id,
+                major_id=selected_major_id,
+                plan_data=json.dumps(plan_data),
+                is_valid=False
+            )
+            db.session.add(study_plan)
         db.session.commit()
 
         # Enrich plan with unit details for frontend
@@ -243,63 +257,62 @@ def generate_initial_plan():
                     'requirement_type': mu.requirement_type
                 })
 
+                   
         # Get degree-specific general electives
-        degree_type = selected_major.degree.lower()
+        course_code = getattr(selected_major, 'course_code', None)  # ex) 'BP004'
         general_electives = []
 
-        if 'economics' in degree_type:
-            # Economics degrees - focus on economics, business, stats, math units
-            economics_prefixes = ['ECON', 'FINA', 'ACCT', 'MGMT', 'EMPL', 'STAT', 'MATH', 'WILG']
-            for prefix in economics_prefixes:
-                econ_units = Unit.query.filter(
-                    Unit.code.like(f'{prefix}%'),
-                    Unit.is_bridging == False,
-                    ~Unit.code.in_(units_in_plan)
-                ).limit(20).all()
-                for unit in econ_units:
-                    general_electives.append({
-                        'code': unit.code,
-                        'title': unit.title,
-                        'level': unit.level,
-                        'points': unit.points,
-                        'prerequisites': unit.prerequisites or '',
-                        'availabilities': unit.availabilities or '',
-                        'corequisites': unit.corequisites or '',
-                        'incompatibilities': unit.incompatibilities or ''
-                    })
-        else:
-            # Science degrees - focus on science units
-            science_prefixes = ['SCIE', 'BIOL', 'CHEM', 'PHYS', 'MATH', 'STAT', 'ENVS', 'GEOL', 'GEOG', 'AGRI', 'ANAT', 'PHYL', 'PCOL', 'GENET', 'MICR']
-            for prefix in science_prefixes:
-                science_units = Unit.query.filter(
-                    Unit.code.like(f'{prefix}%'),
-                    Unit.is_bridging == False,
-                    ~Unit.code.in_(units_in_plan)
-                ).limit(15).all()
-                for unit in science_units:
-                    general_electives.append({
-                        'code': unit.code,
-                        'title': unit.title,
-                        'level': unit.level,
-                        'points': unit.points
-                    })
+        q = Unit.query.filter(
+            Unit.is_bridging == False,
+            ~Unit.code.in_(units_in_plan),
+            Unit.electives.isnot(None),
+            Unit.electives != ''
+        )
 
-        # Remove duplicates and limit
-        seen_codes = set()
+        if course_code:
+            # Since electives are stored as comma-separated values like ‘BP001,BP004,...’, use LIKE with 4 patterns for safe matching
+            q = q.filter(or_(
+                Unit.electives == course_code,
+                Unit.electives.like(f'{course_code},%'),
+                Unit.electives.like(f'%,{course_code},%'),
+                Unit.electives.like(f'%,{course_code}')
+            ))
+
+        q = q.filter(
+            or_(
+                Unit.code.op('GLOB')('*1[0-9][0-9][0-9]'),
+                Unit.code.op('GLOB')('*2[0-9][0-9][0-9]'),
+                Unit.code.op('GLOB')('*3[0-9][0-9][0-9]')
+            )
+        )
+
+        # Sorting + Filtering
+        for unit in q.order_by(Unit.level.asc(), Unit.code.asc()).limit(1000).all():
+            general_electives.append({
+                'code': unit.code,
+                'title': unit.title,
+                'level': unit.level,
+                'points': unit.points,
+                'prerequisites': unit.prerequisites or '',
+                'availabilities': unit.availabilities or '',
+                'corequisites': unit.corequisites or '',
+                'incompatibilities': unit.incompatibilities or ''
+            })
+
+         # dedup
         unique_general_electives = []
-        for unit in general_electives:
-            if unit['code'] not in seen_codes:
-                seen_codes.add(unit['code'])
-                unique_general_electives.append(unit)
-
-        # Sort by level then alphabetically
-        unique_general_electives.sort(key=lambda x: (x['level'], x['code']))
+        seen_codes = set()
+        for u in general_electives:
+            code = u.get('code')
+            if code and code not in seen_codes:
+                unique_general_electives.append(u)
+                seen_codes.add(code)
 
         return jsonify({
             'plan': plan_data,  # Keep original for compatibility
             'enriched_plan': enriched_plan,  # Add enriched version
             'major_electives': unused_major_electives,
-            'general_electives': unique_general_electives[:50],  # Limit to 50
+            'general_electives': unique_general_electives[:1000],  # Limit to 1000
             'major': {
                 'code': selected_major.code,
                 'name': selected_major.name,
@@ -344,26 +357,210 @@ def validate_study_plan():
 def get_available_units():
     """Get list of available units for drag and drop"""
     try:
-        # Get units that are not bridging units
-        units = Unit.query.filter_by(is_bridging=False).all()
-        units_list = []
+        course_code = None
+        used_units = set()
 
-        for unit in units:
-            units_list.append({
-                'code': unit.code,
-                'title': unit.title,
-                'level': unit.level,
-                'points': unit.points,
-                'availabilities': unit.availabilities,
-                'prerequisites': unit.prerequisites,
-                'corequisites': unit.corequisites,
-                'incompatibilities': unit.incompatibilities
-            })
+        # Reading the study_plan in the session
+        session_id = session.get('session_id')
+        if session_id:
+            sp = StudyPlan.query.filter_by(session_id=session_id).order_by(StudyPlan.id.desc()).first()
+            if sp:
+                # major → course_code
+                if getattr(sp.major, 'course_code', None):
+                    course_code = sp.major.course_code
+                # Collect all unit codes currently within plan_data
+                if sp.plan_data:
+                    plan = json.loads(sp.plan_data)
+                    for sem_units in plan.values():
+                        used_units.update(sem_units)
 
-        return jsonify({'units': units_list})
+        # Basic query: non-bridging
+        base_q = Unit.query.filter(Unit.is_bridging == False)
+
+        # Level Filter: Only courses starting at Levels 1, 2, 3
+        base_q = Unit.query.filter(
+            Unit.is_bridging == False,
+            or_(
+                Unit.code.like('____1%'),
+                Unit.code.like('____2%'),
+                Unit.code.like('____3%')
+            )
+        )
+
+        # course_code electives fillter
+        if course_code:
+            base_q = base_q.filter(
+                Unit.electives.isnot(None),
+                Unit.electives != ''
+            ).filter(or_(
+                Unit.electives == course_code,
+                Unit.electives.like(f'{course_code},%'),
+                Unit.electives.like(f'%,{course_code},%'),
+                Unit.electives.like(f'%,{course_code}')
+            ))
+
+        # Exclude subjects already in the Plan
+        if used_units:
+            base_q = base_q.filter(~Unit.code.in_(used_units))
+
+        # Import after sorting
+        units = base_q.order_by(Unit.level.asc(), Unit.code.asc()).all()
+
+        units_list = [{
+            'code': u.code,
+            'title': u.title,
+            'level': u.level,
+            'points': u.points,
+            'availabilities': u.availabilities,
+            'prerequisites': u.prerequisites,
+            'corequisites': u.corequisites,
+            'incompatibilities': u.incompatibilities
+        } for u in units]
+
+        # 1) Major electives (units from the major's ‘option’ category not yet included in the plan)
+        major_electives = []
+        if sp and sp.major_id:
+            mu_rows = MajorUnit.query.filter_by(major_id=sp.major_id, requirement_type='option').all()
+            for mu in mu_rows:
+                u = mu.unit
+                if (not u.is_bridging) and (u.code not in used_units) and u.level in (1,2,3):
+                    major_electives.append({
+                        'code': u.code, 'title': u.title, 'level': u.level,
+                        'points': u.points, 'prerequisites': u.prerequisites or '',
+                        'availabilities': u.availabilities or '',
+                        'corequisites': u.corequisites or '', 'incompatibilities': u.incompatibilities or ''
+                    })
+
+        # 2) General electives
+        base_q = Unit.query.filter(
+            Unit.is_bridging == False,
+            Unit.level.in_([1,2,3])
+        )
+        if course_code:
+            base_q = base_q.filter(
+                Unit.electives.isnot(None),
+                Unit.electives != ''
+            ).filter(or_(
+                Unit.electives == course_code,
+                Unit.electives.like(f'{course_code},%'),
+                Unit.electives.like(f'%,{course_code},%'),
+                Unit.electives.like(f'%,{course_code}')
+            ))
+        if used_units:
+            base_q = base_q.filter(~Unit.code.in_(used_units))
+
+        general_electives = [{
+            'code': u.code, 'title': u.title, 'level': u.level, 'points': u.points,
+            'prerequisites': u.prerequisites or '', 'availabilities': u.availabilities or '',
+            'corequisites': u.corequisites or '', 'incompatibilities': u.incompatibilities or ''
+        } for u in base_q.order_by(Unit.level.asc(), Unit.code.asc()).all()]
+
+        # 3) Major core
+        major_core = []
+        if sp and sp.major_id:
+            mu_rows = MajorUnit.query.filter_by(major_id=sp.major_id, requirement_type='core').all()
+            for mu in mu_rows:
+                u = mu.unit
+                if (not u.is_bridging) and (u.code not in used_units) and (u.level in (1,2,3)):
+                    major_core.append({
+                        'code': u.code, 'title': u.title, 'level': u.level, 'points': u.points,
+                        'prerequisites': u.prerequisites or '', 'availabilities': u.availabilities or '',
+                        'corequisites': u.corequisites or '', 'incompatibilities': u.incompatibilities or ''
+                    })
+
+        return jsonify({
+            'major_core': major_core,
+            'major_electives': major_electives,
+            'general_electives': general_electives
+        })
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+   
+
+def save_current_plan():
+    try:
+        data = request.get_json() or {}
+        session_id = session.get('session_id')
+        if not session_id:
+            return jsonify({'error': 'No session'}), 400
+
+        # Unify using the latest record
+        sp = (StudyPlan.query
+              .filter_by(session_id=session_id)
+              .order_by(StudyPlan.id.desc())
+              .first())
+
+        if not sp:
+            sp = StudyPlan(session_id=session_id, plan_data=json.dumps(data.get('plan', {})))
+            db.session.add(sp)
+        else:
+            sp.plan_data = json.dumps(data.get('plan', {}))
+
+        db.session.commit()
+        return jsonify({'ok': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+
+def get_general_electives():
+    try:
+        session_id = session.get('session_id')
+        sp = StudyPlan.query.filter_by(session_id=session_id).first()
+        if not sp:
+            return jsonify({'general_electives': []})
+
+        # Excluding units already included in the current plan
+        plan = json.loads(sp.plan_data or '{}')
+        units_in_plan = {c for _, codes in plan.items() for c in codes}
+
+        # Resident course_code ↔ Unit.electives matching
+        course_code = getattr(sp.major, 'course_code', None)
+        q = Unit.query.filter(
+            Unit.is_bridging == False,
+            ~Unit.code.in_(units_in_plan),
+            Unit.electives.isnot(None),
+            Unit.electives != ''
+        )
+        if course_code:
+            q = q.filter(or_(
+                Unit.electives == course_code,
+                Unit.electives.like(f'{course_code},%'),
+                Unit.electives.like(f'%,{course_code},%'),
+                Unit.electives.like(f'%,{course_code}')
+            ))
+
+        # Only those with the ‘first digit’ of the subject code being 1/2/3
+        q = q.filter(or_(
+            Unit.code.op('GLOB')('*1[0-9][0-9][0-9]'),
+            Unit.code.op('GLOB')('*2[0-9][0-9][0-9]'),
+            Unit.code.op('GLOB')('*3[0-9][0-9][0-9]')
+        )).order_by(Unit.level.asc(), Unit.code.asc())
+
+        general = [{
+            'code': u.code,
+            'title': u.title,
+            'level': u.level,
+            'points': u.points,
+            'prerequisites': u.prerequisites or '',
+            'availabilities': u.availabilities or '',
+            'corequisites': u.corequisites or '',
+            'incompatibilities': u.incompatibilities or ''
+        } for u in q.all()]
+
+        # dedup → unique_general_electives
+        seen, unique = set(), []
+        for item in general:
+            c = item['code']
+            if c not in seen:
+                seen.add(c)
+                unique.append(item)
+
+        return jsonify({'general_electives': unique})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 def export_plan_to_pdf():
     """Export the current study plan to PDF"""

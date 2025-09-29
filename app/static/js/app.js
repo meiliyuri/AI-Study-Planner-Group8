@@ -80,6 +80,7 @@ function setupDragAndDrop() {
                     updateDropZone(evt.from);
                     // Check if any remaining units depend on the removed unit
                     checkDependentUnitsAfterRemoval(removedUnitCode);
+                    savePlan().then(() => refreshAvailableUnits());
                 }
             });
             sortableInstances.push(sortable);
@@ -104,6 +105,7 @@ function setupDragAndDrop() {
                 updateAvailableUnitsFilter();
                 checkDependentUnitsAfterRemoval(removedUnitCode);
                 validatePlan();
+                savePlan().then(() => refreshAvailableUnits());
             }
         });
     }
@@ -126,6 +128,7 @@ function setupDragAndDrop() {
                 checkDependentUnitsAfterRemoval(removedUnitCode);
                 validatePlan();
                 updateValidationStatus('Unit removed from plan', 'success');
+                savePlan().then(() => refreshAvailableUnits());
             }
         });
     }
@@ -275,6 +278,9 @@ function handleUnitMove(evt) {
 
     // Apply visual validation to all units in the plan
     validateAndHighlightAllUnits();
+
+    // After saving is complete, reload the Available Units to the latest state.
+    savePlan().then(() => refreshAvailableUnits());
 }
 
 
@@ -680,14 +686,28 @@ function loadAvailableUnits() {
         });
 }
 
-function displayAvailableUnits(units) {
-    const container = $('#available-units');
-    container.empty();
+// displayAvailableUnits can handle both arrays (old) and sections (new).
+function displayAvailableUnits(payload) {
+  const $wrap = $('#available-units');
+  $wrap.empty();
 
-    units.forEach(unit => {
-        const unitCard = createUnitCard(unit.code, unit);
-        container.append(unitCard);
-    });
+  const core    = payload.major_core || [];
+  const major   = payload.major_electives || payload.major || [];
+  const general = payload.general_electives || payload.general || payload.units || [];
+
+  renderSection($wrap, 'MAJOR CORE', core);
+  renderSection($wrap, 'MAJOR ELECTIVES',     major);
+  renderSection($wrap, 'GENERAL ELECTIVES',   general);
+}
+
+function renderSection($wrap, headerText, units) {
+  if (!units || !units.length) return;
+  //  The header class is the same as the one used in updateSectionHeaders().
+  $wrap.append(`<div class="unit-section-header"><h6>${headerText}</h6></div>`);
+  units.forEach(u => {
+    // makeUnitCard(X) → createUnitCard(O)
+    $wrap.append(createUnitCard(u.code, u));
+  });
 }
 
 function displayCategorizedUnits(majorElectives, generalElectives) {
@@ -770,7 +790,6 @@ function updateSectionHeaders() {
         }
     });
 }
-
 
 function filterUnits(searchTerm) {
     const term = searchTerm.toLowerCase();
@@ -1287,3 +1306,35 @@ function aiChatMessage(message) {
         $('#debug-log').prepend(errorEntry);
     });
 }
+
+
+function savePlan() {
+  const plan = getCurrentPlan();
+  return fetch('/api/plan/save', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ plan })
+  }).then(r => r.json());
+}
+
+function refreshAvailableUnits() {
+  return $.get('/api/units')
+    .done(function(data) {
+      // allUnitsData also updated (verification metadata retained)
+      const merged = [...(data.major_electives || []), ...(data.general_electives || [])];
+      merged.forEach(unit => {
+        const i = allUnitsData.findIndex(x => x.code === unit.code);
+        if (i >= 0) allUnitsData[i] = unit; else allUnitsData.push(unit);
+      });
+
+      displayAvailableUnits(data);
+      updateAvailableUnitsFilter();
+    })
+    .fail(function(){ showError('Failed to load available units'); });
+}
+
+// To prevent too frequent calls
+const saveAndRefresh = _.debounce(() => {
+  savePlan().then(() => refreshAvailableUnits());
+}, 250);
+

@@ -82,3 +82,11 @@ def import_data():
 @app.route('/api/admin/clear_cache', methods=['POST'])
 def clear_cache():
     return controller.clear_plan_cache()
+
+@app.route('/api/plan/save', methods=['POST'])
+def save_plan():
+    return controller.save_current_plan()
+
+@app.route('/api/electives', methods=['GET'])
+def get_electives():
+    return controller.get_general_electives()
