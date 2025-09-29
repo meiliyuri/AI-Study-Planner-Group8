@@ -22,25 +22,70 @@ An AI-powered Flask web application that helps university students plan their de
 ## Project Structure
 
 ```bash
-AI-Study-Planner-Group8-ZacharyBaker5.2/
-├── app/
-│   ├── __init__.py          # Flask app initialization
-│   ├── models.py            # Database models
-│   ├── routes.py            # API routes
-│   ├── controller.py        # Business logic and AI integration
-│   ├── templates/           # HTML templates
-│   │   ├── base.html
-│   │   ├── index.html
-│   │   └── admin.html
-│   └── static/              # CSS, JS, and other static files
-│       ├── css/
-│       └── js/
-├── Reference_Material/      # Original data files and documentation
-│   └── Essential_Data/      # CSV and XLSX course data
-├── app.py                   # Application entry point
-├── config.py                # Configuration settings
-├── requirements.txt         # Python dependencies
-└── README.md               # This file
+AI-Study-Planner-Group8
+│   .env
+│   .gitignore
+│   app.py
+│   check_prerequisites.py
+│   CODE_OF_CONDUCT.md
+│   data_loader.py
+│   README.md
+│   requirements.txt
+│
+├───app
+│   │   controller.py
+│   │   models.py
+│   │   routes.py
+│   │   __init__.py
+│   │
+│   ├───static
+│   │   ├───css
+│   │   │       contact.css
+│   │   │       faq.css
+│   │   │       home.css
+│   │   │       planner.css
+│   │   │       style.css
+│   │   │
+│   │   ├───images
+│   │   │       uwa_logo.png
+│   │   │       
+│   │   └───js
+│   │           app.js
+│   │
+│   └───templates
+│           admin.html
+│           base.html
+│           contact.html
+│           faq.html
+│           home.html
+│           index.html
+│           planner.html
+│           settings.html
+│
+├───Reference_Material
+│   └───Essential_Data
+│           BP004 Bachelor of Science.pdf
+│           BP013 Bachelor of Economics.pdf
+│           MJD-AGBUS Agribusiness.pdf
+│           MJD-AGSCI Agricultural Science.pdf
+│           MJD-AGTEC Agricultural Technology.pdf
+│           MJD-ECNPF Economics.pdf
+│           MJD-FINEC Financial Economics.pdf
+│           Sequence export (MJD-ECNPF).xlsx
+│           Sequence export (MJD-FINEC).xlsx
+│           Sequence export MJD-AGBUS.xlsx
+│           Sequence export MJD-AGSCI.xlsx
+│           Sequence export MJD-AGTEC.xlsx
+│           Units with unit rules and availabilities.csv
+│           Units.csv
+│           XLSX_Structure_Analysis.md
+│
+└───tests
+        conftest.py
+        test_admin_db.py
+        test_advanced.py
+        test_basics.py
+        test_planner.py
 ```
 
 ## Instructions to Run the app
