@@ -180,7 +180,7 @@ function generateStudyPlan() {
 
             // Display categorized available units
             if (data.major_electives || data.general_electives) {
-                displayCategorizedUnits(data.major_electives || [], data.general_electives || []);
+                displayCategorizedUnits(data.major_electives || [], data.general_electives || [], data.missing_core_units || []);
             } else {
                 loadAvailableUnits();
             }
@@ -730,13 +730,22 @@ function renderSection($wrap, headerText, units) {
   });
 }
 
-function displayCategorizedUnits(majorElectives, generalElectives) {
-    const container = $('#available-units');
-    container.empty();
+function displayCategorizedUnits(majorElectives = [], generalElectives = [], missingCoreUnits = []) {
+  const container = $('#available-units');
+  container.empty();
+
+    // Add Major Core section
+    if (missingCoreUnits.length > 0) {
+        container.append('<div class="unit-section-header"><h6>Major Core</h6></div>');
+        missingCoreUnits.forEach(unit => {
+            const unitCard = createUnitCard(unit.code, unit);
+            container.append(unitCard);
+        });
+    }
 
     // Add Major Electives section
     if (majorElectives.length > 0) {
-        container.append('<div class="unit-section-header"><h6>Major Electives:</h6></div>');
+        container.append('<div class="unit-section-header"><h6>Major Electives</h6></div>');
         majorElectives.forEach(unit => {
             const unitCard = createUnitCard(unit.code, unit);
             container.append(unitCard);
@@ -745,7 +754,7 @@ function displayCategorizedUnits(majorElectives, generalElectives) {
 
     // Add General Electives section
     if (generalElectives.length > 0) {
-        container.append('<div class="unit-section-header mt-3"><h6>General Electives:</h6></div>');
+        container.append('<div class="unit-section-header mt-3"><h6>General Electives</h6></div>');
         generalElectives.forEach(unit => {
             const unitCard = createUnitCard(unit.code, unit);
             container.append(unitCard);
@@ -753,19 +762,16 @@ function displayCategorizedUnits(majorElectives, generalElectives) {
     }
 
     // Store for filtering
-    availableUnits = [...majorElectives, ...generalElectives];
+    availableUnits = [...missingCoreUnits, ...majorElectives, ...generalElectives];
 
     // Add available units to allUnitsData as well
-    [...majorElectives, ...generalElectives].forEach(unit => {
-        const existingIndex = allUnitsData.findIndex(existing => existing.code === unit.code);
-        if (existingIndex >= 0) {
-            // Update existing record with complete data
-            allUnitsData[existingIndex] = unit;
-        } else {
-            // Add new unit
-            allUnitsData.push(unit);
-        }
+    [...missingCoreUnits, ...majorElectives, ...generalElectives].forEach(unit => {
+        const i = allUnitsData.findIndex(existing => existing.code === unit.code);
+        if (i >= 0) allUnitsData[i] = unit; else allUnitsData.push(unit);
     });
+
+    // Hide subjects already in the plan” reflected
+    updateAvailableUnitsFilter();
 }
 
 function updateAvailableUnitsFilter() {
