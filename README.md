@@ -71,7 +71,7 @@ pip install -r requirements.txt
 
 2. **Set a real API key**:
 
-- If you are a team member: copt the **config.py** file from FILES in Teams in to the root of the project folder. Otherwise, contact the devoplement team for assistance.
+- If you are a team member: copy the **config.py** file from FILES in Teams in to the root of the project folder. Otherwise, contact the devoplement team for assistance.
 - Important: **DO NOT** force syncing `config.py`(in `.gitignore` file already) to GitHub. It contains a real API key which will be deactivated if leaked.
 
 3. **Initialise the DB and start the app**:
@@ -145,6 +145,5 @@ Uses a multi-step AI pipeline:
 
 - BUG: AI Quality Check is missing the "or equivalent" part of the ECON1111 prerequisite
 - Research: Not every Ai generated plan is compliant, look at ways to improve the success rate without moving more logic to the code
-- Improvement: The Ai Quality Check should probably have a red/yellow/green indicator if the plan is valid, so students know the Quality Score is not saying the plan is invalid
 - Improvement: The plans must be cached to be cost effective, each call is 10-20c. Implement caching of base plans in to the DB.
 - Improvement: Consider a two-stage build process which pipelines the first generation in to the Ai Validate Plan, and then re-generates the plan, to achieve a better percentage of valid outcomes. This may be part of the Research point above.
