@@ -71,7 +71,7 @@ pip install -r requirements.txt
 
 2. **Set a real API key**:
 
-- If you are a team member: copt the **config.py** file from FILES in Teams in to the root of the project folder. Otherwise, contact the devoplement team for assistance.
+- If you are a team member: copy the **config.py** file from FILES in Teams in to the root of the project folder. Otherwise, contact the devoplement team for assistance.
 - Important: **DO NOT** force syncing `config.py`(in `.gitignore` file already) to GitHub. It contains a real API key which will be deactivated if leaked.
 
 3. **Initialise the DB and start the app**:
