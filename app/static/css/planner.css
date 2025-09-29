@@ -1,0 +1,423 @@
+/* AI Study Planner Styles */
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    height: 60px;
+}
+
+/* Navbar custom */
+.navbar-custom {
+    background-color: #00008B;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    height: 80px;
+    /* Increased height */
+}
+
+.logo-img {
+    width: 80px;
+    height: auto;
+    max-height: 60px;
+}
+
+/* Study Plan Grid */
+.semester-container {
+    margin-bottom: 20px;
+    border: 1px solid #dc3545;
+    border-radius: 8px;
+    background: white;
+}
+
+.semester-container h6 {
+    background: #e9ecef;
+    margin: 0;
+    padding: 10px 15px;
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+    color: #495057;
+}
+
+.semester-units {
+    min-height: 120px;
+    padding: 10px;
+    position: relative;
+}
+
+.drop-zone {
+    color: #6c757d;
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    border: 2px dashed #dee2e6;
+    border-radius: 4px;
+    background: #f8f9fa;
+}
+
+.semester-units.has-units .drop-zone {
+    display: none;
+}
+
+/* Trash Zone */
+.trash-zone {
+    border: 2px dashed #dc3545;
+    border-radius: 8px;
+    background: #fff5f5;
+    padding: 15px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.trash-zone:hover {
+    background: #ffe6e6;
+    border-color: #c82333;
+}
+
+.trash-zone.drag-over {
+    background: #ffcccc;
+    border-color: #a71e2a;
+    transform: scale(1.02);
+}
+
+.trash-content {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+.trash-content i {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+/* Validation Status Styles */
+.validation-success {
+    color: #28a745;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.validation-error {
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.validation-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+/* listing validation erros */
+#validation-status .validation-list { margin: 6px 0 0 18px; }
+
+
+/* Unit Section Headers */
+.unit-section-header {
+    margin-top: 15px;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #007bff;
+}
+
+.unit-section-header h6 {
+    margin: 0;
+    color: #007bff;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.unit-section-header:first-child {
+    margin-top: 0;
+}
+
+/* Unit Cards */
+.unit-card {
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin: 2px 0;
+    cursor: grab;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.unit-card:hover {
+    border-color: #007bff;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.25);
+}
+
+.unit-card.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.unit-code {
+    font-weight: 600;
+    color: #007bff;
+}
+
+.unit-title {
+    font-size: 0.9em;
+    color: #6c757d;
+    flex-grow: 1;
+    margin-left: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.unit-level {
+    font-size: 0.8em;
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: white;
+    font-weight: 500;
+}
+
+.unit-level.level-1 {
+    background-color: #28a745;
+}
+
+.unit-level.level-2 {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.unit-level.level-3 {
+    background-color: #dc3545;
+}
+
+/* Available Units Panel */
+.units-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.unit-card.available {
+    cursor: pointer;
+    margin-bottom: 4px;
+}
+
+.unit-card.available:hover {
+    background-color: #f8f9fa;
+}
+
+/* Validation Status */
+.validation-success {
+    color: #28a745;
+    border: 1px solid #28a745;
+    background-color: #d4edda;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.validation-error {
+    color: #dc3545;
+    border: 1px solid #dc3545;
+    background-color: #f8d7da;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.validation-warning {
+    color: #856404;
+    border: 1px solid #ffc107;
+    background-color: #fff3cd;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+/* Debug Output */
+.debug-output {
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85em;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+
+.debug-output .debug-entry {
+    margin-bottom: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.debug-timestamp {
+    color: #6c757d;
+    font-size: 0.8em;
+}
+
+/* Sortable Styles */
+.sortable-ghost {
+    opacity: 0.4;
+}
+
+.sortable-chosen {
+    background-color: #e3f2fd !important;
+}
+
+.sortable-drag {
+    background-color: #bbdefb !important;
+}
+
+/* Semester Capacity Indicator */
+.semester-full {
+    border-color: #28a745;
+}
+
+.semester-full .drop-zone {
+    background-color: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .semester-container {
+        margin-bottom: 15px;
+    }
+
+    .unit-title {
+        display: none;
+    }
+
+    .col-md-4 {
+        margin-top: 20px;
+    }
+}
+
+/* Admin Panel Styles */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.badge {
+    font-size: 0.8em;
+}
+
+/* Unit Search */
+#unit-search {
+    margin-bottom: 10px;
+}
+
+.unit-card.hidden {
+    display: none !important;
+}
+
+/* Plan Summary */
+.plan-summary {
+    background: #e9ecef;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.plan-summary .stat {
+    display: inline-block;
+    margin-right: 20px;
+}
+
+.plan-summary .stat-number {
+    font-weight: 600;
+    color: #007bff;
+}
+
+/* Semester Validation Indicators */
+.semester-container.invalid {
+    border-color: #dc3545;
+}
+
+.semester-container.warning {
+    border-color: #ffc107;
+}
+
+.semester-container.valid {
+    border-color: #28a745;
+}
+
+/* Unit Constraint Violations */
+.unit-card.constraint-error {
+    border-color: #dc3545 !important;
+    background-color: #f8d7da;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.unit-card.constraint-warning {
+    border-color: #ffc107 !important;
+    background-color: #fff3cd;
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+
+.unit-card.constraint-valid {
+    border-color: #28a745 !important;
+    background-color: #d4edda;
+}
+
+/* Constraint violation tooltip */
+.unit-card[data-constraint-message] {
+    position: relative;
+    cursor: help;
+}
+
+.unit-card[data-constraint-message]:hover::after {
+    content: attr(data-constraint-message);
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    font-size: 0.8em;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.unit-card[data-constraint-message]:hover::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    pointer-events: none;
+}

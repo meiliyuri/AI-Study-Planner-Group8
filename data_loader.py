@@ -100,6 +100,7 @@ def load_units_with_rules_csv():
         prerequisites = clean_field(row.get('prereqs', ''))
         corequisites = clean_field(row.get('coreqs', ''))
         incompatibilities = clean_field(row.get('incompatible', ''))
+        electives = clean_field(row.get('electives', ''))
 
         # Check if it's a bridging unit
         is_bridging = unit_code in BRIDGING_UNITS
@@ -111,6 +112,7 @@ def load_units_with_rules_csv():
             unit.prerequisites = prerequisites
             unit.corequisites = corequisites
             unit.incompatibilities = incompatibilities
+            unit.electives = electives
             unit.is_bridging = is_bridging
             updated_count += 1
         else:
@@ -123,6 +125,7 @@ def load_units_with_rules_csv():
                 prerequisites=prerequisites,
                 corequisites=corequisites,
                 incompatibilities=incompatibilities,
+                electives=electives,
                 is_bridging=is_bridging
             )
             db.session.add(unit)
@@ -131,7 +134,7 @@ def load_units_with_rules_csv():
     db.session.commit()
     print(f"Updated {updated_count} valid units with rules and availability data")
 
-def load_major_sequence_xlsx(file_path, major_code, major_name, degree):
+def load_major_sequence_xlsx(file_path, major_code, major_name, degree, course_code):
     """Load major sequence from XLSX file"""
     if not os.path.exists(file_path):
         print(f"File not found: {file_path}")
@@ -147,7 +150,7 @@ def load_major_sequence_xlsx(file_path, major_code, major_name, degree):
         # Create or get major
         major = Major.query.filter_by(code=major_code).first()
         if not major:
-            major = Major(code=major_code, name=major_name, degree=degree)
+            major = Major(code=major_code, name=major_name, degree=degree, course_code=course_code)
             db.session.add(major)
             db.session.flush()  # Get the ID
 
@@ -169,16 +172,26 @@ def load_major_sequence_xlsx(file_path, major_code, major_name, degree):
                 continue
 
 
-            # Determine requirement type from curriculum column
-            requirement_type = 'option'  # default
-            if f'{major_code}' in curriculum and 'as core' in curriculum:
-                requirement_type = 'core'
-            elif f'{major_code}' in curriculum and 'as option' in curriculum:
-                requirement_type = 'option'
-            elif f'{major_code}' in curriculum and 'as bridging' in curriculum:
-                requirement_type = 'bridging'
-            else:
-                continue  # Skip if not related to this major
+            # Split into segments (;), then evaluate only the syntax containing the specified major_code
+            curriculum = str(row.get('Curriculum', '') or '')
+            segments = [seg.strip() for seg in curriculum.split(';') if seg.strip()]
+
+            requirement_type = None
+            for seg in segments:
+                if major_code in seg:
+                    s = seg.lower()
+                    if 'as bridging' in s:
+                        requirement_type = 'bridging'
+                        break
+                    if 'as core' in s:
+                        requirement_type = 'core'
+                        break
+                    if 'as option' in s:
+                        requirement_type = 'option'
+                        break
+
+            if not requirement_type: # Activities unrelated to this major → Skip
+                continue
 
             # Check if relationship already exists
             existing = MajorUnit.query.filter_by(
@@ -205,15 +218,15 @@ def load_major_sequence_xlsx(file_path, major_code, major_name, degree):
 def load_all_majors():
     """Load all major sequence files"""
     major_files = [
-        ('Reference_Material/Essential_Data/Sequence export (MJD-ECNPF).xlsx', 'MJD-ECNPF', 'Economics', 'Bachelor of Economics'),
-        ('Reference_Material/Essential_Data/Sequence export (MJD-FINEC).xlsx', 'MJD-FINEC', 'Financial Economics', 'Bachelor of Economics'),
-        ('Reference_Material/Essential_Data/Sequence export MJD-AGBUS.xlsx', 'MJD-AGBUS', 'Agribusiness', 'Bachelor of Science'),
-        ('Reference_Material/Essential_Data/Sequence export MJD-AGSCI.xlsx', 'MJD-AGSCI', 'Agricultural Science', 'Bachelor of Science'),
-        ('Reference_Material/Essential_Data/Sequence export MJD-AGTEC.xlsx', 'MJD-AGTEC', 'Agricultural Technology', 'Bachelor of Science'),
+        ('Reference_Material/Essential_Data/Sequence export (MJD-ECNPF).xlsx', 'MJD-ECNPF', 'Economics', 'Bachelor of Economics', 'BP013'),
+        ('Reference_Material/Essential_Data/Sequence export (MJD-FINEC).xlsx', 'MJD-FINEC', 'Financial Economics', 'Bachelor of Economics', 'BP013'),
+        ('Reference_Material/Essential_Data/Sequence export MJD-AGBUS.xlsx', 'MJD-AGBUS', 'Agribusiness', 'Bachelor of Science', 'BP004'),
+        ('Reference_Material/Essential_Data/Sequence export MJD-AGSCI.xlsx', 'MJD-AGSCI', 'Agricultural Science', 'Bachelor of Science', 'BP004'),
+        ('Reference_Material/Essential_Data/Sequence export MJD-AGTEC.xlsx', 'MJD-AGTEC', 'Agricultural Technology', 'Bachelor of Science', 'BP004'),
     ]
 
-    for file_path, major_code, major_name, degree in major_files:
-        load_major_sequence_xlsx(file_path, major_code, major_name, degree)
+    for file_path, major_code, major_name, degree, course_code in major_files:
+        load_major_sequence_xlsx(file_path, major_code, major_name, degree, course_code)
 
 def initialize_database():
     """Initialize the database with all course data"""

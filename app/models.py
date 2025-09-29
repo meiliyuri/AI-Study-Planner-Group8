@@ -30,8 +30,12 @@ class Unit(db.Model):
     corequisites = db.Column(db.Text)    # Units to be taken simultaneously
     incompatibilities = db.Column(db.Text)  # Units that cannot be taken together
 
+    electives = db.Column(db.Text) # Elective groupings if applicable
+    
     # Special unit classification
     is_bridging = db.Column(db.Boolean, default=False)  # Bridging unit flag
+
+   
 
     def __repr__(self):
         """String representation of Unit object for debugging"""
@@ -54,9 +58,10 @@ class Major(db.Model):
     code = db.Column(db.String(20), unique=True, nullable=False, index=True)
     name = db.Column(db.String(100), nullable=False)
     degree = db.Column(db.String(50), nullable=False)
+    course_code = db.Column(db.String(20), nullable=True)
 
     def __repr__(self):
-        return f'<Major {self.code}: {self.name}>'
+        return f'<Major {self.code} ({self.course_code}): {self.name}>'
 
 class MajorUnit(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}UWA AI Study Planner - Home{% endblock %}
+
+{% block head %}
+<!-- Home page specific CSS -->
+<link href="{{ url_for('static', filename='css/home.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="text-center mb-5">
+            <h1 class="display-4">
+                <i class="fas fa-graduation-cap text-primary me-3"></i>
+                AI Study Planner
+            </h1>
+            <p class="lead">
+                Generate and customize your optimal study plan using artificial intelligence.
+                Select a degree program below to get started.
+            </p>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-university me-2"></i>
+                    Available Degree Programs
+                </h3>
+            </div>
+            <div class="card-body">
+                <div id="courses-container">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Loading degree programs...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4 bg-light shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle text-info me-2"></i>
+                    How it works
+                </h5>
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-robot fa-3x text-primary mb-3"></i>
+                        <h6>AI Generation</h6>
+                        <p class="small text-muted">
+                            Our AI analyzes course requirements and generates an optimal study plan
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-hand-paper fa-3x text-primary mb-3"></i>
+                        <h6>Drag & Drop</h6>
+                        <p class="small text-muted">
+                            Customize your plan by dragging units between semesters
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <i class="fas fa-check-circle fa-3x text-primary mb-3"></i>
+                        <h6>Real-time Validation</h6>
+                        <p class="small text-muted">
+                            Instant feedback ensures your plan meets all requirements
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadDegreePrograms();
+});
+
+function loadDegreePrograms() {
+    fetch('/api/majors')
+        .then(response => response.json())
+        .then(data => {
+            if (data.majors && data.majors.length > 0) {
+                displayDegreePrograms(data.majors);
+            } else {
+                displayNoPrograms();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading degree programs:', error);
+            displayError();
+        });
+}
+
+function displayDegreePrograms(majors) {
+    // Group majors by degree
+    const groupedPrograms = {};
+    majors.forEach(major => {
+        if (!groupedPrograms[major.degree]) {
+            groupedPrograms[major.degree] = [];
+        }
+        groupedPrograms[major.degree].push(major);
+    });
+
+    let html = '<div class="row">';
+
+    for (const [degree, programMajors] of Object.entries(groupedPrograms)) {
+        html += `
+            <div class="col-lg-6 col-md-12 mb-4">
+                <div class="card h-100 border-0 shadow-sm degree-program-card">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary mb-3">
+                            <i class="fas fa-award me-2"></i>
+                            ${degree}
+                        </h5>
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>3 years
+                                <i class="fas fa-graduation-cap ms-3 me-1"></i>144 credit points
+                                <i class="fas fa-users ms-3 me-1"></i>${programMajors.length} majors available
+                            </small>
+                        </div>
+                        <h6 class="mb-3">
+                            <i class="fas fa-star text-warning me-2"></i>
+                            Available Majors:
+                        </h6>
+                        <div class="major-buttons">`;
+
+        programMajors.forEach(major => {
+            html += `
+                <a href="/planner?major=${major.code}"
+                   class="btn btn-outline-primary btn-sm me-2 mb-2 major-btn">
+                    <i class="fas fa-calendar-alt me-1"></i>
+                    ${major.name}
+                </a>`;
+        });
+
+        html += `
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    html += '</div>';
+    document.getElementById('courses-container').innerHTML = html;
+}
+
+function displayNoPrograms() {
+    document.getElementById('courses-container').innerHTML = `
+        <div class="text-center py-5">
+            <i class="fas fa-database fa-3x text-muted mb-3"></i>
+            <h4>No degree programs available</h4>
+            <p class="text-muted">Please import course data through the admin panel.</p>
+            <a href="/admin" class="btn btn-primary">
+                <i class="fas fa-cog me-2"></i>Go to Admin
+            </a>
+        </div>`;
+}
+
+function displayError() {
+    document.getElementById('courses-container').innerHTML = `
+        <div class="text-center py-5">
+            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+            <h4>Error loading degree programs</h4>
+            <p class="text-muted">Please try refreshing the page or contact your administrator.</p>
+            <button onclick="loadDegreePrograms()" class="btn btn-primary">
+                <i class="fas fa-redo me-2"></i>Try Again
+            </button>
+        </div>`;
+}
+</script>
+
+
+{% endblock %}
+
+
