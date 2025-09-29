@@ -1,5 +1,7 @@
 {% extends "base.html" %}
-
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/planner.css') }}">
+{% endblock %}
 {% block content %}
 <div class="row">
     <!-- Study Plan Area -->
