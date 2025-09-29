@@ -80,6 +80,9 @@ function setupDragAndDrop() {
                     updateDropZone(evt.from);
                     // Check if any remaining units depend on the removed unit
                     checkDependentUnitsAfterRemoval(removedUnitCode);
+                    validatePlan();
+                    validateAndHighlightAllUnits();
+                    updateAllDropZones();
                     savePlan().then(() => refreshAvailableUnits());
                 }
             });
@@ -104,7 +107,10 @@ function setupDragAndDrop() {
                 evt.item.remove();
                 updateAvailableUnitsFilter();
                 checkDependentUnitsAfterRemoval(removedUnitCode);
+                updateDropZone(evt.from);
                 validatePlan();
+                validateAndHighlightAllUnits();
+                updateAllDropZones();
                 savePlan().then(() => refreshAvailableUnits());
             }
         });
@@ -126,7 +132,10 @@ function setupDragAndDrop() {
                 evt.item.remove();
                 updateAvailableUnitsFilter();
                 checkDependentUnitsAfterRemoval(removedUnitCode);
+                updateDropZone(evt.from);
                 validatePlan();
+                validateAndHighlightAllUnits();
+                updateAllDropZones();
                 updateValidationStatus('Unit removed from plan', 'success');
                 savePlan().then(() => refreshAvailableUnits());
             }
