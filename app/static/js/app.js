@@ -328,12 +328,10 @@ function validatePlan() {
             const issues = Array.isArray(data.errors) ? data.errors.slice() : [];
             const warns  = Array.isArray(data.warnings) ? data.warnings.slice() : [];
             
-            // Additional prerequisites check results
-            const prereqMessages = collectPrerequisiteWarnings();
-            prereqMessages.forEach(msg => {
-                if (msg.startsWith("❌")) issues.push(msg);
-                else warns.push(msg);
-            });
+           // Prerequisites + Availability Check Results Added
+            const { errors: constraintErrors, warnings: constraintWarnings } = collectConstraintResults();
+            issues.push(...constraintErrors);
+            warns.push(...constraintWarnings);
 
             // Backward compatibility:
             // Some server responses may only provide a "reason" string instead of arrays
@@ -1363,9 +1361,10 @@ const saveAndRefresh = _.debounce(() => {
   savePlan().then(() => refreshAvailableUnits());
 }, 250);
 
-// prerequisite inssue Collection Function
-function collectPrerequisiteWarnings() {
-    const prereqWarnings = [];
+// Collect both prerequisite & availability issues
+function collectConstraintResults() {
+    const errors = [];
+    const warnings = [];
 
     $('.semester-units').each(function() {
         const semester = $(this).data('semester');
@@ -1376,13 +1375,13 @@ function collectPrerequisiteWarnings() {
 
             if (!result.isValid) {
                 if (result.type === 'error') {
-                    prereqWarnings.push(`${result.message}`);
+                    errors.push(result.message);
                 } else if (result.type === 'warning') {
-                    prereqWarnings.push(`${result.message}`);
+                    warnings.push(result.message);
                 }
             }
         });
     });
 
-    return prereqWarnings;
+    return { errors, warnings };
 }
