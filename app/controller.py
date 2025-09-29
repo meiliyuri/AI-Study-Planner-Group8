@@ -242,20 +242,29 @@ def generate_initial_plan():
                     })
 
         # Calculate unused major electives
+        missing_core_units = []
         unused_major_electives = []
+
         for mu in major_unit_relationships:
-            if not mu.unit.is_bridging and mu.unit.code not in units_in_plan:
-                unused_major_electives.append({
-                    'code': mu.unit.code,
-                    'title': mu.unit.title,
-                    'level': mu.unit.level,
-                    'points': mu.unit.points,
-                    'prerequisites': mu.unit.prerequisites or '',
-                    'availabilities': mu.unit.availabilities or '',
-                    'corequisites': mu.unit.corequisites or '',
-                    'incompatibilities': mu.unit.incompatibilities or '',
-                    'requirement_type': mu.requirement_type
-                })
+            if mu.unit.is_bridging or mu.unit.code in units_in_plan:
+                continue
+
+            item = {
+                'code': mu.unit.code,
+                'title': mu.unit.title,
+                'level': mu.unit.level,
+                'points': mu.unit.points,
+                'prerequisites': mu.unit.prerequisites or '',
+                'availabilities': mu.unit.availabilities or '',
+                'corequisites': mu.unit.corequisites or '',
+                'incompatibilities': mu.unit.incompatibilities or '',
+                'requirement_type': mu.requirement_type
+            }
+
+            if mu.requirement_type == 'core':
+                missing_core_units.append(item)      
+            elif mu.requirement_type == 'option':
+                unused_major_electives.append(item)  
 
                    
         # Get degree-specific general electives
@@ -313,6 +322,7 @@ def generate_initial_plan():
             'enriched_plan': enriched_plan,  # Add enriched version
             'major_electives': unused_major_electives,
             'general_electives': unique_general_electives[:1000],  # Limit to 1000
+            'missing_core_units': missing_core_units,
             'major': {
                 'code': selected_major.code,
                 'name': selected_major.name,
@@ -334,7 +344,10 @@ def validate_study_plan():
             return jsonify({'error': 'Plan data and session required'}), 400
 
         # Get the current study plan
-        study_plan = StudyPlan.query.filter_by(session_id=session_id).first()
+        study_plan = (StudyPlan.query
+              .filter_by(session_id=session_id)
+              .order_by(StudyPlan.id.desc())
+              .first())
         if not study_plan:
             return jsonify({'error': 'No study plan found for session'}), 404
 
@@ -342,14 +355,44 @@ def validate_study_plan():
 
         # Validate the plan programmatically (don't use AI for counting!)
         validation_result = validate_plan_programmatically(plan_data)
+        critical_errors = validation_result.get("errors", [])
+        warnings = validation_result.get("warnings", [])
 
-        # Update the study plan
+        # Core unit validation 
+        core_units = MajorUnit.query.filter_by(
+            major_id=study_plan.major_id,
+            requirement_type='core'
+        ).all()
+        core_codes = {cu.unit.code for cu in core_units}
+
+        # flatten all plan units
+        plan_units = set()
+        for year in plan_data.values():
+            for unit_code in year:
+                if isinstance(unit_code, dict):
+                    plan_units.add(unit_code.get("code"))
+                else:
+                    plan_units.add(unit_code)
+
+        # find missing core units
+        missing_cores = core_codes - plan_units
+        if missing_cores:
+            for code in missing_cores:
+                critical_errors.append(
+                    f"{code} is a required core unit and must be included in the study plan"
+                )
+
+        # StudyPlan update
         study_plan.plan_data = json.dumps(plan_data)
-        study_plan.is_valid = validation_result.get('isValid', False)
-        study_plan.validation_errors = validation_result.get('reason', '')
+        study_plan.is_valid = len(critical_errors) == 0
+        study_plan.validation_errors = "; ".join(critical_errors)
         db.session.commit()
 
-        return jsonify(validation_result)
+        return jsonify({
+            "isValid": len(critical_errors) == 0,
+            "errors": critical_errors,
+            "warnings": warnings
+        })
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
