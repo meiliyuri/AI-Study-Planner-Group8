@@ -200,7 +200,7 @@ pytest -v
 * **Admin panel and database**: Connection status, system badges.
 * **Advanced features**: AI status badges, import logs, and validation messages.
 
-<img width="1142" height="506" alt="Screenshot 2025-09-29 204828" src="https://github.com/user-attachments/assets/190254e3-57ca-4f2c-8fcf-81e2d4cab127" />
+<img width="1146" height="531" alt="image" src="https://github.com/user-attachments/assets/bb89ade4-a63b-4b4b-a333-6d9ad7d35f78" />
 
 ## Data Structure
 
