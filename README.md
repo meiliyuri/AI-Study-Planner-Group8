@@ -1,5 +1,3 @@
-**Important**: API calls to Claude are expensive, at 5-15c per call. Please keep this in mind while testing, at least until a plan caching feature has been implemented. Plan generation takes 15-30 seconds.
-
 # AI Study Planner
 
 An AI-powered Flask web application that helps university students plan their degree programs with intelligent study plan generation and prerequisite validation.
@@ -92,9 +90,9 @@ python -m flask run
 
 ![Run the flask app](https://github.com/user-attachments/assets/4688c0dd-c3fe-4080-bed2-ccc15d8c63c1)
 
-4. **Visit**: http://127.0.0.1:5000
+4. **Visit**: <http://127.0.0.1:5000>
 
-![Web Demo](https://github.com/user-attachments/assets/2a487579-5d49-4541-8da1-496c114f1ebf)
+![Web Demo](https://github.com/user-attachments/assets/9cca92e0-1574-4b18-933b-ee7d65e316cb)
 
 ## FAQ
 
@@ -116,6 +114,7 @@ See the [FAQ page](http://127.0.0.1:5000/faq) in the web app for answers to comm
 ### Major Structure
 
 Each major contains:
+
 - **Mandatory units** (core): Must be completed
 - **Optional units** (electives): Choose from available options
 - **Bridging units**: Excluded from plans (CHEM1003, MATH1720, SCIE1500, ECON1111)
@@ -144,12 +143,8 @@ Uses a multi-step AI pipeline:
 
 ### Future Enhancements & Known Issues
 
-- BUG: Units pulled over from the Available Units who's pre-requisites are not met are not being flagged (turned yellow)
 - BUG: AI Quality Check is missing the "or equivalent" part of the ECON1111 prerequisite
 - Research: Not every Ai generated plan is compliant, look at ways to improve the success rate without moving more logic to the code
 - Improvement: The Ai Quality Check should probably have a red/yellow/green indicator if the plan is valid, so students know the Quality Score is not saying the plan is invalid
-- Improvement: The whole site is ready for a front-end enhancement, including the outputted PDF document
 - Improvement: The plans must be cached to be cost effective, each call is 10-20c. Implement caching of base plans in to the DB.
-- Improvement: Add chat function where AI Debug Log is to allow students to ask for unit advice, and add a feature to trigger a re-generation with their comments in the API call (i.e. please re-generate but with a focus on microeconomic units)
 - Improvement: Consider a two-stage build process which pipelines the first generation in to the Ai Validate Plan, and then re-generates the plan, to achieve a better percentage of valid outcomes. This may be part of the Research point above.
-- Improvement: Remove references to OpenAi and ChatGPT, we moved to Claude Opus Ai API, what's left are not in use
