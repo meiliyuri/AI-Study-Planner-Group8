@@ -185,6 +185,9 @@ function generateStudyPlan() {
                 loadAvailableUnits();
             }
 
+            validatePlan(); // Initial validation
+            validateAndHighlightAllUnits(); // Visual validation
+
             updateValidationStatus('Plan generated successfully', 'success');
             logDebug('Plan generated', data);
         },
@@ -352,7 +355,7 @@ function validatePlan() {
         },
         error: function() {
             // Handle network or server errors
-            updateValidationStatus('Validation failed due to a network/server error.', 'error');
+            updateValidationStatus(['Validation failed due to a network/server error.'], [], '');
         }
     });
 }
@@ -826,6 +829,10 @@ function updateValidationStatus(errors = [], warnings = [], successMessage = '')
     const $box = $('#validation-status');
     $box.removeClass('validation-success validation-error validation-warning');
     $box.empty();  
+
+    // Forced Array Guarantee
+    if (!Array.isArray(errors)) errors = errors ? [errors] : [];
+    if (!Array.isArray(warnings)) warnings = warnings ? [warnings] : [];
 
     // Errors
     if (errors.length > 0) {
