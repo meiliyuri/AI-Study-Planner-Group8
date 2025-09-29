@@ -2,6 +2,11 @@
 
 {% block title %}UWA AI Study Planner - Home{% endblock %}
 
+{% block head %}
+<!-- Home page specific CSS -->
+<link href="{{ url_for('static', filename='css/home.css') }}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 <div class="row">
     <div class="col-lg-8 mx-auto">
@@ -169,33 +174,7 @@ function displayError() {
 }
 </script>
 
-<style>
-.degree-program-card {
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    border-radius: 12px;
-}
 
-.degree-program-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
-}
-
-.major-btn {
-    transition: all 0.2s ease-in-out;
-    border-radius: 20px;
-}
-
-.major-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0,123,255,0.3);
-}
-
-.card-title i {
-    font-size: 1.2em;
-}
-
-.fa-3x {
-    opacity: 0.8;
-}
-</style>
 {% endblock %}
+
+
