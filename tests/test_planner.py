@@ -1,4 +1,12 @@
-
+def test_planner_page_loads(client):
+    """Check if the study planner page loads correctly."""
+    response = client.get('/planner')
+    assert response.status_code == 200
+    # Check that planner elements exist
+    assert b"Study Plan" in response.data
+    assert b"Available Units" in response.data
+    assert b"Plan Validation" in response.data
+    assert b"AI Debug Log" in response.data
 
 from bs4 import BeautifulSoup
 
