@@ -602,6 +602,24 @@ function validateAndHighlightAllUnits() {
             }
         });
     });
+
+    // apply border color at semester level (with unit count check)
+    $('.semester-container').each(function() {
+        const $semesterBox = $(this);
+        const unitCount = $semesterBox.find('.unit-card').length;   
+        const hasError = $semesterBox.find('.constraint-error').length > 0 || unitCount > 4;
+        const hasWarning = $semesterBox.find('.constraint-warning').length > 0;
+
+        $semesterBox.removeClass('invalid warning valid');
+
+        if (hasError) {
+            $semesterBox.addClass('invalid');   
+        } else if (hasWarning) {
+            $semesterBox.addClass('warning');  
+        } else {
+            $semesterBox.addClass('valid');    
+        }
+    });
 }
 
 function checkDependentUnitsAfterRemoval(removedUnitCode) {
