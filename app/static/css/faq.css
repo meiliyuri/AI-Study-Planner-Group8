@@ -1,0 +1,92 @@
+/* FAQ Section Styled Like Contact */
+.contact-section {
+  padding: 50px 30px;
+  max-width: 900px;
+  margin: 50px auto;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(20px);
+  border-radius: 25px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  color: #f1f1f1;
+  border: 1px solid rgba(255,255,255,0.15);
+  box-sizing: border-box;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+/* Section Header */
+.form-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.form-header h2 {
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  color: #00bfff;
+  margin-bottom: 10px;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(0, 191, 255, 0.5);
+  letter-spacing: 1px;
+}
+
+/* Individual FAQ Items */
+.faq {
+  background: rgba(0, 0, 139, 0.3);
+  border-left: 5px solid #00bfff;
+  padding: 20px 25px;
+  margin-bottom: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.3s ease;
+}
+
+/* Question text */
+.faq h3 {
+  font-size: 1.3rem;
+  color: #00ffff;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* Answer text hidden by default */
+.faq p {
+  font-size: 1rem;
+  color: #e0e0e0;
+  line-height: 1.6;
+  margin: 10px 0 0 0;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.5s ease, opacity 0.5s ease;
+}
+
+/* Reveal answer on hover */
+.faq:hover p {
+  max-height: 500px; /* enough to show answer */
+  opacity: 1;
+}
+
+/* Hover effect */
+.faq:hover {
+  transform: translateY(-3px);
+  background: rgba(0, 0, 139, 0.45);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .contact-section {
+    padding: 30px 20px;
+  }
+
+  .form-header h2 {
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+  }
+
+  .faq h3 {
+    font-size: 1.1rem;
+  }
+
+  .faq p {
+    font-size: 0.95rem;
+  }
+}
