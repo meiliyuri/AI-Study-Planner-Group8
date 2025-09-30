@@ -15,18 +15,35 @@
 
                     <form id="import-form" enctype="multipart/form-data">
                         <div class="mb-3">
-                            <label for="units-file" class="form-label">Units CSV File</label>
+                            <label for="units-file" class="form-label" style="color: #212529; font-weight: 600;">Units
+                                CSV File</label>
                             <input type="file" class="form-control" id="units-file" name="units_file" accept=".csv">
+                            <a href="{{ url_for('static', filename='templates/units_template.csv') }}"
+                                class="btn btn-link btn-sm" download>
+                                Download Units CSV Template
+                            </a>
                         </div>
 
                         <div class="mb-3">
-                            <label for="units-rules-file" class="form-label">Units with Rules CSV File</label>
-                            <input type="file" class="form-control" id="units-rules-file" name="units_rules_file" accept=".csv">
+                            <label for="units-file" class="form-label" style="color: #212529; font-weight: 600;">Units
+                                CSV File</label>
+                            <input type="file" class="form-control" id="units-rules-file" name="units_rules_file"
+                                accept=".csv">
+                            <a href="{{ url_for('static', filename='templates/units_rules_template.csv') }}"
+                                class="btn btn-link btn-sm" download>
+                                Download Units Rules CSV Template
+                            </a>
                         </div>
 
                         <div class="mb-3">
-                            <label for="sequence-files" class="form-label">Major Sequence XLSX Files</label>
-                            <input type="file" class="form-control" id="sequence-files" name="sequence_files" multiple accept=".xlsx">
+                            <label for="sequence-files" class="form-label"
+                                style="color: #212529; font-weight: 600;">Major Sequence XLSX Files</label>
+                            <input type="file" class="form-control" id="sequence-files" name="sequence_files" multiple
+                                accept=".xlsx">
+                            <a href="{{ url_for('static', filename='templates/major_sequence_template.xlsx') }}"
+                                class="btn btn-link btn-sm" download>
+                                Download Major Sequence XLSX Template
+                            </a>
                         </div>
 
                         <button type="submit" class="btn btn-primary">Import Data</button>
@@ -89,64 +106,64 @@
 
 {% block scripts %}
 <script>
-$(document).ready(function() {
-    // Check system status
-    checkSystemStatus();
+    $(document).ready(function () {
+        // Check system status
+        checkSystemStatus();
 
-    // Handle data import
-    $('#import-form').on('submit', function(e) {
-        e.preventDefault();
-        importData();
-    });
-
-    // Handle cache clearing
-    $('#clear-cache').on('click', function() {
-        clearCache();
-    });
-});
-
-function checkSystemStatus() {
-    // Check database status
-    $.get('/api/admin/status')
-        .done(function(data) {
-            $('#db-status').removeClass('bg-secondary').addClass('bg-success').text('Connected');
-        })
-        .fail(function() {
-            $('#db-status').removeClass('bg-secondary').addClass('bg-danger').text('Error');
+        // Handle data import
+        $('#import-form').on('submit', function (e) {
+            e.preventDefault();
+            importData();
         });
 
-    // Check AI API status
-    $('#ai-status').removeClass('bg-secondary').addClass('bg-warning').text('Not Implemented');
-}
-
-function importData() {
-    const formData = new FormData($('#import-form')[0]);
-
-    $('#import-log').html('<div class="text-info">Starting import...</div>');
-
-    $.ajax({
-        url: '/api/admin/import_data',
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function(response) {
-            $('#import-log').append('<div class="text-success">Import completed successfully</div>');
-        },
-        error: function(xhr) {
-            $('#import-log').append('<div class="text-danger">Import failed: ' + xhr.responseJSON.error + '</div>');
-        }
-    });
-}
-
-function clearCache() {
-    $.post('/api/admin/clear_cache')
-        .done(function(response) {
-            alert('Cache cleared successfully');
-        })
-        .fail(function(xhr) {
-            alert('Failed to clear cache: ' + xhr.responseJSON.error);
+        // Handle cache clearing
+        $('#clear-cache').on('click', function () {
+            clearCache();
         });
-}
+    });
+
+    function checkSystemStatus() {
+        // Check database status
+        $.get('/api/admin/status')
+            .done(function (data) {
+                $('#db-status').removeClass('bg-secondary').addClass('bg-success').text('Connected');
+            })
+            .fail(function () {
+                $('#db-status').removeClass('bg-secondary').addClass('bg-danger').text('Error');
+            });
+
+        // Check AI API status
+        $('#ai-status').removeClass('bg-secondary').addClass('bg-warning').text('Not Implemented');
+    }
+
+    function importData() {
+        const formData = new FormData($('#import-form')[0]);
+
+        $('#import-log').html('<div class="text-info">Starting import...</div>');
+
+        $.ajax({
+            url: '/api/admin/import_data',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                $('#import-log').append('<div class="text-success">Import completed successfully</div>');
+            },
+            error: function (xhr) {
+                $('#import-log').append('<div class="text-danger">Import failed: ' + xhr.responseJSON.error + '</div>');
+            }
+        });
+    }
+
+    function clearCache() {
+        $.post('/api/admin/clear_cache')
+            .done(function (response) {
+                alert('Cache cleared successfully');
+            })
+            .fail(function (xhr) {
+                alert('Failed to clear cache: ' + xhr.responseJSON.error);
+            });
+    }
 </script>
 {% endblock %}
