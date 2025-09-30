@@ -15,14 +15,11 @@
                     </select>
                     <div>
                         <button id="generate-plan" class="btn btn-primary" disabled>Generate Plan</button>
-                        <button id="ai-validate-plan" class="btn btn-warning" disabled title="Comprehensive AI quality analysis">
+                        <button id="ai-validate-plan" class="btn btn-warning" disabled
+                            title="Comprehensive AI quality analysis">
                             <i class="fas fa-robot"></i> AI Validate Plan
-                        <span id="ai-status-indicator"
-                              class="badge rounded-pill ms-2"
-                              style="display:none;"></span>
-                        <span id="ai-status-indicator"
-                              class="badge rounded-pill ms-2"
-                              style="display:none;"></span>
+                            <span id="ai-status-indicator" class="badge rounded-pill ms-2" style="display:none;"></span>
+                            <span id="ai-status-indicator" class="badge rounded-pill ms-2" style="display:none;"></span>
                         </button>
                         <button id="export-pdf" class="btn btn-success" disabled>Export PDF</button>
                     </div>
@@ -44,7 +41,8 @@
                             <div class="col-md-6">
                                 <div class="semester-container">
                                     <h6>Semester 1</h6>
-                                    <div class="semester-units" id="Year 1, Semester 1" data-semester="Year 1, Semester 1">
+                                    <div class="semester-units" id="Year 1, Semester 1"
+                                        data-semester="Year 1, Semester 1">
                                         <div class="drop-zone">Drop units here (4 max)</div>
                                     </div>
                                 </div>
@@ -52,7 +50,8 @@
                             <div class="col-md-6">
                                 <div class="semester-container">
                                     <h6>Semester 2</h6>
-                                    <div class="semester-units" id="Year 1, Semester 2" data-semester="Year 1, Semester 2">
+                                    <div class="semester-units" id="Year 1, Semester 2"
+                                        data-semester="Year 1, Semester 2">
                                         <div class="drop-zone">Drop units here (4 max)</div>
                                     </div>
                                 </div>
@@ -67,7 +66,8 @@
                             <div class="col-md-6">
                                 <div class="semester-container">
                                     <h6>Semester 1</h6>
-                                    <div class="semester-units" id="Year 2, Semester 1" data-semester="Year 2, Semester 1">
+                                    <div class="semester-units" id="Year 2, Semester 1"
+                                        data-semester="Year 2, Semester 1">
                                         <div class="drop-zone">Drop units here (4 max)</div>
                                     </div>
                                 </div>
@@ -75,7 +75,8 @@
                             <div class="col-md-6">
                                 <div class="semester-container">
                                     <h6>Semester 2</h6>
-                                    <div class="semester-units" id="Year 2, Semester 2" data-semester="Year 2, Semester 2">
+                                    <div class="semester-units" id="Year 2, Semester 2"
+                                        data-semester="Year 2, Semester 2">
                                         <div class="drop-zone">Drop units here (4 max)</div>
                                     </div>
                                 </div>
@@ -90,7 +91,8 @@
                             <div class="col-md-6">
                                 <div class="semester-container">
                                     <h6>Semester 1</h6>
-                                    <div class="semester-units" id="Year 3, Semester 1" data-semester="Year 3, Semester 1">
+                                    <div class="semester-units" id="Year 3, Semester 1"
+                                        data-semester="Year 3, Semester 1">
                                         <div class="drop-zone">Drop units here (4 max)</div>
                                     </div>
                                 </div>
@@ -98,7 +100,8 @@
                             <div class="col-md-6">
                                 <div class="semester-container">
                                     <h6>Semester 2</h6>
-                                    <div class="semester-units" id="Year 3, Semester 2" data-semester="Year 3, Semester 2">
+                                    <div class="semester-units" id="Year 3, Semester 2"
+                                        data-semester="Year 3, Semester 2">
                                         <div class="drop-zone">Drop units here (4 max)</div>
                                     </div>
                                 </div>
@@ -137,7 +140,21 @@
                     </div>
                 </div>
 
-                <input type="text" id="unit-search" class="form-control form-control-sm mt-2" placeholder="Search units...">
+                <!-- Search Bar -->
+                <input type="text" id="unit-search" class="form-control form-control-sm mt-2"
+                    placeholder="Search units...">
+
+                <!-- Level filters -->
+                <div class="mt-2">
+                    <span class="level-label-title">Level:</span>
+                    <label class="level-filter-label"><input type="checkbox" class="level-filter" value="1" checked />
+                        L1</label>
+                    <label class="level-filter-label"><input type="checkbox" class="level-filter" value="2" checked />
+                        L2</label>
+                    <label class="level-filter-label"><input type="checkbox" class="level-filter" value="3" checked />
+                        L3</label>
+                </div>
+
             </div>
             <div class="card-body">
                 <div id="available-units" class="units-list">
@@ -158,8 +175,7 @@
             </div>
             <div class="card-footer">
                 <form id="ai-chat-form" class="d-flex">
-                    <input id="ai-chat-input" type="text" class="form-control me-2"
-                           placeholder="Ask AI">
+                    <input id="ai-chat-input" type="text" class="form-control me-2" placeholder="Ask AI">
                     <button type="submit" class="btn btn-primary">Send</button>
                 </form>
             </div>
@@ -187,37 +203,37 @@
 {% block scripts %}
 {% if selected_major %}
 <script>
-// Auto-select major and generate plan if a major was pre-selected
-$(document).ready(function() {
-    const selectedMajorCode = '{{ selected_major }}';
-    if (selectedMajorCode) {
-        // Wait for majors to load, then select the appropriate one
-        const checkMajorsLoaded = setInterval(function() {
-            const majorSelect = $('#major-select');
-            if (majorSelect.find('option').length > 1) { // More than just the default option
-                // Find the option with the matching major code
-                majorSelect.find('option').each(function() {
-                    const optionText = $(this).text();
-                    if (optionText.includes(selectedMajorCode)) {
-                        majorSelect.val($(this).val());
-                        majorSelect.trigger('change');
-                        // Auto-generate the plan
-                        setTimeout(function() {
-                            $('#generate-plan').click();
-                        }, 500);
-                        clearInterval(checkMajorsLoaded);
-                        return false;
-                    }
-                });
-            }
-        }, 100);
+    // Auto-select major and generate plan if a major was pre-selected
+    $(document).ready(function () {
+        const selectedMajorCode = '{{ selected_major }}';
+        if (selectedMajorCode) {
+            // Wait for majors to load, then select the appropriate one
+            const checkMajorsLoaded = setInterval(function () {
+                const majorSelect = $('#major-select');
+                if (majorSelect.find('option').length > 1) { // More than just the default option
+                    // Find the option with the matching major code
+                    majorSelect.find('option').each(function () {
+                        const optionText = $(this).text();
+                        if (optionText.includes(selectedMajorCode)) {
+                            majorSelect.val($(this).val());
+                            majorSelect.trigger('change');
+                            // Auto-generate the plan
+                            setTimeout(function () {
+                                $('#generate-plan').click();
+                            }, 500);
+                            clearInterval(checkMajorsLoaded);
+                            return false;
+                        }
+                    });
+                }
+            }, 100);
 
-        // Clear the interval after 10 seconds to avoid infinite checking
-        setTimeout(function() {
-            clearInterval(checkMajorsLoaded);
-        }, 10000);
-    }
-});
+            // Clear the interval after 10 seconds to avoid infinite checking
+            setTimeout(function () {
+                clearInterval(checkMajorsLoaded);
+            }, 10000);
+        }
+    });
 </script>
 {% endif %}
 {% endblock %}

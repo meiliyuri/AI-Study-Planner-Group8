@@ -93,7 +93,9 @@
 }
 
 /* listing validation erros */
-#validation-status .validation-list { margin: 6px 0 0 18px; }
+#validation-status .validation-list {
+    margin: 6px 0 0 18px;
+}
 
 
 /* Unit Section Headers */
@@ -302,7 +304,39 @@
 
 /* Unit Search */
 #unit-search {
+    height: 48px;
     margin-bottom: 10px;
+}
+
+/* Level Filter Styles */
+.level-filter+label,
+.level-filter-label {
+    color: #007bff;
+    font-weight: 500;
+    margin-right: 18px;
+    font-size: 1em;
+}
+
+.level-filter {
+    accent-color: #007bff;
+    /* Modern browsers: checkbox color */
+    margin-right: 6px;
+}
+
+/* For better spacing between each filter */
+.level-filter-label {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 18px;
+}
+
+/* Change color of "Level:" text and checkboxes */
+.level-filter-label,
+.level-filter-label strong,
+.level-filter-label span,
+.level-filter-label input,
+.level-label-title {
+    color: #007bff;
 }
 
 .unit-card.hidden {
