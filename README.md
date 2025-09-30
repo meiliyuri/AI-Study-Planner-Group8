@@ -86,6 +86,7 @@ AI-Study-Planner-Group8
         test_advanced.py
         test_basics.py
         test_planner.py
+        test_faq.py
 ```
 
 ## Instructions to Run the app
