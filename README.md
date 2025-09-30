@@ -22,25 +22,70 @@ An AI-powered Flask web application that helps university students plan their de
 ## Project Structure
 
 ```bash
-AI-Study-Planner-Group8-ZacharyBaker5.2/
-├── app/
-│   ├── __init__.py          # Flask app initialization
-│   ├── models.py            # Database models
-│   ├── routes.py            # API routes
-│   ├── controller.py        # Business logic and AI integration
-│   ├── templates/           # HTML templates
-│   │   ├── base.html
-│   │   ├── index.html
-│   │   └── admin.html
-│   └── static/              # CSS, JS, and other static files
-│       ├── css/
-│       └── js/
-├── Reference_Material/      # Original data files and documentation
-│   └── Essential_Data/      # CSV and XLSX course data
-├── app.py                   # Application entry point
-├── config.py                # Configuration settings
-├── requirements.txt         # Python dependencies
-└── README.md               # This file
+AI-Study-Planner-Group8
+│   .env
+│   .gitignore
+│   app.py
+│   check_prerequisites.py
+│   CODE_OF_CONDUCT.md
+│   data_loader.py
+│   README.md
+│   requirements.txt
+│
+├───app
+│   │   controller.py
+│   │   models.py
+│   │   routes.py
+│   │   __init__.py
+│   │
+│   ├───static
+│   │   ├───css
+│   │   │       contact.css
+│   │   │       faq.css
+│   │   │       home.css
+│   │   │       planner.css
+│   │   │       style.css
+│   │   │
+│   │   ├───images
+│   │   │       uwa_logo.png
+│   │   │       
+│   │   └───js
+│   │           app.js
+│   │
+│   └───templates
+│           admin.html
+│           base.html
+│           contact.html
+│           faq.html
+│           home.html
+│           index.html
+│           planner.html
+│           settings.html
+│
+├───Reference_Material
+│   └───Essential_Data
+│           BP004 Bachelor of Science.pdf
+│           BP013 Bachelor of Economics.pdf
+│           MJD-AGBUS Agribusiness.pdf
+│           MJD-AGSCI Agricultural Science.pdf
+│           MJD-AGTEC Agricultural Technology.pdf
+│           MJD-ECNPF Economics.pdf
+│           MJD-FINEC Financial Economics.pdf
+│           Sequence export (MJD-ECNPF).xlsx
+│           Sequence export (MJD-FINEC).xlsx
+│           Sequence export MJD-AGBUS.xlsx
+│           Sequence export MJD-AGSCI.xlsx
+│           Sequence export MJD-AGTEC.xlsx
+│           Units with unit rules and availabilities.csv
+│           Units.csv
+│           XLSX_Structure_Analysis.md
+│
+└───tests
+        conftest.py
+        test_admin_db.py
+        test_advanced.py
+        test_basics.py
+        test_planner.py
 ```
 
 ## Instructions to Run the app
@@ -71,7 +116,7 @@ pip install -r requirements.txt
 
 2. **Set a real API key**:
 
-- If you are a team member: copt the **config.py** file from FILES in Teams in to the root of the project folder. Otherwise, contact the devoplement team for assistance.
+- If you are a team member: copy the **config.py** file from FILES in Teams in to the root of the project folder. Otherwise, contact the devoplement team for assistance.
 - Important: **DO NOT** force syncing `config.py`(in `.gitignore` file already) to GitHub. It contains a real API key which will be deactivated if leaked.
 
 3. **Initialise the DB and start the app**:
@@ -93,6 +138,69 @@ python -m flask run
 4. **Visit**: <http://127.0.0.1:5000>
 
 ![Web Demo](https://github.com/user-attachments/assets/9cca92e0-1574-4b18-933b-ee7d65e316cb)
+
+## FAQ
+
+See the [FAQ page](http://127.0.0.1:5000/faq) in the web app for answers to common questions about speed, cost, accuracy, prerequisites, and exporting.
+
+## Contact Page
+
+If you encounter issues or have questions about the AI Study Planner, you can use the **Contact form** in the app:
+
+* **Visit**: [http://127.0.0.1:5000/contact](http://127.0.0.1:5000/contact)
+* Fill out the form with your **name**, **email**, and **message**.
+* Submit your query, and the development team will review it.
+
+This is the primary channel for reporting bugs, asking questions, or providing feedback while using the local development version of the app.
+
+## Running Tests
+
+To ensure everything is working correctly and all features are stable, the project includes automated tests for routes, the database, and planner functionality.
+
+### 1. Activate the Python environment
+
+Make sure you are in the project folder and your virtual environment is activated.
+
+**Windows:**
+
+```bash
+.\venv\Scripts\Activate
+```
+
+**macOS/Linux:**
+
+```bash
+source venv/bin/activate
+```
+
+### 2. Install test dependencies
+
+All required packages are included in `requirements.txt`, including `pytest` and `beautifulsoup4` (for HTML parsing in tests). If you haven’t installed them yet:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Run the tests
+
+From the project root folder, simply run:
+
+```bash
+pytest -v
+```
+
+* `-v` (verbose) shows each test’s status.
+* All tests should pass.
+* If any fail, carefully review the error message and make sure the environment is correctly set up.
+
+### 4. Test coverage areas
+
+* **Basic pages**: Home page, admin page, planner page.
+* **Planner functionality**: Buttons, major selection, plan generation.
+* **Admin panel and database**: Connection status, system badges.
+* **Advanced features**: AI status badges, import logs, and validation messages.
+
+<img width="1146" height="531" alt="image" src="https://github.com/user-attachments/assets/bb89ade4-a63b-4b4b-a333-6d9ad7d35f78" />
 
 ## Data Structure
 
@@ -140,6 +248,5 @@ Uses a multi-step AI pipeline:
 
 - BUG: AI Quality Check is missing the "or equivalent" part of the ECON1111 prerequisite
 - Research: Not every Ai generated plan is compliant, look at ways to improve the success rate without moving more logic to the code
-- Improvement: The Ai Quality Check should probably have a red/yellow/green indicator if the plan is valid, so students know the Quality Score is not saying the plan is invalid
 - Improvement: The plans must be cached to be cost effective, each call is 10-20c. Implement caching of base plans in to the DB.
 - Improvement: Consider a two-stage build process which pipelines the first generation in to the Ai Validate Plan, and then re-generates the plan, to achieve a better percentage of valid outcomes. This may be part of the Research point above.

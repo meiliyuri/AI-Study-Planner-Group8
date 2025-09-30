@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link href="{{ url_for('static', filename='css/contact.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<main class="content">
+  <div class="contact-section">
+    <div class="form-header">
+      <h2>Admin Login</h2>
+      <p>Enter your credentials to access the admin panel</p>
+    </div>
+
+    <form class="contact-form" id="admin-login-form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Enter username">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter password">
+      </div>
+
+      <button type="submit" class="submit-btn">Login</button>
+      <div id="login-message" class="login-message">Invalid credentials</div>
+    </form>
+  </div>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('admin-login-form').addEventListener('submit', function(e) {
+    e.preventDefault(); // prevent actual form submission
+    const message = document.getElementById('login-message');
+    message.style.display = 'block';
+    setTimeout(() => {
+        message.style.display = 'none';
+    }, 3000); // hide after 3 seconds
+});
+</script>
+{% endblock %}

@@ -8,21 +8,35 @@ from app import controller  # Controller functions for business logic
 import uuid  # UUID generation for session management
 
 @app.route('/')  # Root URL route
-@app.route('/index')  # Alternative index route
 def index():
-    """Main index page for AI Study Planner
+    """Homepage for AI Study Planner
 
-    Generates a unique session ID for user tracking and renders
-    the main application interface.
+    Shows available degree programs in an attractive layout.
 
     Returns:
-        HTML template: Main application page
+        HTML template: Homepage with degree program selection
+    """
+    return render_template('home.html', title_page="AI Study Planner")
+
+@app.route('/planner')  # Study planner interface
+def planner():
+    """Study planner interface for AI Study Planner
+
+    Generates a unique session ID for user tracking and renders
+    the main application interface. Optionally pre-selects a major
+    if specified in query parameters.
+
+    Returns:
+        HTML template: Study planner application page
     """
     # Generate a session ID if not exists - Flask session function
     if 'session_id' not in session:
         session['session_id'] = str(uuid.uuid4())  # Generate unique identifier
 
-    return render_template('index.html', title_page="AI Study Planner")
+    # Get pre-selected major from query parameters
+    selected_major = request.args.get('major', '')
+
+    return render_template('planner.html', title_page="Study Planner", selected_major=selected_major)
 
 @app.route('/api/majors', methods=['GET'])  # API endpoint for major data
 def get_majors():
@@ -75,6 +89,10 @@ def contact():
 def faq():
     return render_template('faq.html', title_page="FAQ's")
 
+@app.route('/settings')
+def settings():
+    return render_template('settings.html', title_page="Settings")
+
 @app.route('/api/admin/import_data', methods=['POST'])
 def import_data():
     return controller.import_course_data()
@@ -82,3 +100,11 @@ def import_data():
 @app.route('/api/admin/clear_cache', methods=['POST'])
 def clear_cache():
     return controller.clear_plan_cache()
+
+@app.route('/api/plan/save', methods=['POST'])
+def save_plan():
+    return controller.save_current_plan()
+
+@app.route('/api/electives', methods=['GET'])
+def get_electives():
+    return controller.get_general_electives()

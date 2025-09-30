@@ -80,6 +80,10 @@ function setupDragAndDrop() {
                     updateDropZone(evt.from);
                     // Check if any remaining units depend on the removed unit
                     checkDependentUnitsAfterRemoval(removedUnitCode);
+                    validatePlan();
+                    validateAndHighlightAllUnits();
+                    updateAllDropZones();
+                    savePlan().then(() => refreshAvailableUnits());
                 }
             });
             sortableInstances.push(sortable);
@@ -103,7 +107,11 @@ function setupDragAndDrop() {
                 evt.item.remove();
                 updateAvailableUnitsFilter();
                 checkDependentUnitsAfterRemoval(removedUnitCode);
+                updateDropZone(evt.from);
                 validatePlan();
+                validateAndHighlightAllUnits();
+                updateAllDropZones();
+                savePlan().then(() => refreshAvailableUnits());
             }
         });
     }
@@ -124,8 +132,12 @@ function setupDragAndDrop() {
                 evt.item.remove();
                 updateAvailableUnitsFilter();
                 checkDependentUnitsAfterRemoval(removedUnitCode);
+                updateDropZone(evt.from);
                 validatePlan();
+                validateAndHighlightAllUnits();
+                updateAllDropZones();
                 updateValidationStatus('Unit removed from plan', 'success');
+                savePlan().then(() => refreshAvailableUnits());
             }
         });
     }
@@ -177,10 +189,13 @@ function generateStudyPlan() {
 
             // Display categorized available units
             if (data.major_electives || data.general_electives) {
-                displayCategorizedUnits(data.major_electives || [], data.general_electives || []);
+                displayCategorizedUnits(data.major_electives || [], data.general_electives || [], data.missing_core_units || []);
             } else {
                 loadAvailableUnits();
             }
+
+            validatePlan(); // Initial validation
+            validateAndHighlightAllUnits(); // Visual validation
 
             updateValidationStatus('Plan generated successfully', 'success');
             logDebug('Plan generated', data);
@@ -275,6 +290,9 @@ function handleUnitMove(evt) {
 
     // Apply visual validation to all units in the plan
     validateAndHighlightAllUnits();
+
+    // After saving is complete, reload the Available Units to the latest state.
+    savePlan().then(() => refreshAvailableUnits());
 }
 
 
@@ -318,6 +336,11 @@ function validatePlan() {
             // Collect validation issues and warnings returned by the server
             const issues = Array.isArray(data.errors) ? data.errors.slice() : [];
             const warns  = Array.isArray(data.warnings) ? data.warnings.slice() : [];
+            
+           // Prerequisites + Availability Check Results Added
+            const { errors: constraintErrors, warnings: constraintWarnings } = collectConstraintResults();
+            issues.push(...constraintErrors);
+            warns.push(...constraintWarnings);
 
             // Backward compatibility:
             // Some server responses may only provide a "reason" string instead of arrays
@@ -333,19 +356,13 @@ function validatePlan() {
 
             const allIssues = uniq(issues);
             const allWarns  = uniq(warns);
-
+            
             // Update the validation status box depending on the results
-            if (allIssues.length) {
-                updateValidationStatus(allIssues, 'error');    
-            } else if (allWarns.length) {
-                updateValidationStatus(allWarns, 'warning');   
-            } else {
-                updateValidationStatus('Plan generated successfully', 'success');
-            }
+            updateValidationStatus(allIssues, allWarns, 'Plan generated successfully');
         },
         error: function() {
             // Handle network or server errors
-            updateValidationStatus('Validation failed due to a network/server error.', 'error');
+            updateValidationStatus(['Validation failed due to a network/server error.'], [], '');
         }
     });
 }
@@ -594,6 +611,24 @@ function validateAndHighlightAllUnits() {
             }
         });
     });
+
+    // apply border color at semester level (with unit count check)
+    $('.semester-container').each(function() {
+        const $semesterBox = $(this);
+        const unitCount = $semesterBox.find('.unit-card').length;   
+        const hasError = $semesterBox.find('.constraint-error').length > 0 || unitCount > 4;
+        const hasWarning = $semesterBox.find('.constraint-warning').length > 0;
+
+        $semesterBox.removeClass('invalid warning valid');
+
+        if (hasError) {
+            $semesterBox.addClass('invalid');   
+        } else if (hasWarning) {
+            $semesterBox.addClass('warning');  
+        } else {
+            $semesterBox.addClass('valid');    
+        }
+    });
 }
 
 function checkDependentUnitsAfterRemoval(removedUnitCode) {
@@ -680,23 +715,46 @@ function loadAvailableUnits() {
         });
 }
 
-function displayAvailableUnits(units) {
-    const container = $('#available-units');
-    container.empty();
+// displayAvailableUnits can handle both arrays (old) and sections (new).
+function displayAvailableUnits(payload) {
+  const $wrap = $('#available-units');
+  $wrap.empty();
 
-    units.forEach(unit => {
-        const unitCard = createUnitCard(unit.code, unit);
-        container.append(unitCard);
-    });
+  const core    = payload.major_core || [];
+  const major   = payload.major_electives || payload.major || [];
+  const general = payload.general_electives || payload.general || payload.units || [];
+
+  renderSection($wrap, 'MAJOR CORE', core);
+  renderSection($wrap, 'MAJOR ELECTIVES',     major);
+  renderSection($wrap, 'GENERAL ELECTIVES',   general);
 }
 
-function displayCategorizedUnits(majorElectives, generalElectives) {
-    const container = $('#available-units');
-    container.empty();
+function renderSection($wrap, headerText, units) {
+  if (!units || !units.length) return;
+  //  The header class is the same as the one used in updateSectionHeaders().
+  $wrap.append(`<div class="unit-section-header"><h6>${headerText}</h6></div>`);
+  units.forEach(u => {
+    // makeUnitCard(X) → createUnitCard(O)
+    $wrap.append(createUnitCard(u.code, u));
+  });
+}
+
+function displayCategorizedUnits(majorElectives = [], generalElectives = [], missingCoreUnits = []) {
+  const container = $('#available-units');
+  container.empty();
+
+    // Add Major Core section
+    if (missingCoreUnits.length > 0) {
+        container.append('<div class="unit-section-header"><h6>Major Core</h6></div>');
+        missingCoreUnits.forEach(unit => {
+            const unitCard = createUnitCard(unit.code, unit);
+            container.append(unitCard);
+        });
+    }
 
     // Add Major Electives section
     if (majorElectives.length > 0) {
-        container.append('<div class="unit-section-header"><h6>Major Electives:</h6></div>');
+        container.append('<div class="unit-section-header"><h6>Major Electives</h6></div>');
         majorElectives.forEach(unit => {
             const unitCard = createUnitCard(unit.code, unit);
             container.append(unitCard);
@@ -705,7 +763,7 @@ function displayCategorizedUnits(majorElectives, generalElectives) {
 
     // Add General Electives section
     if (generalElectives.length > 0) {
-        container.append('<div class="unit-section-header mt-3"><h6>General Electives:</h6></div>');
+        container.append('<div class="unit-section-header mt-3"><h6>General Electives</h6></div>');
         generalElectives.forEach(unit => {
             const unitCard = createUnitCard(unit.code, unit);
             container.append(unitCard);
@@ -713,19 +771,16 @@ function displayCategorizedUnits(majorElectives, generalElectives) {
     }
 
     // Store for filtering
-    availableUnits = [...majorElectives, ...generalElectives];
+    availableUnits = [...missingCoreUnits, ...majorElectives, ...generalElectives];
 
     // Add available units to allUnitsData as well
-    [...majorElectives, ...generalElectives].forEach(unit => {
-        const existingIndex = allUnitsData.findIndex(existing => existing.code === unit.code);
-        if (existingIndex >= 0) {
-            // Update existing record with complete data
-            allUnitsData[existingIndex] = unit;
-        } else {
-            // Add new unit
-            allUnitsData.push(unit);
-        }
+    [...missingCoreUnits, ...majorElectives, ...generalElectives].forEach(unit => {
+        const i = allUnitsData.findIndex(existing => existing.code === unit.code);
+        if (i >= 0) allUnitsData[i] = unit; else allUnitsData.push(unit);
     });
+
+    // Hide subjects already in the plan” reflected
+    updateAvailableUnitsFilter();
 }
 
 function updateAvailableUnitsFilter() {
@@ -771,7 +826,6 @@ function updateSectionHeaders() {
     });
 }
 
-
 function filterUnits(searchTerm) {
     const term = searchTerm.toLowerCase();
 
@@ -802,27 +856,48 @@ function filterUnits(searchTerm) {
     updateSectionHeaders();
 }
 
-function updateValidationStatus(messageOrList, type) {
+function updateValidationStatus(errors = [], warnings = [], successMessage = '') {
     const $box = $('#validation-status');
     $box.removeClass('validation-success validation-error validation-warning');
+    $box.empty();  
 
-    if (type === 'error') $box.addClass('validation-error');
-    else if (type === 'warning') $box.addClass('validation-warning');
-    else $box.addClass('validation-success');
+    // Forced Array Guarantee
+    if (!Array.isArray(errors)) errors = errors ? [errors] : [];
+    if (!Array.isArray(warnings)) warnings = warnings ? [warnings] : [];
 
-    const title = type ? type[0].toUpperCase() + type.slice(1) : 'Status';
-    let body = '';
-
-    if (Array.isArray(messageOrList)) {
-        body = '<ul class="validation-list">' +
-               messageOrList.map(m => `<li>${m}</li>`).join('') +
-               '</ul>';
-    } else {
-        body = String(messageOrList || '');
+    // Errors
+    if (errors.length > 0) {
+        const errorHtml = `
+            <div class="validation-error">
+                <strong>Errors:</strong>
+                <ul class="validation-list">
+                    ${errors.map(m => `<li>${m}</li>`).join('')}
+                </ul>
+            </div>`;
+        $box.append(errorHtml);
     }
-    $box.html(`<strong>${title}:</strong> ${body}`);
-}
 
+    // Warnings
+    if (warnings.length > 0) {
+        const warnHtml = `
+            <div class="validation-warning mt-2">
+                <strong>Warnings:</strong>
+                <ul class="validation-list">
+                    ${warnings.map(m => `<li>${m}</li>`).join('')}
+                </ul>
+            </div>`;
+        $box.append(warnHtml);
+    }
+
+    // Success
+    if (errors.length === 0 && warnings.length === 0 && successMessage) {
+        const successHtml = `
+            <div class="validation-success">
+                <strong>Success:</strong> ${successMessage}
+            </div>`;
+        $box.append(successHtml);
+    }
+}
 
 function exportToPDF() {
     const plan = getCurrentPlan();
@@ -1286,4 +1361,60 @@ function aiChatMessage(message) {
         `;
         $('#debug-log').prepend(errorEntry);
     });
+}
+
+
+function savePlan() {
+  const plan = getCurrentPlan();
+  return fetch('/api/plan/save', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ plan })
+  }).then(r => r.json());
+}
+
+function refreshAvailableUnits() {
+  return $.get('/api/units')
+    .done(function(data) {
+      // allUnitsData also updated (verification metadata retained)
+      const merged = [...(data.major_electives || []), ...(data.general_electives || [])];
+      merged.forEach(unit => {
+        const i = allUnitsData.findIndex(x => x.code === unit.code);
+        if (i >= 0) allUnitsData[i] = unit; else allUnitsData.push(unit);
+      });
+
+      displayAvailableUnits(data);
+      updateAvailableUnitsFilter();
+    })
+    .fail(function(){ showError('Failed to load available units'); });
+}
+
+// To prevent too frequent calls
+const saveAndRefresh = _.debounce(() => {
+  savePlan().then(() => refreshAvailableUnits());
+}, 250);
+
+// Collect both prerequisite & availability issues
+function collectConstraintResults() {
+    const errors = [];
+    const warnings = [];
+
+    $('.semester-units').each(function() {
+        const semester = $(this).data('semester');
+
+        $(this).find('.unit-card').each(function() {
+            const unitCode = $(this).data('unit-code');
+            const result = validateUnitConstraints(unitCode, semester);
+
+            if (!result.isValid) {
+                if (result.type === 'error') {
+                    errors.push(result.message);
+                } else if (result.type === 'warning') {
+                    warnings.push(result.message);
+                }
+            }
+        });
+    });
+
+    return { errors, warnings };
 }

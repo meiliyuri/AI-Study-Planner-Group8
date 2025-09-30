@@ -1,8 +1,90 @@
 {% extends "base.html" %}
 
+{% block title %}UWA AI Study Planner - Home{% endblock %}
+
+{% block head %}
+<link href="{{ url_for('static', filename='css/faq.css') }}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
+<main class="content">
+    <div class="contact-section">
+        <h2 class="form-header">Frequently Asked Questions (FAQs)</h2>
 
+        <section class="faq">
+            <h3>“Generate Plan” is disabled — how do I enable it?</h3>
+            <p>Choose a major from the dropdown first. The button activates only after a major is selected.
+            If the list is empty, refresh the page. Still empty? Try closing and reopening the site.</p>
+        </section>
 
+        <section class="faq">
+            <h3>I clicked “Generate Plan” but it failed — what should I do?</h3>
+            <p>1) Wait a few seconds and try again (the generator can be busy).<br/>
+            2) Make sure you have an internet connection.<br/>
+            3) If it still fails, return to the home page and re-select your major, then generate again.<br/>
+            4) If the issue repeats, take a screenshot and contact support with the time and what you selected.</p>
+        </section>
 
+        <section class="faq">
+            <h3>The major list is empty — how can I fix this?</h3>
+            <p>Try refreshing the page. If you still don’t see majors, please close the tab and reopen the planner.
+            If it persists, contact support — the catalog may be updating.</p>
+        </section>
+
+        <section class="faq">
+            <h3>I see “Missing prerequisites” — how do I resolve it?</h3>
+            <p>Move the required unit(s) to an earlier semester. You can hover over a highlighted unit to see what it needs,
+            or check the Validation panel for a bullet list of missing prerequisites. After rearranging,
+            click “Validate Plan” to re-check.</p>
+        </section>
+
+        <section class="faq">
+            <h3>A unit says it’s only available in a certain semester — what now?</h3>
+            <p>Some units run only in Semester 1 or only in Semester 2. Drag the unit into a matching semester
+            (e.g., move “Semester 1 only” units into Year 1/3/5). Then re-validate.</p>
+        </section>
+
+        <section class="faq">
+            <h3>I can’t drag a unit or the semester won’t accept it — how can I fix this?</h3>
+            <p>Each semester allows a maximum of 4 units. If a semester is full, remove a unit first or move it elsewhere.
+            You can also drag a unit back to “Available Units” to free space. If dragging feels unresponsive,
+            try a quick page refresh.</p>
+        </section>
+
+        <section class="faq">
+            <h3>The Validation panel shows errors — what’s the best way to fix them?</h3>
+            <p>Read the list from top to bottom and fix issues one at a time:<br/>
+            • If total units &lt; 24, add more from “Available Units”.<br/>
+            • If a semester has &gt; 4 units, move extras to another semester.<br/>
+            • For missing prerequisites, move required units earlier.<br/>
+            • Re-click “Validate Plan” after each change to confirm you’ve resolved it.</p>
+        </section>
+
+        <section class="faq">
+            <h3>The PDF didn’t download — what should I try?</h3>
+            <p>Make sure your browser allows downloads/pop-ups for this site. Try again, or switch to Chrome/Edge.
+            If the issue continues, try exporting after a page refresh.</p>
+        </section>
+
+        <section class="faq">
+            <h3>“AI Validate Plan” feels slow — is that normal?</h3>
+            <p>Yes — the AI performs a deeper analysis and can take a little longer. You can keep editing your plan
+            and use the standard “Validate Plan” for quick checks, then run the AI check when you’re ready.</p>
+        </section>
+
+        <section class="faq">
+            <h3>How do I reset and start over?</h3>
+            <p>Refresh the page to clear the board. Then pick your major again and click “Generate Plan”.
+            You can always re-add units from the “Available Units” panel.</p>
+        </section>
+
+        <section class="faq">
+            <h3>I think a unit’s information is wrong — how do I report it?</h3>
+            <p>Take a screenshot and note the unit code, the semester, and what looks incorrect.
+            Send it to the support contact listed on the home page so we can correct the data quickly.</p>
+        </section>
+
+    </div>
+</main>
 
 {% endblock %}
