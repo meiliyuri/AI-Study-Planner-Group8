@@ -1,11 +1,13 @@
 # tests/test_faq.py
 from bs4 import BeautifulSoup
 
+
 def test_faq_page_loads(client):
     resp = client.get("/faq")
     assert resp.status_code == 200
     html = resp.data.decode("utf-8")
     assert "Frequently Asked Questions" in html
+
 
 def test_faq_has_multiple_questions(client):
     resp = client.get("/faq")
