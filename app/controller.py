@@ -2,26 +2,48 @@
 # Handles all business logic for study plan generation, validation, and export
 # Written with the aid of Claude AI for enhanced academic planning capabilities
 
-from app import app, db  # Flask app and SQLAlchemy database instance
-from flask import request, jsonify, session, make_response  # Flask request handling functions
-from app.models import Unit, Major, MajorUnit, StudyPlan  # Database models for academic data
-import json  # JSON parsing and serialization
 import io  # Input/output operations for PDF generation
+import json  # JSON parsing and serialization
 import os  # Logo file path in PDF
 from datetime import datetime  # Date and time utilities
-from reportlab.pdfgen import canvas  # PDF generation library
-from reportlab.lib.pagesizes import letter, A4  # PDF page size constants
-from reportlab.lib import colors  # PDF color utilities
-from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet  # PDF styling utilities
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer  # PDF layout components
-from config import Config  # Application configuration
-from reportlab.lib.units import inch # Add UWA logo
-from reportlab.pdfbase import pdfdoc # PDF metadata
-from sqlalchemy import or_  # SQLAlchemy logical operators for queries
 
 # Claude AI client setup for enhanced academic reasoning capabilities
 from anthropic import Anthropic
+from flask import (  # Flask request handling functions
+    jsonify,
+    make_response,
+    request,
+    session,
+)
+from reportlab.lib import colors  # PDF color utilities
+from reportlab.lib.pagesizes import A4, letter  # PDF page size constants
+from reportlab.lib.styles import (  # PDF styling utilities
+    ParagraphStyle,
+    getSampleStyleSheet,
+)
+from reportlab.lib.units import inch  # Add UWA logo
+from reportlab.pdfbase import pdfdoc  # PDF metadata
+from reportlab.pdfgen import canvas  # PDF generation library
+from reportlab.platypus import (  # PDF layout components
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
+    Table,
+    TableStyle,
+)
+from sqlalchemy import or_  # SQLAlchemy logical operators for queries
+
+from app import app, db  # Flask app and SQLAlchemy database instance
+from app.models import (  # Database models for academic data
+    Major,
+    MajorUnit,
+    StudyPlan,
+    Unit,
+)
+from config import Config  # Application configuration
+
 claude_client = Anthropic(api_key=Config.CLAUDE_API_KEY)
+
 
 def extract_json_from_response(text):
     """Extract JSON object from a text response that might contain extra content
@@ -38,16 +60,17 @@ def extract_json_from_response(text):
     import re  # Regular expression library for pattern matching
 
     # Look for JSON object starting with { and ending with }
-    json_object_match = re.search(r'\{.*\}', text, re.DOTALL)
+    json_object_match = re.search(r"\{.*\}", text, re.DOTALL)
     if json_object_match:
         return json_object_match.group(0)
 
     # Look for JSON array starting with [ and ending with ]
-    json_array_match = re.search(r'\[.*\]', text, re.DOTALL)
+    json_array_match = re.search(r"\[.*\]", text, re.DOTALL)
     if json_array_match:
         return json_array_match.group(0)
 
     return None  # Return None if no valid JSON structure found
+
 
 def get_available_majors():
     """Get list of available majors for degree selection
@@ -66,18 +89,19 @@ def get_available_majors():
         # Build list of major dictionaries for JSON response
         for individual_major in available_majors:
             major_data = {
-                'id': individual_major.id,
-                'code': individual_major.code,
-                'name': individual_major.name,
-                'degree': individual_major.degree
+                "id": individual_major.id,
+                "code": individual_major.code,
+                "name": individual_major.name,
+                "degree": individual_major.degree,
             }
             majors_list.append(major_data)
 
         # Return JSON response with majors list
-        return jsonify({'majors': majors_list})
+        return jsonify({"majors": majors_list})
     except Exception as database_error:
         # Return error response if database operation fails
-        return jsonify({'error': str(database_error)}), 500
+        return jsonify({"error": str(database_error)}), 500
+
 
 def generate_initial_plan():
     """Generate an initial study plan using Claude AI
@@ -92,24 +116,26 @@ def generate_initial_plan():
     try:
         # Get request data from frontend
         request_data = request.get_json()
-        selected_major_id = request_data.get('major_id')
-        current_session_id = session.get('session_id')  # Flask session function
+        selected_major_id = request_data.get("major_id")
+        current_session_id = session.get("session_id")  # Flask session function
 
         # Validate required parameters
         if not selected_major_id or not current_session_id:
-            return jsonify({'error': 'Major ID and session required'}), 400
+            return jsonify({"error": "Major ID and session required"}), 400
 
         # SQLAlchemy query to find the selected major
         selected_major = Major.query.get(selected_major_id)
         if not selected_major:
-            return jsonify({'error': 'Major not found'}), 404
+            return jsonify({"error": "Major not found"}), 404
 
         # Get major requirements from database
-        major_unit_relationships = MajorUnit.query.filter_by(major_id=selected_major_id).all()  # SQLAlchemy query
+        major_unit_relationships = MajorUnit.query.filter_by(
+            major_id=selected_major_id
+        ).all()  # SQLAlchemy query
 
         # Separate mandatory and optional units by academic level
-        mandatory_units = {'level_1': [], 'level_2': [], 'level_3': []}
-        optional_units = {'level_1': [], 'level_2': [], 'level_3': []}
+        mandatory_units = {"level_1": [], "level_2": [], "level_3": []}
+        optional_units = {"level_1": [], "level_2": [], "level_3": []}
 
         # Process each unit relationship for the selected major
         for major_unit_relationship in major_unit_relationships:
@@ -118,14 +144,17 @@ def generate_initial_plan():
                 continue
 
             # Categorize units based on requirement type
-            if major_unit_relationship.requirement_type == 'core':
-                mandatory_units[f'level_{major_unit_relationship.level}'].append(major_unit_relationship.unit.code)
-            elif major_unit_relationship.requirement_type == 'option':
-                optional_units[f'level_{major_unit_relationship.level}'].append(major_unit_relationship.unit.code)
-
+            if major_unit_relationship.requirement_type == "core":
+                mandatory_units[f"level_{major_unit_relationship.level}"].append(
+                    major_unit_relationship.unit.code
+                )
+            elif major_unit_relationship.requirement_type == "option":
+                optional_units[f"level_{major_unit_relationship.level}"].append(
+                    major_unit_relationship.unit.code
+                )
 
         # Get additional units from the broader course pool to fill 24 total units
-        additional_units = {'level_1': [], 'level_2': [], 'level_3': []}
+        additional_units = {"level_1": [], "level_2": [], "level_3": []}
 
         # Get non-bridging units that aren't already in the major
         existing_unit_codes = set()
@@ -136,37 +165,54 @@ def generate_initial_plan():
 
         # Get suitable additional units for each level
         for level in [1, 2, 3]:
-            additional_level_units = Unit.query.filter(
-                Unit.level == level,
-                Unit.is_bridging == False,
-                ~Unit.code.in_(existing_unit_codes)
-            ).limit(20).all()  # Get 20 options per level for AI to choose from
+            additional_level_units = (
+                Unit.query.filter(
+                    Unit.level == level,
+                    Unit.is_bridging == False,
+                    ~Unit.code.in_(existing_unit_codes),
+                )
+                .limit(20)
+                .all()
+            )  # Get 20 options per level for AI to choose from
 
-            additional_units[f'level_{level}'] = [u.code for u in additional_level_units]
-
+            additional_units[f"level_{level}"] = [
+                u.code for u in additional_level_units
+            ]
 
         # Fallback if no units found for major - use typical Economics units
         if not major_unit_relationships:
             mandatory_units = {
-                'level_1': ['ECON1101', 'ECON1102', 'STAT1520', 'FINA1221'],
-                'level_2': ['ECON2233', 'ECON2234', 'ECON2235', 'ECON2236'],
-                'level_3': ['ECON3301', 'ECON3302', 'ECON3303']
+                "level_1": ["ECON1101", "ECON1102", "STAT1520", "FINA1221"],
+                "level_2": ["ECON2233", "ECON2234", "ECON2235", "ECON2236"],
+                "level_3": ["ECON3301", "ECON3302", "ECON3303"],
             }
             optional_units = {
-                'level_1': [],
-                'level_2': ['ECON2237', 'ECON2238', 'ECON2239', 'ECON2240', 'ECON2241'],
-                'level_3': ['ECON3304', 'ECON3305', 'ECON3306', 'ECON3307', 'ECON3308', 'ECON3309', 'ECON3310', 'ECON3311', 'ECON3312', 'ECON3313']
+                "level_1": [],
+                "level_2": ["ECON2237", "ECON2238", "ECON2239", "ECON2240", "ECON2241"],
+                "level_3": [
+                    "ECON3304",
+                    "ECON3305",
+                    "ECON3306",
+                    "ECON3307",
+                    "ECON3308",
+                    "ECON3309",
+                    "ECON3310",
+                    "ECON3311",
+                    "ECON3312",
+                    "ECON3313",
+                ],
             }
 
         # Create Claude prompt with constraint data
-        prompt = create_plan_generation_prompt(selected_major, mandatory_units, optional_units, additional_units)
+        prompt = create_plan_generation_prompt(
+            selected_major, mandatory_units, optional_units, additional_units
+        )
 
         # Call Claude 3.5 Sonnet with maximum reasoning
         plan_json = call_claude_for_plan_generation(prompt)
 
         if not plan_json:
-            return jsonify({'error': 'Failed to generate plan with Claude'}), 500
-
+            return jsonify({"error": "Failed to generate plan with Claude"}), 500
 
         # Parse and validate the response
         try:
@@ -178,22 +224,26 @@ def generate_initial_plan():
                 try:
                     plan_data = json.loads(cleaned_json)
                 except json.JSONDecodeError:
-                    return jsonify({'error': f'Invalid plan format from AI: {str(e)}'}), 500
+                    return (
+                        jsonify({"error": f"Invalid plan format from AI: {str(e)}"}),
+                        500,
+                    )
             else:
-                return jsonify({'error': f'Invalid plan format from AI: {str(e)}'}), 500
+                return jsonify({"error": f"Invalid plan format from AI: {str(e)}"}), 500
 
         # Convert new format to old format if needed (for backward compatibility)
         original_plan_data = plan_data.copy()
         for semester, items in plan_data.items():
-            if items and isinstance(items[0], dict) and 'unit' in items[0]:
+            if items and isinstance(items[0], dict) and "unit" in items[0]:
                 # New format: convert objects to unit codes
-                plan_data[semester] = [item['unit'] for item in items]
-       
+                plan_data[semester] = [item["unit"] for item in items]
+
         # Save / Upsert the plan for this session (Only one per session)
-        existing = (StudyPlan.query
-                    .filter_by(session_id=current_session_id)
-                    .order_by(StudyPlan.id.desc())
-                    .first())
+        existing = (
+            StudyPlan.query.filter_by(session_id=current_session_id)
+            .order_by(StudyPlan.id.desc())
+            .first()
+        )
 
         if existing:
             # If it's the same session, it overwrites the existing record (prevents duplicate inserts).
@@ -207,7 +257,7 @@ def generate_initial_plan():
                 session_id=current_session_id,
                 major_id=selected_major_id,
                 plan_data=json.dumps(plan_data),
-                is_valid=False
+                is_valid=False,
             )
             db.session.add(study_plan)
         db.session.commit()
@@ -222,24 +272,32 @@ def generate_initial_plan():
                 units_in_plan.add(unit_code)
                 unit = Unit.query.filter_by(code=unit_code).first()
                 if unit:
-                    enriched_plan[semester].append({
-                        'code': unit.code,
-                        'title': unit.title,
-                        'level': unit.level,
-                        'points': unit.points,
-                        'prerequisites': unit.prerequisites or '',
-                        'availabilities': unit.availabilities or '',
-                        'corequisites': unit.corequisites or '',
-                        'incompatibilities': unit.incompatibilities or ''
-                    })
+                    enriched_plan[semester].append(
+                        {
+                            "code": unit.code,
+                            "title": unit.title,
+                            "level": unit.level,
+                            "points": unit.points,
+                            "prerequisites": unit.prerequisites or "",
+                            "availabilities": unit.availabilities or "",
+                            "corequisites": unit.corequisites or "",
+                            "incompatibilities": unit.incompatibilities or "",
+                        }
+                    )
                 else:
                     # Fallback for units not in database
-                    enriched_plan[semester].append({
-                        'code': unit_code,
-                        'title': f'Unit {unit_code}',
-                        'level': int(unit_code[4]) if len(unit_code) >= 5 and unit_code[4].isdigit() else 1,
-                        'points': 6
-                    })
+                    enriched_plan[semester].append(
+                        {
+                            "code": unit_code,
+                            "title": f"Unit {unit_code}",
+                            "level": (
+                                int(unit_code[4])
+                                if len(unit_code) >= 5 and unit_code[4].isdigit()
+                                else 1
+                            ),
+                            "points": 6,
+                        }
+                    )
 
         # Calculate unused major electives
         missing_core_units = []
@@ -250,106 +308,113 @@ def generate_initial_plan():
                 continue
 
             item = {
-                'code': mu.unit.code,
-                'title': mu.unit.title,
-                'level': mu.unit.level,
-                'points': mu.unit.points,
-                'prerequisites': mu.unit.prerequisites or '',
-                'availabilities': mu.unit.availabilities or '',
-                'corequisites': mu.unit.corequisites or '',
-                'incompatibilities': mu.unit.incompatibilities or '',
-                'requirement_type': mu.requirement_type
+                "code": mu.unit.code,
+                "title": mu.unit.title,
+                "level": mu.unit.level,
+                "points": mu.unit.points,
+                "prerequisites": mu.unit.prerequisites or "",
+                "availabilities": mu.unit.availabilities or "",
+                "corequisites": mu.unit.corequisites or "",
+                "incompatibilities": mu.unit.incompatibilities or "",
+                "requirement_type": mu.requirement_type,
             }
 
-            if mu.requirement_type == 'core':
-                missing_core_units.append(item)      
-            elif mu.requirement_type == 'option':
-                unused_major_electives.append(item)  
+            if mu.requirement_type == "core":
+                missing_core_units.append(item)
+            elif mu.requirement_type == "option":
+                unused_major_electives.append(item)
 
-                   
         # Get degree-specific general electives
-        course_code = getattr(selected_major, 'course_code', None)  # ex) 'BP004'
+        course_code = getattr(selected_major, "course_code", None)  # ex) 'BP004'
         general_electives = []
 
         q = Unit.query.filter(
             Unit.is_bridging == False,
             ~Unit.code.in_(units_in_plan),
             Unit.electives.isnot(None),
-            Unit.electives != ''
+            Unit.electives != "",
         )
 
         if course_code:
             # Since electives are stored as comma-separated values like ‘BP001,BP004,...’, use LIKE with 4 patterns for safe matching
-            q = q.filter(or_(
-                Unit.electives == course_code,
-                Unit.electives.like(f'{course_code},%'),
-                Unit.electives.like(f'%,{course_code},%'),
-                Unit.electives.like(f'%,{course_code}')
-            ))
+            q = q.filter(
+                or_(
+                    Unit.electives == course_code,
+                    Unit.electives.like(f"{course_code},%"),
+                    Unit.electives.like(f"%,{course_code},%"),
+                    Unit.electives.like(f"%,{course_code}"),
+                )
+            )
 
         q = q.filter(
             or_(
-                Unit.code.op('GLOB')('*1[0-9][0-9][0-9]'),
-                Unit.code.op('GLOB')('*2[0-9][0-9][0-9]'),
-                Unit.code.op('GLOB')('*3[0-9][0-9][0-9]')
+                Unit.code.op("GLOB")("*1[0-9][0-9][0-9]"),
+                Unit.code.op("GLOB")("*2[0-9][0-9][0-9]"),
+                Unit.code.op("GLOB")("*3[0-9][0-9][0-9]"),
             )
         )
 
         # Sorting + Filtering
         for unit in q.order_by(Unit.level.asc(), Unit.code.asc()).limit(1000).all():
-            general_electives.append({
-                'code': unit.code,
-                'title': unit.title,
-                'level': unit.level,
-                'points': unit.points,
-                'prerequisites': unit.prerequisites or '',
-                'availabilities': unit.availabilities or '',
-                'corequisites': unit.corequisites or '',
-                'incompatibilities': unit.incompatibilities or ''
-            })
+            general_electives.append(
+                {
+                    "code": unit.code,
+                    "title": unit.title,
+                    "level": unit.level,
+                    "points": unit.points,
+                    "prerequisites": unit.prerequisites or "",
+                    "availabilities": unit.availabilities or "",
+                    "corequisites": unit.corequisites or "",
+                    "incompatibilities": unit.incompatibilities or "",
+                }
+            )
 
-         # dedup
+        # dedup
         unique_general_electives = []
         seen_codes = set()
         for u in general_electives:
-            code = u.get('code')
+            code = u.get("code")
             if code and code not in seen_codes:
                 unique_general_electives.append(u)
                 seen_codes.add(code)
 
-        return jsonify({
-            'plan': plan_data,  # Keep original for compatibility
-            'enriched_plan': enriched_plan,  # Add enriched version
-            'major_electives': unused_major_electives,
-            'general_electives': unique_general_electives[:1000],  # Limit to 1000
-            'missing_core_units': missing_core_units,
-            'major': {
-                'code': selected_major.code,
-                'name': selected_major.name,
-                'degree': selected_major.degree
+        return jsonify(
+            {
+                "plan": plan_data,  # Keep original for compatibility
+                "enriched_plan": enriched_plan,  # Add enriched version
+                "major_electives": unused_major_electives,
+                "general_electives": unique_general_electives[:1000],  # Limit to 1000
+                "missing_core_units": missing_core_units,
+                "major": {
+                    "code": selected_major.code,
+                    "name": selected_major.name,
+                    "degree": selected_major.degree,
+                },
             }
-        })
+        )
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500
+
 
 def validate_study_plan():
     """Validate a modified study plan using Claude API"""
     try:
         data = request.get_json()
-        plan_data = data.get('plan')
-        session_id = session.get('session_id')
+        plan_data = data.get("plan")
+        session_id = session.get("session_id")
 
         if not plan_data or not session_id:
-            return jsonify({'error': 'Plan data and session required'}), 400
+            return jsonify({"error": "Plan data and session required"}), 400
 
         # Get the current study plan
-        study_plan = (StudyPlan.query
-              .filter_by(session_id=session_id)
-              .order_by(StudyPlan.id.desc())
-              .first())
+        study_plan = (
+            StudyPlan.query.filter_by(session_id=session_id)
+            .order_by(StudyPlan.id.desc())
+            .first()
+        )
         if not study_plan:
-            return jsonify({'error': 'No study plan found for session'}), 404
+            return jsonify({"error": "No study plan found for session"}), 404
 
         major = study_plan.major
 
@@ -358,10 +423,9 @@ def validate_study_plan():
         critical_errors = validation_result.get("errors", [])
         warnings = validation_result.get("warnings", [])
 
-        # Core unit validation 
+        # Core unit validation
         core_units = MajorUnit.query.filter_by(
-            major_id=study_plan.major_id,
-            requirement_type='core'
+            major_id=study_plan.major_id, requirement_type="core"
         ).all()
         core_codes = {cu.unit.code for cu in core_units}
 
@@ -388,14 +452,17 @@ def validate_study_plan():
         study_plan.validation_errors = "; ".join(critical_errors)
         db.session.commit()
 
-        return jsonify({
-            "isValid": len(critical_errors) == 0,
-            "errors": critical_errors,
-            "warnings": warnings
-        })
+        return jsonify(
+            {
+                "isValid": len(critical_errors) == 0,
+                "errors": critical_errors,
+                "warnings": warnings,
+            }
+        )
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500
+
 
 def get_available_units():
     """Get list of available units for drag and drop"""
@@ -404,12 +471,16 @@ def get_available_units():
         used_units = set()
 
         # Reading the study_plan in the session
-        session_id = session.get('session_id')
+        session_id = session.get("session_id")
         if session_id:
-            sp = StudyPlan.query.filter_by(session_id=session_id).order_by(StudyPlan.id.desc()).first()
+            sp = (
+                StudyPlan.query.filter_by(session_id=session_id)
+                .order_by(StudyPlan.id.desc())
+                .first()
+            )
             if sp:
                 # major → course_code
-                if getattr(sp.major, 'course_code', None):
+                if getattr(sp.major, "course_code", None):
                     course_code = sp.major.course_code
                 # Collect all unit codes currently within plan_data
                 if sp.plan_data:
@@ -424,23 +495,24 @@ def get_available_units():
         base_q = Unit.query.filter(
             Unit.is_bridging == False,
             or_(
-                Unit.code.like('____1%'),
-                Unit.code.like('____2%'),
-                Unit.code.like('____3%')
-            )
+                Unit.code.like("____1%"),
+                Unit.code.like("____2%"),
+                Unit.code.like("____3%"),
+            ),
         )
 
         # course_code electives fillter
         if course_code:
             base_q = base_q.filter(
-                Unit.electives.isnot(None),
-                Unit.electives != ''
-            ).filter(or_(
-                Unit.electives == course_code,
-                Unit.electives.like(f'{course_code},%'),
-                Unit.electives.like(f'%,{course_code},%'),
-                Unit.electives.like(f'%,{course_code}')
-            ))
+                Unit.electives.isnot(None), Unit.electives != ""
+            ).filter(
+                or_(
+                    Unit.electives == course_code,
+                    Unit.electives.like(f"{course_code},%"),
+                    Unit.electives.like(f"%,{course_code},%"),
+                    Unit.electives.like(f"%,{course_code}"),
+                )
+            )
 
         # Exclude subjects already in the Plan
         if used_units:
@@ -449,160 +521,205 @@ def get_available_units():
         # Import after sorting
         units = base_q.order_by(Unit.level.asc(), Unit.code.asc()).all()
 
-        units_list = [{
-            'code': u.code,
-            'title': u.title,
-            'level': u.level,
-            'points': u.points,
-            'availabilities': u.availabilities,
-            'prerequisites': u.prerequisites,
-            'corequisites': u.corequisites,
-            'incompatibilities': u.incompatibilities
-        } for u in units]
+        units_list = [
+            {
+                "code": u.code,
+                "title": u.title,
+                "level": u.level,
+                "points": u.points,
+                "availabilities": u.availabilities,
+                "prerequisites": u.prerequisites,
+                "corequisites": u.corequisites,
+                "incompatibilities": u.incompatibilities,
+            }
+            for u in units
+        ]
 
         # 1) Major electives (units from the major's ‘option’ category not yet included in the plan)
         major_electives = []
         if sp and sp.major_id:
-            mu_rows = MajorUnit.query.filter_by(major_id=sp.major_id, requirement_type='option').all()
+            mu_rows = MajorUnit.query.filter_by(
+                major_id=sp.major_id, requirement_type="option"
+            ).all()
             for mu in mu_rows:
                 u = mu.unit
-                if (not u.is_bridging) and (u.code not in used_units) and u.level in (1,2,3):
-                    major_electives.append({
-                        'code': u.code, 'title': u.title, 'level': u.level,
-                        'points': u.points, 'prerequisites': u.prerequisites or '',
-                        'availabilities': u.availabilities or '',
-                        'corequisites': u.corequisites or '', 'incompatibilities': u.incompatibilities or ''
-                    })
+                if (
+                    (not u.is_bridging)
+                    and (u.code not in used_units)
+                    and u.level in (1, 2, 3)
+                ):
+                    major_electives.append(
+                        {
+                            "code": u.code,
+                            "title": u.title,
+                            "level": u.level,
+                            "points": u.points,
+                            "prerequisites": u.prerequisites or "",
+                            "availabilities": u.availabilities or "",
+                            "corequisites": u.corequisites or "",
+                            "incompatibilities": u.incompatibilities or "",
+                        }
+                    )
 
         # 2) General electives
-        base_q = Unit.query.filter(
-            Unit.is_bridging == False,
-            Unit.level.in_([1,2,3])
-        )
+        base_q = Unit.query.filter(Unit.is_bridging == False, Unit.level.in_([1, 2, 3]))
         if course_code:
             base_q = base_q.filter(
-                Unit.electives.isnot(None),
-                Unit.electives != ''
-            ).filter(or_(
-                Unit.electives == course_code,
-                Unit.electives.like(f'{course_code},%'),
-                Unit.electives.like(f'%,{course_code},%'),
-                Unit.electives.like(f'%,{course_code}')
-            ))
+                Unit.electives.isnot(None), Unit.electives != ""
+            ).filter(
+                or_(
+                    Unit.electives == course_code,
+                    Unit.electives.like(f"{course_code},%"),
+                    Unit.electives.like(f"%,{course_code},%"),
+                    Unit.electives.like(f"%,{course_code}"),
+                )
+            )
         if used_units:
             base_q = base_q.filter(~Unit.code.in_(used_units))
 
-        general_electives = [{
-            'code': u.code, 'title': u.title, 'level': u.level, 'points': u.points,
-            'prerequisites': u.prerequisites or '', 'availabilities': u.availabilities or '',
-            'corequisites': u.corequisites or '', 'incompatibilities': u.incompatibilities or ''
-        } for u in base_q.order_by(Unit.level.asc(), Unit.code.asc()).all()]
+        general_electives = [
+            {
+                "code": u.code,
+                "title": u.title,
+                "level": u.level,
+                "points": u.points,
+                "prerequisites": u.prerequisites or "",
+                "availabilities": u.availabilities or "",
+                "corequisites": u.corequisites or "",
+                "incompatibilities": u.incompatibilities or "",
+            }
+            for u in base_q.order_by(Unit.level.asc(), Unit.code.asc()).all()
+        ]
 
         # 3) Major core
         major_core = []
         if sp and sp.major_id:
-            mu_rows = MajorUnit.query.filter_by(major_id=sp.major_id, requirement_type='core').all()
+            mu_rows = MajorUnit.query.filter_by(
+                major_id=sp.major_id, requirement_type="core"
+            ).all()
             for mu in mu_rows:
                 u = mu.unit
-                if (not u.is_bridging) and (u.code not in used_units) and (u.level in (1,2,3)):
-                    major_core.append({
-                        'code': u.code, 'title': u.title, 'level': u.level, 'points': u.points,
-                        'prerequisites': u.prerequisites or '', 'availabilities': u.availabilities or '',
-                        'corequisites': u.corequisites or '', 'incompatibilities': u.incompatibilities or ''
-                    })
+                if (
+                    (not u.is_bridging)
+                    and (u.code not in used_units)
+                    and (u.level in (1, 2, 3))
+                ):
+                    major_core.append(
+                        {
+                            "code": u.code,
+                            "title": u.title,
+                            "level": u.level,
+                            "points": u.points,
+                            "prerequisites": u.prerequisites or "",
+                            "availabilities": u.availabilities or "",
+                            "corequisites": u.corequisites or "",
+                            "incompatibilities": u.incompatibilities or "",
+                        }
+                    )
 
-        return jsonify({
-            'major_core': major_core,
-            'major_electives': major_electives,
-            'general_electives': general_electives
-        })
+        return jsonify(
+            {
+                "major_core": major_core,
+                "major_electives": major_electives,
+                "general_electives": general_electives,
+            }
+        )
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-   
+        return jsonify({"error": str(e)}), 500
+
 
 def save_current_plan():
     try:
         data = request.get_json() or {}
-        session_id = session.get('session_id')
+        session_id = session.get("session_id")
         if not session_id:
-            return jsonify({'error': 'No session'}), 400
+            return jsonify({"error": "No session"}), 400
 
         # Unify using the latest record
-        sp = (StudyPlan.query
-              .filter_by(session_id=session_id)
-              .order_by(StudyPlan.id.desc())
-              .first())
+        sp = (
+            StudyPlan.query.filter_by(session_id=session_id)
+            .order_by(StudyPlan.id.desc())
+            .first()
+        )
 
         if not sp:
-            sp = StudyPlan(session_id=session_id, plan_data=json.dumps(data.get('plan', {})))
+            sp = StudyPlan(
+                session_id=session_id, plan_data=json.dumps(data.get("plan", {}))
+            )
             db.session.add(sp)
         else:
-            sp.plan_data = json.dumps(data.get('plan', {}))
+            sp.plan_data = json.dumps(data.get("plan", {}))
 
         db.session.commit()
-        return jsonify({'ok': True})
+        return jsonify({"ok": True})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
+        return jsonify({"error": str(e)}), 500
 
 
 def get_general_electives():
     try:
-        session_id = session.get('session_id')
+        session_id = session.get("session_id")
         sp = StudyPlan.query.filter_by(session_id=session_id).first()
         if not sp:
-            return jsonify({'general_electives': []})
+            return jsonify({"general_electives": []})
 
         # Excluding units already included in the current plan
-        plan = json.loads(sp.plan_data or '{}')
+        plan = json.loads(sp.plan_data or "{}")
         units_in_plan = {c for _, codes in plan.items() for c in codes}
 
         # Resident course_code ↔ Unit.electives matching
-        course_code = getattr(sp.major, 'course_code', None)
+        course_code = getattr(sp.major, "course_code", None)
         q = Unit.query.filter(
             Unit.is_bridging == False,
             ~Unit.code.in_(units_in_plan),
             Unit.electives.isnot(None),
-            Unit.electives != ''
+            Unit.electives != "",
         )
         if course_code:
-            q = q.filter(or_(
-                Unit.electives == course_code,
-                Unit.electives.like(f'{course_code},%'),
-                Unit.electives.like(f'%,{course_code},%'),
-                Unit.electives.like(f'%,{course_code}')
-            ))
+            q = q.filter(
+                or_(
+                    Unit.electives == course_code,
+                    Unit.electives.like(f"{course_code},%"),
+                    Unit.electives.like(f"%,{course_code},%"),
+                    Unit.electives.like(f"%,{course_code}"),
+                )
+            )
 
         # Only those with the ‘first digit’ of the subject code being 1/2/3
-        q = q.filter(or_(
-            Unit.code.op('GLOB')('*1[0-9][0-9][0-9]'),
-            Unit.code.op('GLOB')('*2[0-9][0-9][0-9]'),
-            Unit.code.op('GLOB')('*3[0-9][0-9][0-9]')
-        )).order_by(Unit.level.asc(), Unit.code.asc())
+        q = q.filter(
+            or_(
+                Unit.code.op("GLOB")("*1[0-9][0-9][0-9]"),
+                Unit.code.op("GLOB")("*2[0-9][0-9][0-9]"),
+                Unit.code.op("GLOB")("*3[0-9][0-9][0-9]"),
+            )
+        ).order_by(Unit.level.asc(), Unit.code.asc())
 
-        general = [{
-            'code': u.code,
-            'title': u.title,
-            'level': u.level,
-            'points': u.points,
-            'prerequisites': u.prerequisites or '',
-            'availabilities': u.availabilities or '',
-            'corequisites': u.corequisites or '',
-            'incompatibilities': u.incompatibilities or ''
-        } for u in q.all()]
+        general = [
+            {
+                "code": u.code,
+                "title": u.title,
+                "level": u.level,
+                "points": u.points,
+                "prerequisites": u.prerequisites or "",
+                "availabilities": u.availabilities or "",
+                "corequisites": u.corequisites or "",
+                "incompatibilities": u.incompatibilities or "",
+            }
+            for u in q.all()
+        ]
 
         # dedup → unique_general_electives
         seen, unique = set(), []
         for item in general:
-            c = item['code']
+            c = item["code"]
             if c not in seen:
                 seen.add(c)
                 unique.append(item)
 
-        return jsonify({'general_electives': unique})
+        return jsonify({"general_electives": unique})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
 
 def export_plan_to_pdf():
@@ -610,10 +727,10 @@ def export_plan_to_pdf():
     try:
         # Get plan data from request
         data = request.get_json()
-        if not data or 'plan' not in data:
-            return jsonify({'error': 'Plan data required'}), 400
+        if not data or "plan" not in data:
+            return jsonify({"error": "Plan data required"}), 400
 
-        plan = data['plan']
+        plan = data["plan"]
 
         # Create PDF in memory
         buffer = io.BytesIO()
@@ -623,13 +740,13 @@ def export_plan_to_pdf():
         # Styles
         styles = getSampleStyleSheet()
         title_style = ParagraphStyle(
-            'MyTitle',
-            parent=styles['Title'],
+            "MyTitle",
+            parent=styles["Title"],
             textColor=colors.whitesmoke,
-            alignment=1  # center
+            alignment=1,  # center
         )
-        heading_style = styles['Heading2']
-        normal_style = styles['Normal']
+        heading_style = styles["Heading2"]
+        normal_style = styles["Normal"]
 
         # Title
         title = Paragraph("My Study Plan", title_style)
@@ -637,15 +754,20 @@ def export_plan_to_pdf():
         elements.append(Spacer(1, 20))
 
         # Generated timestamp
-        timestamp = Paragraph(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", normal_style)
+        timestamp = Paragraph(
+            f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", normal_style
+        )
         elements.append(timestamp)
         elements.append(Spacer(1, 20))
 
         # Process each semester
         semester_order = [
-            'Year 1, Semester 1', 'Year 1, Semester 2',
-            'Year 2, Semester 1', 'Year 2, Semester 2',
-            'Year 3, Semester 1', 'Year 3, Semester 2'
+            "Year 1, Semester 1",
+            "Year 1, Semester 2",
+            "Year 2, Semester 1",
+            "Year 2, Semester 2",
+            "Year 3, Semester 1",
+            "Year 3, Semester 2",
         ]
 
         for semester in semester_order:
@@ -657,40 +779,46 @@ def export_plan_to_pdf():
 
                 # Get unit details from database
                 unit_codes = plan[semester]
-                table_data = [['Unit Code', 'Title', 'Level', 'Points']]
+                table_data = [["Unit Code", "Title", "Level", "Points"]]
 
                 for unit_code in unit_codes:
                     unit = Unit.query.filter_by(code=unit_code).first()
                     if unit:
-                        table_data.append([
-                            unit.code,
-                            unit.title or 'Unknown Title',
-                            str(unit.level or ''),
-                            str(unit.points or '')
-                        ])
+                        table_data.append(
+                            [
+                                unit.code,
+                                unit.title or "Unknown Title",
+                                str(unit.level or ""),
+                                str(unit.points or ""),
+                            ]
+                        )
                     else:
                         # Unit not found in database
-                        table_data.append([unit_code, 'Unit not found', '', ''])
+                        table_data.append([unit_code, "Unit not found", "", ""])
 
                 # Create table
-                uwa_blue = colors.HexColor('#00008B')
+                uwa_blue = colors.HexColor("#00008B")
                 table = Table(table_data, colWidths=[80, 300, 50, 50])
-                table.setStyle(TableStyle([
-                    ('BACKGROUND', (0, 0), (-1, 0), uwa_blue),
-                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                    ('FONTSIZE', (0, 0), (-1, 0), 10),
-                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                    ('FONTSIZE', (0, 1), (-1, -1), 9),
-                    ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-                    ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-                    ('GRID', (0, 0), (-1, -1), 1, colors.black)
-                ]))
+                table.setStyle(
+                    TableStyle(
+                        [
+                            ("BACKGROUND", (0, 0), (-1, 0), uwa_blue),
+                            ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+                            ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                            ("FONTSIZE", (0, 0), (-1, 0), 10),
+                            ("BOTTOMPADDING", (0, 0), (-1, 0), 12),
+                            ("FONTSIZE", (0, 1), (-1, -1), 9),
+                            ("BACKGROUND", (0, 1), (-1, -1), colors.white),
+                            ("TEXTCOLOR", (0, 1), (-1, -1), colors.black),
+                            ("GRID", (0, 0), (-1, -1), 1, colors.black),
+                        ]
+                    )
+                )
 
                 elements.append(table)
                 elements.append(Spacer(1, 20))
-                
+
         doc = SimpleDocTemplate(buffer, pagesize=A4)
 
         # PDF metadata
@@ -705,36 +833,40 @@ def export_plan_to_pdf():
 
         # Create response
         response = make_response(pdf_data)
-        response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = f'attachment; filename="study_plan_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+        response.headers["Content-Type"] = "application/pdf"
+        response.headers["Content-Disposition"] = (
+            f'attachment; filename="study_plan_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
+        )
 
         return response
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500
+
 
 def add_logo(canvas, doc):
     # background
     page_width, page_height = doc.pagesize
     left_margin = 40
     right_margin = 40
-    rect_height = 80          # hight
+    rect_height = 80  # hight
     rect_width = page_width - left_margin - right_margin  # width
     rect_x = left_margin
     rect_y = page_height - rect_height - 40  # top
-    
-    uwa_blue = colors.HexColor('#00008B')
+
+    uwa_blue = colors.HexColor("#00008B")
     canvas.setFillColor(uwa_blue)
     canvas.rect(rect_x, rect_y, rect_width, rect_height, fill=1, stroke=0)
 
     # Logo is at left center
-    logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                             "static", "images", "uwa_logo.png")
+    logo_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "static", "images", "uwa_logo.png"
+    )
     if os.path.exists(logo_path):
         logo_width = 60
         logo_height = 60
-        logo_x = rect_x + 20   
-        logo_y = rect_y + (rect_height - logo_height)/2 
+        logo_x = rect_x + 20
+        logo_y = rect_y + (rect_height - logo_height) / 2
         canvas.drawImage(
             logo_path,
             x=logo_x,
@@ -742,35 +874,36 @@ def add_logo(canvas, doc):
             width=logo_width,
             height=logo_height,
             preserveAspectRatio=True,
-            mask='auto'
+            mask="auto",
         )
     else:
         print(f"Logo not found: {logo_path}")
+
 
 def ai_validate_plan():
     """AI-powered comprehensive study plan quality validation"""
     try:
         # Get plan data from request
         data = request.get_json()
-        if not data or 'plan' not in data or 'major_code' not in data:
-            return jsonify({'error': 'Plan data and major_code required'}), 400
+        if not data or "plan" not in data or "major_code" not in data:
+            return jsonify({"error": "Plan data and major_code required"}), 400
 
-        plan = data['plan']
-        major_id = data['major_code']  # Frontend sends ID, not code
+        plan = data["plan"]
+        major_id = data["major_code"]  # Frontend sends ID, not code
 
         # Validate input
         if not plan or not major_id:
-            return jsonify({'error': 'Invalid plan or major_id'}), 400
+            return jsonify({"error": "Invalid plan or major_id"}), 400
 
         # Get major information by ID
         major = Major.query.get(major_id)
         if not major:
-            return jsonify({'error': 'Major not found'}), 404
+            return jsonify({"error": "Major not found"}), 404
 
         # Prepare plan summary for AI analysis
         total_units = sum(len(units) for units in plan.values())
         if total_units == 0:
-            return jsonify({'error': 'Empty study plan'}), 400
+            return jsonify({"error": "Empty study plan"}), 400
 
         # Count units by level
         level_counts = {1: 0, 2: 0, 3: 0}
@@ -790,32 +923,32 @@ def ai_validate_plan():
             unit = Unit.query.filter_by(code=unit_code).first()
             if unit:
                 unit_details[unit_code] = {
-                    'title': unit.title,
-                    'level': unit.level,
-                    'points': unit.points,
-                    'prerequisites': unit.prerequisites,
-                    'availabilities': unit.availabilities
+                    "title": unit.title,
+                    "level": unit.level,
+                    "points": unit.points,
+                    "prerequisites": unit.prerequisites,
+                    "availabilities": unit.availabilities,
                 }
 
         # Call Claude AI for comprehensive analysis
-        quality_result = _analyze_plan_with_claude(plan, major, unit_details, level_counts, total_units)
+        quality_result = _analyze_plan_with_claude(
+            plan, major, unit_details, level_counts, total_units
+        )
 
         # Add metadata
-        quality_result['metadata'] = {
-            'majorInfo': {
-                'title': major.name,
-                'code': major.code
+        quality_result["metadata"] = {
+            "majorInfo": {"title": major.name, "code": major.code},
+            "planSummary": {
+                "totalUnits": total_units,
+                "levelDistribution": level_counts,
             },
-            'planSummary': {
-                'totalUnits': total_units,
-                'levelDistribution': level_counts
-            }
         }
 
         return jsonify(quality_result)
 
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500
+
 
 def _analyze_plan_with_claude(plan, major, unit_details, level_counts, total_units):
     """Perform comprehensive AI analysis using Claude"""
@@ -831,10 +964,10 @@ def _analyze_plan_with_claude(plan, major, unit_details, level_counts, total_uni
             plan_summary += f"\n{semester}:\n"
             for unit_code in units:
                 unit_info = unit_details.get(unit_code, {})
-                title = unit_info.get('title', 'Unknown')
-                prereqs = unit_info.get('prerequisites', 'Unknown')
+                title = unit_info.get("title", "Unknown")
+                prereqs = unit_info.get("prerequisites", "Unknown")
                 plan_summary += f"  • {unit_code}: {title}\n"
-                if prereqs and prereqs != 'Nil':
+                if prereqs and prereqs != "Nil":
                     plan_summary += f"    Prerequisites: {prereqs}\n"
 
         # Create comprehensive prompt for Claude
@@ -888,10 +1021,7 @@ Provide your assessment in the following JSON format:
             model="claude-opus-4-1-20250805",  # Using Claude Opus 4.1 - same as plan generation
             max_tokens=2000,
             temperature=0.3,
-            messages=[{
-                "role": "user",
-                "content": prompt
-            }]
+            messages=[{"role": "user", "content": prompt}],
         )
 
         # Parse Claude's response
@@ -914,16 +1044,16 @@ Provide your assessment in the following JSON format:
         result = json.loads(json_text)
 
         # Ensure all required fields are present
-        result.setdefault('overallQuality', 'fair')
-        result.setdefault('qualityScore', 70)
-        result.setdefault('recommendations', [])
-        result.setdefault('warnings', [])
-        result.setdefault('strengths', [])
-        result.setdefault('academicProgression', 'Analysis unavailable')
-        result.setdefault('levelDistribution', 'Analysis unavailable')
-        result.setdefault('majorCoherence', 'Analysis unavailable')
-        result.setdefault('constraintCompliance', 'Analysis unavailable')
-        result.setdefault('careerPathway', 'Analysis unavailable')
+        result.setdefault("overallQuality", "fair")
+        result.setdefault("qualityScore", 70)
+        result.setdefault("recommendations", [])
+        result.setdefault("warnings", [])
+        result.setdefault("strengths", [])
+        result.setdefault("academicProgression", "Analysis unavailable")
+        result.setdefault("levelDistribution", "Analysis unavailable")
+        result.setdefault("majorCoherence", "Analysis unavailable")
+        result.setdefault("constraintCompliance", "Analysis unavailable")
+        result.setdefault("careerPathway", "Analysis unavailable")
 
         return result
 
@@ -932,29 +1062,34 @@ Provide your assessment in the following JSON format:
         return {
             "overallQuality": "unknown",
             "qualityScore": 50,
-            "recommendations": ["AI analysis temporarily unavailable - please validate manually"],
+            "recommendations": [
+                "AI analysis temporarily unavailable - please validate manually"
+            ],
             "warnings": [f"AI validation error: {str(e)}"],
             "strengths": ["Plan structure appears complete"],
             "academicProgression": "Unable to assess - AI service unavailable",
             "levelDistribution": f"L1: {level_counts[1]}/12, L2: {level_counts[2]}, L3: {level_counts[3]}/6",
             "majorCoherence": "Unable to assess - AI service unavailable",
             "constraintCompliance": "Basic requirements appear met",
-            "careerPathway": "Unable to assess - AI service unavailable"
+            "careerPathway": "Unable to assess - AI service unavailable",
         }
+
 
 def import_course_data():
     """Import course data from uploaded files"""
     # TODO: Implement data import functionality
-    return jsonify({'message': 'Data import not yet implemented'}), 501
+    return jsonify({"message": "Data import not yet implemented"}), 501
+
 
 def clear_plan_cache():
     """Clear cached study plans"""
     try:
         StudyPlan.query.delete()
         db.session.commit()
-        return jsonify({'message': 'Plan cache cleared successfully'})
+        return jsonify({"message": "Plan cache cleared successfully"})
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"error": str(e)}), 500
+
 
 def call_claude_for_plan_generation(prompt):
     """Call Claude Opus 4.1 with maximum reasoning capabilities for plan generation"""
@@ -977,9 +1112,9 @@ Use deep reasoning to verify:
 3. No temporal logic violations occur
 4. All degree requirements are met
 
-Reason through each placement decision carefully."""
+Reason through each placement decision carefully.""",
                 }
-            ]
+            ],
         )
 
         plan_content = response.content[0].text if response.content else None
@@ -992,11 +1127,16 @@ Reason through each placement decision carefully."""
     except Exception as e:
         return None
 
-def create_plan_generation_prompt(major, mandatory_units, optional_units, additional_units):
+
+def create_plan_generation_prompt(
+    major, mandatory_units, optional_units, additional_units
+):
     """Create Claude API prompt for intelligent plan generation with STRATEGY 2: Pre-split by availability"""
 
     # Count total mandatory and optional units from major
-    total_major_units = sum(len(units) for units in mandatory_units.values()) + sum(len(units) for units in optional_units.values())
+    total_major_units = sum(len(units) for units in mandatory_units.values()) + sum(
+        len(units) for units in optional_units.values()
+    )
     units_needed = 24 - total_major_units
 
     # Gather all unit codes and split by availability
@@ -1009,9 +1149,9 @@ def create_plan_generation_prompt(major, mandatory_units, optional_units, additi
         all_unit_codes.extend(level_units[:10])  # Limit additional units
 
     # STRATEGY 2: Pre-split units by semester availability
-    semester_1_units = {'level_1': [], 'level_2': [], 'level_3': []}
-    semester_2_units = {'level_1': [], 'level_2': [], 'level_3': []}
-    both_semesters_units = {'level_1': [], 'level_2': [], 'level_3': []}
+    semester_1_units = {"level_1": [], "level_2": [], "level_3": []}
+    semester_2_units = {"level_1": [], "level_2": [], "level_3": []}
+    both_semesters_units = {"level_1": [], "level_2": [], "level_3": []}
 
     # Build constraint information AND split by availability
     constraint_info = []
@@ -1023,40 +1163,55 @@ def create_plan_generation_prompt(major, mandatory_units, optional_units, additi
         # Determine level
         if len(unit_code) >= 5 and unit_code[4].isdigit():
             level = int(unit_code[4])
-            level_key = f'level_{level}' if level in [1, 2, 3] else None
+            level_key = f"level_{level}" if level in [1, 2, 3] else None
         else:
             level_key = None
 
         # Determine availability and add to appropriate list
         availability_text = ""
         if unit.availabilities and unit.availabilities.strip():
-            if 'Semester 1' in unit.availabilities and 'Semester 2' not in unit.availabilities:
+            if (
+                "Semester 1" in unit.availabilities
+                and "Semester 2" not in unit.availabilities
+            ):
                 availability_text = " - SEMESTER 1 ONLY"
-                if level_key: semester_1_units[level_key].append(unit_code)
-            elif 'Semester 2' in unit.availabilities and 'Semester 1' not in unit.availabilities:
+                if level_key:
+                    semester_1_units[level_key].append(unit_code)
+            elif (
+                "Semester 2" in unit.availabilities
+                and "Semester 1" not in unit.availabilities
+            ):
                 availability_text = " - SEMESTER 2 ONLY"
-                if level_key: semester_2_units[level_key].append(unit_code)
+                if level_key:
+                    semester_2_units[level_key].append(unit_code)
             else:
                 availability_text = " - Available both semesters"
-                if level_key: both_semesters_units[level_key].append(unit_code)
+                if level_key:
+                    both_semesters_units[level_key].append(unit_code)
         else:
             # No availability info = assume available both semesters
             availability_text = " - Available both semesters"
-            if level_key: both_semesters_units[level_key].append(unit_code)
+            if level_key:
+                both_semesters_units[level_key].append(unit_code)
 
         # Build constraint info for display
         if unit.prerequisites or unit.availabilities:
             info = f"• {unit_code}"
 
             # Extract and clean prerequisite unit codes
-            if unit.prerequisites and unit.prerequisites.strip() and unit.prerequisites.lower() != 'nil':
+            if (
+                unit.prerequisites
+                and unit.prerequisites.strip()
+                and unit.prerequisites.lower() != "nil"
+            ):
                 import re
-                prereq_units = re.findall(r'[A-Z]{4}[0-9]{4}', unit.prerequisites)
+
+                prereq_units = re.findall(r"[A-Z]{4}[0-9]{4}", unit.prerequisites)
                 if prereq_units:
                     info += f" - Needs: {' OR '.join(prereq_units)}"
                 else:
                     # Handle point requirements or other text
-                    if 'points' in unit.prerequisites.lower():
+                    if "points" in unit.prerequisites.lower():
                         info += f" - Needs: 48+ points"
                     else:
                         info += f" - Prerequisites: {unit.prerequisites[:50]}..."
@@ -1066,7 +1221,11 @@ def create_plan_generation_prompt(major, mandatory_units, optional_units, additi
             if len(info) > len(f"• {unit_code}"):  # Only add if there's constraint info
                 constraint_info.append(info)
 
-    constraints_text = "\n".join(constraint_info[:20]) if constraint_info else "No specific constraints for listed units."
+    constraints_text = (
+        "\n".join(constraint_info[:20])
+        if constraint_info
+        else "No specific constraints for listed units."
+    )
 
     prompt = f"""You are an expert academic advisor creating a 3-year study plan for the {major.name} major ({major.code}).
 
@@ -1154,6 +1313,7 @@ RESPOND WITH ONLY JSON (no explanation):
 
     return prompt
 
+
 def validate_plan_programmatically(plan_data):
     """Validate study plan using proper programming logic (not AI counting!)"""
 
@@ -1189,58 +1349,75 @@ def validate_plan_programmatically(plan_data):
 
     # Rule 1: Total units - warn if incomplete, error if too many
     if total_units > 24:
-        critical_errors.append(f"Plan has {total_units} units, but maximum allowed is 24.")
+        critical_errors.append(
+            f"Plan has {total_units} units, but maximum allowed is 24."
+        )
     elif total_units < 24:
-        warnings.append(f"Plan has {total_units} units, target is 24 units ({24 - total_units} more needed).")
+        warnings.append(
+            f"Plan has {total_units} units, target is 24 units ({24 - total_units} more needed)."
+        )
 
     # Rule 2: Semester capacity - warn if incomplete, error if too many
     for semester, units in plan_data.items():
         if len(units) > 4:
-            critical_errors.append(f"{semester} has {len(units)} units, but maximum allowed is 4.")
+            critical_errors.append(
+                f"{semester} has {len(units)} units, but maximum allowed is 4."
+            )
         elif 0 < len(units) < 4:
             warnings.append(f"{semester} has {len(units)} units, target is 4 units.")
 
     # Rule 3: Maximum 12 Level 1 units - always critical error if exceeded
     if level_1_count > 12:
-        critical_errors.append(f"There are {level_1_count} Level 1 units which exceeds the maximum of 12.")
+        critical_errors.append(
+            f"There are {level_1_count} Level 1 units which exceeds the maximum of 12."
+        )
 
     # Rule 4: Minimum 12 Level 2 or Level 3 units
     if level_2_3_count < 8:  # Really low
-        critical_errors.append(f"There are only {level_2_3_count} Level 2 or Level 3 units, minimum required is 12.")
+        critical_errors.append(
+            f"There are only {level_2_3_count} Level 2 or Level 3 units, minimum required is 12."
+        )
     elif level_2_3_count < 12:
-        warnings.append(f"There are only {level_2_3_count} Level 2 or Level 3 units, minimum required is 12.")
+        warnings.append(
+            f"There are only {level_2_3_count} Level 2 or Level 3 units, minimum required is 12."
+        )
 
     # Rule 5: Minimum 6 Level 3 units
     if level_3_count < 3:
-        critical_errors.append(f"There are only {level_3_count} Level 3 units, minimum required is 6.")
+        critical_errors.append(
+            f"There are only {level_3_count} Level 3 units, minimum required is 6."
+        )
     elif level_3_count < 6:
-        warnings.append(f"There are only {level_3_count} Level 3 units, minimum required is 6.")
+        warnings.append(
+            f"There are only {level_3_count} Level 3 units, minimum required is 6."
+        )
 
     # Return validation result
     if critical_errors:
         return {
-            'isValid': False,
-            'reason': "Critical issues found: " + " ".join(critical_errors),
-            'type': 'error',
-            'errors': critical_errors,   
-            'warnings': warnings,        
+            "isValid": False,
+            "reason": "Critical issues found: " + " ".join(critical_errors),
+            "type": "error",
+            "errors": critical_errors,
+            "warnings": warnings,
         }
     elif warnings:
         return {
-            'isValid': True,  # Valid but incomplete
-            'reason': "Plan incomplete: " + warnings[0],  
-            'type': 'warning',
-            'errors': [],                  
-            'warnings': warnings,
+            "isValid": True,  # Valid but incomplete
+            "reason": "Plan incomplete: " + warnings[0],
+            "type": "warning",
+            "errors": [],
+            "warnings": warnings,
         }
     else:
         return {
-            'isValid': True,
-            'reason': 'Plan meets all UWA degree requirements',
-            'type': 'success',
-            'errors': [],
-            'warnings': [],
+            "isValid": True,
+            "reason": "Plan meets all UWA degree requirements",
+            "type": "success",
+            "errors": [],
+            "warnings": [],
         }
+
 
 def create_validation_prompt(major, plan_data):
     """Create OpenAI prompt for plan validation"""

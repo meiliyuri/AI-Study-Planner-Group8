@@ -3,7 +3,9 @@
 # Written using SQLAlchemy ORM following Flask patterns
 
 from datetime import datetime  # Date and time utilities for timestamps
+
 from app import db  # SQLAlchemy database instance
+
 
 class Unit(db.Model):
     """Academic unit model representing individual courses
@@ -11,6 +13,7 @@ class Unit(db.Model):
     Stores information about university units including prerequisites,
     availability, and academic level. Used for study plan generation.
     """
+
     # Primary key and unique identifier
     id = db.Column(db.Integer, primary_key=True)
 
@@ -26,20 +29,18 @@ class Unit(db.Model):
 
     # Academic constraint information stored as text
     availabilities = db.Column(db.Text)  # Semester availability information
-    prerequisites = db.Column(db.Text)   # Required units before this one
-    corequisites = db.Column(db.Text)    # Units to be taken simultaneously
+    prerequisites = db.Column(db.Text)  # Required units before this one
+    corequisites = db.Column(db.Text)  # Units to be taken simultaneously
     incompatibilities = db.Column(db.Text)  # Units that cannot be taken together
 
-    electives = db.Column(db.Text) # Elective groupings if applicable
-    
+    electives = db.Column(db.Text)  # Elective groupings if applicable
+
     # Special unit classification
     is_bridging = db.Column(db.Boolean, default=False)  # Bridging unit flag
 
-   
-
     def __repr__(self):
         """String representation of Unit object for debugging"""
-        return f'<Unit {self.code}: {self.title}>'
+        return f"<Unit {self.code}: {self.title}>"
 
     def get_level_from_code(self):
         """Extract academic level from unit code
@@ -53,6 +54,7 @@ class Unit(db.Model):
             return int(self.code[4])  # Fifth character indicates level
         return 1  # Default to level 1 if code format is unexpected
 
+
 class Major(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(20), unique=True, nullable=False, index=True)
@@ -61,32 +63,38 @@ class Major(db.Model):
     course_code = db.Column(db.String(20), nullable=True)
 
     def __repr__(self):
-        return f'<Major {self.code} ({self.course_code}): {self.name}>'
+        return f"<Major {self.code} ({self.course_code}): {self.name}>"
+
 
 class MajorUnit(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    major_id = db.Column(db.Integer, db.ForeignKey('major.id'), nullable=False)
-    unit_id = db.Column(db.Integer, db.ForeignKey('unit.id'), nullable=False)
-    requirement_type = db.Column(db.String(20), nullable=False)  # 'core', 'option', 'bridging'
+    major_id = db.Column(db.Integer, db.ForeignKey("major.id"), nullable=False)
+    unit_id = db.Column(db.Integer, db.ForeignKey("unit.id"), nullable=False)
+    requirement_type = db.Column(
+        db.String(20), nullable=False
+    )  # 'core', 'option', 'bridging'
     level = db.Column(db.Integer, nullable=False)
 
-    major = db.relationship('Major', backref='major_units')
-    unit = db.relationship('Unit', backref='major_units')
+    major = db.relationship("Major", backref="major_units")
+    unit = db.relationship("Unit", backref="major_units")
 
     def __repr__(self):
-        return f'<MajorUnit {self.major.code} - {self.unit.code} ({self.requirement_type})>'
+        return f"<MajorUnit {self.major.code} - {self.unit.code} ({self.requirement_type})>"
+
 
 class StudyPlan(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     session_id = db.Column(db.String(100), nullable=False, index=True)
-    major_id = db.Column(db.Integer, db.ForeignKey('major.id'), nullable=False)
+    major_id = db.Column(db.Integer, db.ForeignKey("major.id"), nullable=False)
     plan_data = db.Column(db.Text)  # JSON string of the plan
     is_valid = db.Column(db.Boolean, default=False)
     validation_errors = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = db.Column(
+        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
-    major = db.relationship('Major', backref='study_plans')
+    major = db.relationship("Major", backref="study_plans")
 
     def __repr__(self):
-        return f'<StudyPlan {self.session_id} - {self.major.code}>'
+        return f"<StudyPlan {self.session_id} - {self.major.code}>"

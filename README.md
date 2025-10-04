@@ -48,7 +48,7 @@ AI-Study-Planner-Group8
 │   │   │
 │   │   ├───images
 │   │   │       uwa_logo.png
-│   │   │       
+│   │   │
 │   │   └───js
 │   │           app.js
 │   │
@@ -102,6 +102,7 @@ cd AI-Study-Planner-Group8
 python3 -m venv venv # create environment and install requirements
 .\venv\Scripts\Activate
 pip install -r requirements.txt
+pre-commit install # pre commit automation
 ```
 
 macOS:
@@ -113,6 +114,7 @@ cd AI-Study-Planner-Group8
 python3 -m venv venv # create environment and install requirements
 source venv/bin/activate
 pip install -r requirements.txt
+pre-commit install # pre commit automation
 ```
 
 2. **Set a real API key**:

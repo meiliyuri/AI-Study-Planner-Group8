@@ -1,14 +1,17 @@
-import pandas as pd
 import os
+
+import pandas as pd
+
 from app import app, db
-from app.models import Unit, Major, MajorUnit
+from app.models import Major, MajorUnit, Unit
 
 # List of bridging units to exclude
-BRIDGING_UNITS = ['CHEM1003', 'MATH1720', 'SCIE1500', 'ECON1111']
+BRIDGING_UNITS = ["CHEM1003", "MATH1720", "SCIE1500", "ECON1111"]
+
 
 def load_units_csv():
     """Load units from Units.csv"""
-    csv_path = 'Reference_Material/Essential_Data/Units.csv'
+    csv_path = "Reference_Material/Essential_Data/Units.csv"
 
     if not os.path.exists(csv_path):
         print(f"File not found: {csv_path}")
@@ -19,11 +22,16 @@ def load_units_csv():
 
     loaded_count = 0
     for _, row in df.iterrows():
-        unit_code = row['code']
-        unit_title = row['title']
+        unit_code = row["code"]
+        unit_title = row["title"]
 
         # Skip rows with missing essential data
-        if pd.isna(unit_code) or pd.isna(unit_title) or str(unit_code).strip() == '' or str(unit_title).strip() == '':
+        if (
+            pd.isna(unit_code)
+            or pd.isna(unit_title)
+            or str(unit_code).strip() == ""
+            or str(unit_title).strip() == ""
+        ):
             continue
 
         # Clean the data
@@ -49,7 +57,7 @@ def load_units_csv():
                 title=unit_title,
                 level=level,
                 points=6,  # Default 6 points
-                is_bridging=is_bridging
+                is_bridging=is_bridging,
             )
             db.session.add(unit)
             loaded_count += 1
@@ -57,9 +65,12 @@ def load_units_csv():
     db.session.commit()
     print(f"Loaded {loaded_count} valid units from Units.csv")
 
+
 def load_units_with_rules_csv():
     """Load unit rules from Units with unit rules and availabilities.csv"""
-    csv_path = 'Reference_Material/Essential_Data/Units with unit rules and availabilities.csv'
+    csv_path = (
+        "Reference_Material/Essential_Data/Units with unit rules and availabilities.csv"
+    )
 
     if not os.path.exists(csv_path):
         print(f"File not found: {csv_path}")
@@ -70,17 +81,22 @@ def load_units_with_rules_csv():
 
     def clean_field(value):
         """Clean field value, converting nan to empty string"""
-        if pd.isna(value) or str(value).lower() == 'nan':
-            return ''
+        if pd.isna(value) or str(value).lower() == "nan":
+            return ""
         return str(value).strip()
 
     updated_count = 0
     for _, row in df.iterrows():
-        unit_code = row['unitnumber']
-        unit_title = row['unitname']
+        unit_code = row["unitnumber"]
+        unit_title = row["unitname"]
 
         # Skip rows with missing essential data
-        if pd.isna(unit_code) or pd.isna(unit_title) or str(unit_code).strip() == '' or str(unit_title).strip() == '':
+        if (
+            pd.isna(unit_code)
+            or pd.isna(unit_title)
+            or str(unit_code).strip() == ""
+            or str(unit_title).strip() == ""
+        ):
             continue
 
         # Clean the data
@@ -96,11 +112,11 @@ def load_units_with_rules_csv():
                 level = 1
 
         # Get availability, prerequisites, etc. - clean the fields
-        availabilities = clean_field(row.get('offering', ''))
-        prerequisites = clean_field(row.get('prereqs', ''))
-        corequisites = clean_field(row.get('coreqs', ''))
-        incompatibilities = clean_field(row.get('incompatible', ''))
-        electives = clean_field(row.get('electives', ''))
+        availabilities = clean_field(row.get("offering", ""))
+        prerequisites = clean_field(row.get("prereqs", ""))
+        corequisites = clean_field(row.get("coreqs", ""))
+        incompatibilities = clean_field(row.get("incompatible", ""))
+        electives = clean_field(row.get("electives", ""))
 
         # Check if it's a bridging unit
         is_bridging = unit_code in BRIDGING_UNITS
@@ -126,13 +142,14 @@ def load_units_with_rules_csv():
                 corequisites=corequisites,
                 incompatibilities=incompatibilities,
                 electives=electives,
-                is_bridging=is_bridging
+                is_bridging=is_bridging,
             )
             db.session.add(unit)
             updated_count += 1
 
     db.session.commit()
     print(f"Updated {updated_count} valid units with rules and availability data")
+
 
 def load_major_sequence_xlsx(file_path, major_code, major_name, degree, course_code):
     """Load major sequence from XLSX file"""
@@ -144,20 +161,23 @@ def load_major_sequence_xlsx(file_path, major_code, major_name, degree, course_c
 
     try:
         # Read the XLSX file - skip first 2 rows (metadata), use row 2 as headers
-        df = pd.read_excel(file_path, sheet_name='Sequence export', skiprows=2, header=0)
-
+        df = pd.read_excel(
+            file_path, sheet_name="Sequence export", skiprows=2, header=0
+        )
 
         # Create or get major
         major = Major.query.filter_by(code=major_code).first()
         if not major:
-            major = Major(code=major_code, name=major_name, degree=degree, course_code=course_code)
+            major = Major(
+                code=major_code, name=major_name, degree=degree, course_code=course_code
+            )
             db.session.add(major)
             db.session.flush()  # Get the ID
 
         # Process each row in the sequence
         for _, row in df.iterrows():
-            unit_code = row.get('Code', '')
-            curriculum = str(row.get('Curriculum', ''))
+            unit_code = row.get("Code", "")
+            curriculum = str(row.get("Curriculum", ""))
 
             if not unit_code or pd.isna(unit_code):
                 continue
@@ -171,32 +191,30 @@ def load_major_sequence_xlsx(file_path, major_code, major_name, degree, course_c
                 print(f"Warning: Unit {unit_code} not found in database")
                 continue
 
-
             # Split into segments (;), then evaluate only the syntax containing the specified major_code
-            curriculum = str(row.get('Curriculum', '') or '')
-            segments = [seg.strip() for seg in curriculum.split(';') if seg.strip()]
+            curriculum = str(row.get("Curriculum", "") or "")
+            segments = [seg.strip() for seg in curriculum.split(";") if seg.strip()]
 
             requirement_type = None
             for seg in segments:
                 if major_code in seg:
                     s = seg.lower()
-                    if 'as bridging' in s:
-                        requirement_type = 'bridging'
+                    if "as bridging" in s:
+                        requirement_type = "bridging"
                         break
-                    if 'as core' in s:
-                        requirement_type = 'core'
+                    if "as core" in s:
+                        requirement_type = "core"
                         break
-                    if 'as option' in s:
-                        requirement_type = 'option'
+                    if "as option" in s:
+                        requirement_type = "option"
                         break
 
-            if not requirement_type: # Activities unrelated to this major → Skip
+            if not requirement_type:  # Activities unrelated to this major → Skip
                 continue
 
             # Check if relationship already exists
             existing = MajorUnit.query.filter_by(
-                major_id=major.id,
-                unit_id=unit.id
+                major_id=major.id, unit_id=unit.id
             ).first()
 
             if not existing:
@@ -204,7 +222,7 @@ def load_major_sequence_xlsx(file_path, major_code, major_name, degree, course_c
                     major_id=major.id,
                     unit_id=unit.id,
                     requirement_type=requirement_type,
-                    level=unit.level
+                    level=unit.level,
                 )
                 db.session.add(major_unit)
 
@@ -215,18 +233,50 @@ def load_major_sequence_xlsx(file_path, major_code, major_name, degree, course_c
         print(f"Error loading {file_path}: {str(e)}")
         db.session.rollback()
 
+
 def load_all_majors():
     """Load all major sequence files"""
     major_files = [
-        ('Reference_Material/Essential_Data/Sequence export (MJD-ECNPF).xlsx', 'MJD-ECNPF', 'Economics', 'Bachelor of Economics', 'BP013'),
-        ('Reference_Material/Essential_Data/Sequence export (MJD-FINEC).xlsx', 'MJD-FINEC', 'Financial Economics', 'Bachelor of Economics', 'BP013'),
-        ('Reference_Material/Essential_Data/Sequence export MJD-AGBUS.xlsx', 'MJD-AGBUS', 'Agribusiness', 'Bachelor of Science', 'BP004'),
-        ('Reference_Material/Essential_Data/Sequence export MJD-AGSCI.xlsx', 'MJD-AGSCI', 'Agricultural Science', 'Bachelor of Science', 'BP004'),
-        ('Reference_Material/Essential_Data/Sequence export MJD-AGTEC.xlsx', 'MJD-AGTEC', 'Agricultural Technology', 'Bachelor of Science', 'BP004'),
+        (
+            "Reference_Material/Essential_Data/Sequence export (MJD-ECNPF).xlsx",
+            "MJD-ECNPF",
+            "Economics",
+            "Bachelor of Economics",
+            "BP013",
+        ),
+        (
+            "Reference_Material/Essential_Data/Sequence export (MJD-FINEC).xlsx",
+            "MJD-FINEC",
+            "Financial Economics",
+            "Bachelor of Economics",
+            "BP013",
+        ),
+        (
+            "Reference_Material/Essential_Data/Sequence export MJD-AGBUS.xlsx",
+            "MJD-AGBUS",
+            "Agribusiness",
+            "Bachelor of Science",
+            "BP004",
+        ),
+        (
+            "Reference_Material/Essential_Data/Sequence export MJD-AGSCI.xlsx",
+            "MJD-AGSCI",
+            "Agricultural Science",
+            "Bachelor of Science",
+            "BP004",
+        ),
+        (
+            "Reference_Material/Essential_Data/Sequence export MJD-AGTEC.xlsx",
+            "MJD-AGTEC",
+            "Agricultural Technology",
+            "Bachelor of Science",
+            "BP004",
+        ),
     ]
 
     for file_path, major_code, major_name, degree, course_code in major_files:
         load_major_sequence_xlsx(file_path, major_code, major_name, degree, course_code)
+
 
 def initialize_database():
     """Initialize the database with all course data"""
@@ -251,5 +301,6 @@ def initialize_database():
         print(f"- Majors: {major_count}")
         print(f"- Major-Unit relationships: {major_unit_count}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     initialize_database()
