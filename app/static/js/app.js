@@ -1352,7 +1352,7 @@ function aiChatMessage(message) {
         `;
             $('#debug-log').prepend(aiEntry);
 
-            updateValidationStatus('Plan updated with feedback', 'success');
+            validatePlan();
         })
         .catch(error => {
             hideLoading();

@@ -117,6 +117,8 @@ def generate_initial_plan():
         # Get request data from frontend
         request_data = request.get_json()
         selected_major_id = request_data.get("major_id")
+        user_feedback = request_data.get("user_feedback")
+        previous_plan = request_data.get("plan")
         current_session_id = session.get("session_id")  # Flask session function
 
         # Validate required parameters
@@ -207,6 +209,30 @@ def generate_initial_plan():
         prompt = create_plan_generation_prompt(
             selected_major, mandatory_units, optional_units, additional_units
         )
+
+        #  If AI feedback exists, it will be delivered to Claude along with the existing plan.
+        if user_feedback:
+            prompt += f"""
+
+        # USER FEEDBACK
+        The user said: "{user_feedback}"
+
+        # EXISTING PLAN
+        {json.dumps(previous_plan, indent=2)}
+
+        Modify the existing plan according to the user's feedback above.
+        Interpret the feedback naturally and make appropriate adjustments
+        to the plan while preserving all academic and structural constraints below:
+
+        - Exactly 24 total units (4 per semester × 6 semesters)
+        - Maintain valid prerequisite order and avoid incompatibilities
+        - Ensure each semester has 4 units
+        - Maintain level balance (max 12 Level 1 units, min 6 Level 3 units)
+        - Respect unit availability (semester offerings)
+        - If a specific unit or topic is mentioned, update the plan accordingly
+        (add, remove, replace, or adjust as logically appropriate)
+        - Respond ONLY with valid JSON representing the full updated plan.
+        """
 
         # Call Claude 3.5 Sonnet with maximum reasoning
         plan_json = call_claude_for_plan_generation(prompt)
